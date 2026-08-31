@@ -227,6 +227,17 @@ const CONFIG = {
     /* ===== Python ===== */
     {
       tool: "py",
+      org: "Financial analytics",
+      title: "Financial Intelligence - Analytics & Dashboard",
+      desc: "End-to-end financial analytics over public market data: Python ETL into a Postgres star schema, analysis notebooks (risk/return, DCA backtesting, sector momentum), a Streamlit dashboard with dual Postgres/Parquet access, and a Power BI executive report on the same model.",
+      problem: "Scattered market data needed one queryable model and a shareable dashboard",
+      stack: ["Python", "SQL", "PostgreSQL", "Streamlit", "Power BI"],
+      embedUrl: "",
+      imageUrl: "",
+      link: "https://github.com/lsaucen/inteligencia-financiera"
+    },
+    {
+      tool: "py",
       org: "Reporting automation",
       title: "Human-in-the-Loop Report Bot",
       desc: "End-to-end reporting robot: a watchdog service monitors a cloud folder for new data drops, generates the executive report draft automatically, sends it to Telegram for one-tap approval via inline buttons, and only then dispatches the final email through Outlook COM. Approval stays human; everything else is code.",
@@ -256,7 +267,7 @@ const CONFIG = {
       stack: ["Python", "Ollama", "Open WebUI", "MCP"],
       embedUrl: "",
       imageUrl: "",
-      link: ""
+      link: "https://github.com/lsaucen/nova-ai-stem-tutor"
     },
     {
       tool: "py",
