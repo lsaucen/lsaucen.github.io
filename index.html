@@ -238,6 +238,17 @@ const CONFIG = {
     },
     {
       tool: "py",
+      org: "Real estate analytics",
+      title: "Dominican Real Estate - Valuation & Market Map",
+      desc: "Nationwide analysis of Dominican property listings: responsible collection and tabulation of public listing data into a Postgres star schema, currency normalization and province mapping, a gradient-boosting valuation model, and residual analysis that surfaces over- and under-valued neighborhoods, plus a Streamlit dashboard with a price map and a valuation estimator.",
+      problem: "Scattered public listings needed one clean dataset, a valuation model, and a way to spot pricing anomalies by zone",
+      stack: ["Python", "SQL", "PostgreSQL", "scikit-learn", "Streamlit"],
+      embedUrl: "",
+      imageUrl: "",
+      link: "https://github.com/lsaucen/mercado-inmobiliario-rd"
+    },
+    {
+      tool: "py",
       org: "Reporting automation",
       title: "Human-in-the-Loop Report Bot",
       desc: "End-to-end reporting robot: a watchdog service monitors a cloud folder for new data drops, generates the executive report draft automatically, sends it to Telegram for one-tap approval via inline buttons, and only then dispatches the final email through Outlook COM. Approval stays human; everything else is code.",
