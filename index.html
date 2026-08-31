@@ -199,7 +199,7 @@ const CONFIG = {
       stack: ["Excel", "Pivot Tables", "Advanced Filters", "Power Query"],
       embedUrl: "",
       imageUrl: "",
-      link: ""    // EDITAR: enlace OneDrive/Drive a versión de muestra
+      link: "https://github.com/lsaucen/excel-analytics-samples/blob/main/financial-operational-modeling.xlsx"    // EDITAR: enlace OneDrive/Drive a versión de muestra
     },
     {
       tool: "excel",
@@ -210,7 +210,7 @@ const CONFIG = {
       stack: ["Excel", "Data Validation", "SPSS"],
       embedUrl: "",
       imageUrl: "",
-      link: ""
+      link: "https://github.com/lsaucen/excel-analytics-samples/blob/main/inventory-reconciliation.xlsx"
     },
     {
       tool: "excel",
@@ -221,7 +221,7 @@ const CONFIG = {
       stack: ["Excel", "VBA", "Nested Logic", "Conditional Formatting"],
       embedUrl: "",
       imageUrl: "",
-      link: ""
+      link: "https://github.com/lsaucen/excel-analytics-samples/blob/main/data-audit-qa-toolkit.xlsx"
     },
 
     /* ===== Python ===== */
@@ -256,7 +256,18 @@ const CONFIG = {
       stack: ["Python", "watchdog", "Telegram Bot API", "win32com / Outlook"],
       embedUrl: "",
       imageUrl: "",
-      link: ""   // EDITAR: repo de GitHub (versión sanitizada, sin credenciales ni destinatarios)
+      link: "https://github.com/lsaucen/report-approval-bot"
+    },
+    {
+      tool: "py",
+      org: "Public-data API",
+      title: "Data Logger API - Power BI Scraper",
+      desc: "A FastAPI service that turns a public Power BI dashboard into a clean JSON endpoint. Playwright loads the page, finds the embedded Power BI iframe, waits for the visuals to render, and extracts their content so figures published only as a dashboard become queryable programmatically.",
+      problem: "Public figures were locked inside an embedded dashboard with no download or API",
+      stack: ["Python", "FastAPI", "Playwright", "REST"],
+      embedUrl: "",
+      imageUrl: "",
+      link: "https://github.com/lsaucen/Data-Logger-API"
     },
     {
       tool: "py",
