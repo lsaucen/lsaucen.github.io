@@ -271,6 +271,17 @@ const CONFIG = {
     },
     {
       tool: "py",
+      org: "Territorial analytics",
+      title: "Territorial Demand & Accessibility Model",
+      desc: "Reproducible geospatial + ML pipeline: builds accessibility features per territorial unit (distance to the nearest health/education/transport facility, count within a 3 km radius) in GeoPandas and equivalent PostGIS SQL, then trains a Random Forest to predict a service-demand index (test R2 ~0.89). Outputs a demand choropleth and a feature-importance chart.",
+      problem: "Where does service demand concentrate, predicted from spatial features?",
+      stack: ["Python", "GeoPandas", "PostGIS", "scikit-learn", "Spatial SQL"],
+      embedUrl: "",
+      imageUrl: "",
+      link: "https://github.com/lsaucen/territorial-demographic-profiling"
+    },
+    {
+      tool: "py",
       org: "Tourism intelligence",
       title: "Social Media Demand-Intelligence Pipeline",
       desc: "Scraping and NLP pipeline over Reddit travel communities to estimate demand signals for a historical-cultural tourism product: deductive codebook, thematic classification, and explicit methodological guardrails so that post volume is never read as demand.",
