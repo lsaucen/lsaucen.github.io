@@ -347,6 +347,39 @@ const CONFIG = {
       embedUrl: "",
       imageUrl: "",
       link: "https://github.com/lsaucen/sql-data-modeling-patterns/tree/main/03-privacy-by-design-capacity"
+    },
+    {
+      tool: "sql",
+      org: "Performance",
+      title: "PostgreSQL Query Optimization Lab",
+      desc: "Why a query gets slow and how to fix it, on a 2,000,000-row table with real EXPLAIN ANALYZE. Four before/after fixes: missing index (~300x), composite index for filter+sort+limit (~400x), sargable rewrite (~12x), and a covering index for an index-only scan.",
+      problem: "A dashboard query that scans the whole table on every load",
+      stack: ["PostgreSQL", "EXPLAIN ANALYZE", "Indexes", "Query Tuning"],
+      embedUrl: "",
+      imageUrl: "",
+      link: "https://github.com/lsaucen/postgres-query-optimization"
+    },
+    {
+      tool: "sql",
+      org: "Data engineering",
+      title: "PostgreSQL ETL Pipeline",
+      desc: "A staging to core star schema to marts pipeline in plain SQL. Lands a messy extract as-is, cleans and types it, deduplicates on the natural key, quarantines bad rows instead of dropping them, and serves a dashboard from views and a refreshable materialized view.",
+      problem: "Manual reporting built on a messy source extract",
+      stack: ["PostgreSQL", "ETL", "Star Schema", "Materialized Views"],
+      embedUrl: "",
+      imageUrl: "",
+      link: "https://github.com/lsaucen/postgres-etl-pipeline"
+    },
+    {
+      tool: "sql",
+      org: "Search",
+      title: "PostgreSQL Full-Text & Fuzzy Search",
+      desc: "Text search without an external engine: ranked full-text search with highlighted snippets over 30k documents (tsvector + GIN), and typo-tolerant fuzzy matching over 100k product names (pg_trgm trigrams). Both index-backed, with real EXPLAIN plans.",
+      problem: "Search that tolerates typos and ranks by relevance, inside the database",
+      stack: ["PostgreSQL", "Full-Text Search", "GIN", "pg_trgm"],
+      embedUrl: "",
+      imageUrl: "",
+      link: "https://github.com/lsaucen/postgres-fulltext-search"
     }
   ],
 
