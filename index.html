@@ -380,6 +380,39 @@ const CONFIG = {
       embedUrl: "",
       imageUrl: "",
       link: "https://github.com/lsaucen/postgres-fulltext-search"
+    },
+    {
+      tool: "sql",
+      org: "Analytics",
+      title: "SQL Analytics Patterns",
+      desc: "Six analytical SQL patterns with real PostgreSQL output over a 20k-user, ~98k-row dataset: running totals and moving averages (window frames), month-over-month growth (LAG), top-N per group (ROW_NUMBER), cohort retention, FILTER pivots, and NTILE lifetime-value deciles.",
+      problem: "The analytical questions a dashboard asks, answered in pure SQL",
+      stack: ["PostgreSQL", "Window Functions", "CTEs", "Cohort Analysis"],
+      embedUrl: "",
+      imageUrl: "",
+      link: "https://github.com/lsaucen/sql-analytics-patterns"
+    },
+    {
+      tool: "sql",
+      org: "Large volumes",
+      title: "PostgreSQL Table Partitioning",
+      desc: "Range partitioning on a 3,000,000-row table (12 monthly partitions): partition pruning reads only the months a query needs (~63 ms for one month vs ~1.8 s across all), and archival is a metadata-only DETACH instead of a giant DELETE. Real EXPLAIN ANALYZE.",
+      problem: "Keeping a large, ever-growing table fast and cheap to archive",
+      stack: ["PostgreSQL", "Partitioning", "Pruning", "EXPLAIN ANALYZE"],
+      embedUrl: "",
+      imageUrl: "",
+      link: "https://github.com/lsaucen/postgres-partitioning"
+    },
+    {
+      tool: "sql",
+      org: "Security",
+      title: "PostgreSQL Access Control (RLS)",
+      desc: "Access control in the database: roles and grants decide what each user may do, and Row-Level Security decides which rows they see. Region-scoped analysts and a full-access admin run the same query and get different data, enforced automatically with no application-side WHERE.",
+      problem: "Multi-tenant row isolation that a missed WHERE clause can't leak",
+      stack: ["PostgreSQL", "Row-Level Security", "Roles", "Grants"],
+      embedUrl: "",
+      imageUrl: "",
+      link: "https://github.com/lsaucen/postgres-access-control"
     }
   ],
 
