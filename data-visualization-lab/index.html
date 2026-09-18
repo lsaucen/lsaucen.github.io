@@ -1,62 +1,14 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Data Visualization Lab — Laura Nuñez Salcé</title>
-<style>
-:root{--bg:#f3f5f8;--card:#fff;--ink:#101828;--muted:#667085;--line:#eaecf0;--blue:#4f7cff;--soft:#eef3ff;--shadow:0 18px 48px rgba(16,24,40,.07)}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-.top{height:66px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 34px;position:sticky;top:0;z-index:5}
-.brand{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700}.mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(145deg,#4f7cff,#7a5cff);color:#fff;display:grid;place-items:center;font-size:11px}
-.top a{font-size:12px;color:#475467;text-decoration:none}
-.wrap{max-width:1240px;margin:auto;padding:62px 28px 80px}
-.eyebrow{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:#4f7cff;font-weight:800}
-h1{font-size:clamp(38px,6vw,66px);max-width:850px;letter-spacing:-.055em;line-height:.99;margin:14px 0 22px}
-.lede{font-size:17px;line-height:1.7;color:#667085;max-width:760px;margin:0}
-.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}.pill{background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 11px;font-size:11px;color:#475467}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:48px}
-.card{background:#fff;border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:var(--shadow);transition:.2s}.card:hover{transform:translateY(-4px);box-shadow:0 24px 60px rgba(16,24,40,.11)}
-.preview{height:240px;background:#f7f8fb;padding:18px;display:grid;grid-template-columns:46px 1fr;gap:10px;border-bottom:1px solid var(--line)}
-.mini-side{background:#fff;border:1px solid #edf0f3;border-radius:10px;padding:9px 7px;display:flex;flex-direction:column;gap:8px}.mini-logo{width:18px;height:18px;border-radius:6px;background:#4f7cff;margin-bottom:7px}.mini-line{height:5px;border-radius:99px;background:#e7ebf2}.mini-line.on{background:#a9beff}
-.mini-main{display:flex;flex-direction:column;gap:9px}.mini-top{height:18px;background:#fff;border:1px solid #edf0f3;border-radius:7px}.mini-filters{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.mini-filter{height:20px;border:1px solid #edf0f3;background:#fff;border-radius:6px}.mini-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.mini-kpi{height:48px;background:#fff;border:1px solid #edf0f3;border-radius:8px;padding:7px}.mini-kpi:before{content:"";display:block;width:38%;height:4px;background:#d9dee8;border-radius:10px}.mini-kpi:after{content:"";display:block;width:58%;height:9px;background:#6e91ff;border-radius:4px;margin-top:9px}
-.mini-chart{flex:1;background:#fff;border:1px solid #edf0f3;border-radius:10px;display:flex;align-items:flex-end;gap:7px;padding:16px 14px 12px}.mini-chart i{flex:1;border-radius:4px 4px 2px 2px;background:linear-gradient(#79a0ff,#4f7cff);min-height:18px}
-.card-body{padding:20px 21px 22px}.tag{font-size:10px;color:#315fd6;background:var(--soft);padding:5px 8px;border-radius:999px;font-weight:750}.card h2{font-size:19px;margin:14px 0 8px}.card p{font-size:12px;line-height:1.6;color:#667085;min-height:58px}.features{display:flex;flex-wrap:wrap;gap:6px;margin:16px 0}.feature{font-size:9px;color:#667085;border:1px solid var(--line);border-radius:999px;padding:5px 7px}.open{display:flex;align-items:center;justify-content:space-between;margin-top:17px;padding-top:15px;border-top:1px solid var(--line);font-size:11px;font-weight:750;color:#344054}.open b{color:#4f7cff;font-size:15px}
-.note{margin-top:34px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px 20px;color:#667085;font-size:12px;line-height:1.65}
-@media(max-width:950px){.grid{grid-template-columns:1fr}.preview{height:280px}.card p{min-height:auto}}
-
-iconify-icon{display:inline-block;width:1em;height:1em;vertical-align:-.125em}
-.mark iconify-icon{font-size:15px}
-.top a{display:flex;align-items:center;gap:6px}
-.pill,.tag{display:inline-flex;align-items:center;gap:6px}
-.pill iconify-icon,.tag iconify-icon{font-size:12px}
-.open b{display:grid;place-items:center}
-.open b iconify-icon{font-size:16px}
-</style>
-<script src="https://code.iconify.design/iconify-icon/3.0.3/iconify-icon.min.js"></script>\n</head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="refresh" content="0; url=../">
+<title>Portfolio — Laura Nuñez Salcé</title>
+<link rel="canonical" href="../">
+</head>
 <body>
-<header class="top"><div class="brand"><div class="mark"><iconify-icon icon="lucide:chart-no-axes-combined"></iconify-icon></div>Data Visualization Lab</div><a href="../"><iconify-icon icon="lucide:arrow-left"></iconify-icon> Main portfolio</a></header>
-<main class="wrap">
-  <div class="eyebrow">Interactive portfolio projects</div>
-  <h1>Dashboards built to answer questions, not just display charts.</h1>
-  <p class="lede">A set of interactive analytics prototypes focused on hierarchy, filtering, drill-through and decision-oriented storytelling. All data is synthetic, so the design and analytical logic can be reviewed without exposing confidential information.</p>
-  <div class="meta"><span class="pill"><iconify-icon icon="lucide:list-filter"></iconify-icon>Interactive filters</span><span class="pill"><iconify-icon icon="lucide:split"></iconify-icon>Drill-through</span><span class="pill"><iconify-icon icon="lucide:gauge"></iconify-icon>Executive KPIs</span><span class="pill"><iconify-icon icon="lucide:monitor-smartphone"></iconify-icon>Responsive design</span><span class="pill"><iconify-icon icon="lucide:chart-column-big"></iconify-icon>Chart.js</span></div>
-
-  <section class="grid">
-    <a class="card" href="retail-performance.html">
-      <div class="preview"><div class="mini-side"><div class="mini-logo"></div><div class="mini-line on"></div><div class="mini-line"></div><div class="mini-line"></div><div class="mini-line"></div></div><div class="mini-main"><div class="mini-top"></div><div class="mini-filters"><div class="mini-filter"></div><div class="mini-filter"></div><div class="mini-filter"></div></div><div class="mini-kpis"><div class="mini-kpi"></div><div class="mini-kpi"></div><div class="mini-kpi"></div></div><div class="mini-chart"><i style="height:34%"></i><i style="height:49%"></i><i style="height:44%"></i><i style="height:66%"></i><i style="height:58%"></i><i style="height:79%"></i><i style="height:88%"></i></div></div></div>
-      <div class="card-body"><span class="tag"><iconify-icon icon="lucide:briefcase-business"></iconify-icon>Executive analytics</span><h2>Retail Performance</h2><p>Revenue, target attainment, regional contribution and product mix with context-preserving drill-through.</p><div class="features"><span class="feature">Time filters</span><span class="feature">Region filters</span><span class="feature">Product filters</span><span class="feature">Drill-through</span></div><div class="open"><span>Open interactive dashboard</span><b><iconify-icon icon="lucide:arrow-up-right"></iconify-icon></b></div></div>
-    </a>
-    <a class="card" href="web-analytics.html">
-      <div class="preview"><div class="mini-side"><div class="mini-logo"></div><div class="mini-line on"></div><div class="mini-line"></div><div class="mini-line"></div><div class="mini-line"></div></div><div class="mini-main"><div class="mini-top"></div><div class="mini-filters"><div class="mini-filter"></div><div class="mini-filter"></div><div class="mini-filter"></div></div><div class="mini-kpis"><div class="mini-kpi"></div><div class="mini-kpi"></div><div class="mini-kpi"></div></div><div class="mini-chart"><i style="height:50%"></i><i style="height:43%"></i><i style="height:60%"></i><i style="height:51%"></i><i style="height:71%"></i><i style="height:85%"></i><i style="height:76%"></i></div></div></div>
-      <div class="card-body"><span class="tag"><iconify-icon icon="lucide:mouse-pointer-click"></iconify-icon>Digital analytics</span><h2>Web Analytics</h2><p>Acquisition, engagement, devices and content performance designed around traffic quality rather than vanity metrics.</p><div class="features"><span class="feature">Channel filters</span><span class="feature">Device filters</span><span class="feature">Content detail</span><span class="feature">Drill-through</span></div><div class="open"><span>Open interactive dashboard</span><b><iconify-icon icon="lucide:arrow-up-right"></iconify-icon></b></div></div>
-    </a>
-    <a class="card" href="customer-retention.html">
-      <div class="preview"><div class="mini-side"><div class="mini-logo"></div><div class="mini-line on"></div><div class="mini-line"></div><div class="mini-line"></div><div class="mini-line"></div></div><div class="mini-main"><div class="mini-top"></div><div class="mini-filters"><div class="mini-filter"></div><div class="mini-filter"></div><div class="mini-filter"></div></div><div class="mini-kpis"><div class="mini-kpi"></div><div class="mini-kpi"></div><div class="mini-kpi"></div></div><div class="mini-chart"><i style="height:88%"></i><i style="height:76%"></i><i style="height:68%"></i><i style="height:62%"></i><i style="height:55%"></i><i style="height:50%"></i><i style="height:47%"></i></div></div></div>
-      <div class="card-body"><span class="tag"><iconify-icon icon="lucide:users-round"></iconify-icon>Retention analytics</span><h2>Customer Retention</h2><p>Cohort retention, churn concentration and customer-risk segmentation with filter-aware details.</p><div class="features"><span class="feature">Cohorts</span><span class="feature">Plan filters</span><span class="feature">Risk bands</span><span class="feature">Drill-through</span></div><div class="open"><span>Open interactive dashboard</span><b><iconify-icon icon="lucide:arrow-up-right"></iconify-icon></b></div></div>
-    </a>
-  </section>
-
-  <div class="note"><strong>Portfolio methodology.</strong> These are original interface and analytics prototypes built with synthetic data. The objective is to demonstrate how I structure information, choose visual encodings, preserve filter context and design drill-through paths for decision-makers.</div>
-</main>
+<p>Redirecting to <a href="../">Laura Nuñez Salcé's data portfolio</a>…</p>
+<script>location.replace('../');</script>
 </body>
 </html>
