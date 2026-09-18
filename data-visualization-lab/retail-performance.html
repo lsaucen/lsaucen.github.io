@@ -2,45 +2,154 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Retail Performance Dashboard</title>
+<title>Retail Performance — Data Visualization Lab</title>
+<link rel="stylesheet" href="dashboard.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>
-:root{--bg:#f5f7fb;--card:#fff;--ink:#101828;--muted:#667085;--line:#e4e7ec;--blue:#175cd3}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-.shell{max-width:1220px;margin:auto;padding:26px}.top{display:flex;justify-content:space-between;gap:18px;align-items:flex-end;margin-bottom:24px}
-small,a{color:var(--muted)}h1{margin:5px 0 0;font-size:30px}.back{font-size:13px;text-decoration:none}
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.kpi,.panel{background:#fff;border:1px solid var(--line);border-radius:16px}
-.kpi{padding:18px}.label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}.value{font-size:29px;font-weight:800;margin-top:8px}.delta{font-size:12px;margin-top:5px;color:#067647}
-.grid{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-top:14px}.panel{padding:18px;min-height:320px}.panel h2{font-size:16px;margin:0 0 4px}.panel p{font-size:12px;color:var(--muted);margin:0 0 16px}
-.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{padding:11px 8px;border-bottom:1px solid var(--line);text-align:left}.table th{font-size:11px;color:var(--muted);text-transform:uppercase}
-.foot{margin-top:16px;color:var(--muted);font-size:12px}
-@media(max-width:850px){.kpis{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
-</style></head>
-<body><main class="shell">
-<div class="top"><div><a class="back" href="index.html">← Data Visualization Lab</a><small style="display:block;margin-top:14px">Executive analytics · synthetic data</small><h1>Retail Performance Dashboard</h1></div><small>FY 2026 · YTD through Aug</small></div>
-<section class="kpis">
-<div class="kpi"><div class="label">Revenue</div><div class="value">$4.82M</div><div class="delta">+11.8% vs prior year</div></div>
-<div class="kpi"><div class="label">Gross margin</div><div class="value">37.6%</div><div class="delta">+1.9 pp vs prior year</div></div>
-<div class="kpi"><div class="label">Target attainment</div><div class="value">96.4%</div><div class="delta">Gap: $181K</div></div>
-<div class="kpi"><div class="label">Avg. order value</div><div class="value">$84.20</div><div class="delta">+6.2% vs prior year</div></div>
-</section>
-<section class="grid">
-<div class="panel"><h2>Revenue trend vs target</h2><p>Monthly actual revenue compared with management target.</p><canvas id="trend"></canvas></div>
-<div class="panel"><h2>Revenue by region</h2><p>Contribution to total YTD revenue.</p><canvas id="region"></canvas></div>
-<div class="panel"><h2>Product mix</h2><p>Revenue and margin by category.</p><canvas id="product"></canvas></div>
-<div class="panel"><h2>Regional detail</h2><p>Where the performance gap is concentrated.</p>
-<table class="table"><thead><tr><th>Region</th><th>Revenue</th><th>Margin</th><th>Target</th></tr></thead><tbody>
-<tr><td>North</td><td>$1.42M</td><td>39.8%</td><td>102%</td></tr>
-<tr><td>East</td><td>$1.18M</td><td>36.1%</td><td>94%</td></tr>
-<tr><td>Central</td><td>$1.09M</td><td>35.7%</td><td>91%</td></tr>
-<tr><td>South</td><td>$1.13M</td><td>38.2%</td><td>98%</td></tr>
-</tbody></table></div>
-</section>
-<div class="foot">Portfolio demo. All values are synthetic. Focus: hierarchy, target comparison, contribution and exception identification.</div>
-</main>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="brandmark">LN</div><div><strong>Data Lab</strong><span>Laura Nuñez Salcé</span></div></div>
+    <div class="navlabel">Dashboard</div>
+    <nav class="nav">
+      <a class="active" href="#overview"><span class="icon">⌁</span><span>Overview</span></a>
+      <a href="#trends"><span class="icon">↗</span><span>Trends</span></a>
+      <a href="#products"><span class="icon">▦</span><span>Products</span></a>
+      <a href="#regions"><span class="icon">◎</span><span>Regions</span></a>
+    </nav>
+    <div class="navlabel">Portfolio</div>
+    <nav class="nav">
+      <a href="index.html"><span class="icon">◫</span><span>Data Viz Lab</span></a>
+      <a href="../"><span class="icon">←</span><span>Main portfolio</span></a>
+    </nav>
+    <div class="sidebar-footer"><a href="web-analytics.html">Web Analytics →</a><a href="customer-retention.html">Retention →</a></div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="titleblock"><small>Executive analytics · synthetic data</small><h1>Retail Performance</h1></div>
+      <div class="actions"><button class="ghost-btn" onclick="resetFilters()">Reset filters</button><button class="ghost-btn" onclick="window.print()">Download view</button></div>
+    </header>
+
+    <div class="content">
+      <section id="overview" class="section-anchor">
+        <div class="filters">
+          <div class="filter"><label>Timeframe</label><select id="period"><option value="1">YTD 2026</option><option value=".78">Last 6 months</option><option value=".39">Last 90 days</option></select></div>
+          <div class="filter"><label>Region</label><select id="regionFilter"><option value="1">All regions</option><option value=".295">North</option><option value=".245">East</option><option value=".226">Central</option><option value=".234">South</option></select></div>
+          <div class="filter"><label>Category</label><select id="categoryFilter"><option value="1">All categories</option><option value=".245">Home</option><option value=".216">Electronics</option><option value=".191">Beauty</option><option value=".181">Sports</option><option value=".167">Kids</option></select></div>
+          <button class="reset" onclick="resetFilters()">Clear</button>
+        </div>
+
+        <div class="kpis">
+          <article class="kpi"><div class="label">Revenue</div><div class="value" id="kpiRevenue">$4.82M</div><div class="delta up">+11.8% vs prior year</div></article>
+          <article class="kpi"><div class="label">Gross margin</div><div class="value" id="kpiMargin">37.6%</div><div class="delta up">+1.9 pp vs prior year</div></article>
+          <article class="kpi"><div class="label">Target attainment</div><div class="value" id="kpiTarget">96.4%</div><div class="delta">Gap: <span id="kpiGap">$181K</span></div></article>
+          <article class="kpi"><div class="label">Average order value</div><div class="value" id="kpiAov">$84.20</div><div class="delta up">+6.2% vs prior year</div></article>
+        </div>
+      </section>
+
+      <section id="trends" class="layout section-anchor">
+        <article class="panel">
+          <div class="panel-head"><div><h2>Revenue activity</h2><p>Actual revenue against target by month</p></div><span class="panel-tag">Click a month</span></div>
+          <div class="chart-wrap tall"><canvas id="trendChart"></canvas></div>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><div><h2>Regional performance</h2><p>Contribution and target attainment</p></div><span class="panel-tag">Drill-through enabled</span></div>
+          <div class="chart-wrap"><canvas id="regionChart"></canvas></div>
+        </article>
+      </section>
+
+      <section id="products" class="layout section-anchor">
+        <article class="panel">
+          <div class="panel-head"><div><h2>Product mix</h2><p>Revenue by category</p></div><span class="panel-tag">Click a bar</span></div>
+          <div class="chart-wrap"><canvas id="productChart"></canvas></div>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><div><h2>Strongest categories</h2><p>Revenue quality, not just volume</p></div></div>
+          <div class="list" id="strongList">
+            <div class="list-row" onclick="openDrill('Home','Product category',1180,41.2,103)"><div class="list-main"><div class="list-title">Home</div><div class="list-sub">High margin · Above target</div><div class="progress"><i style="width:91%"></i></div></div><div class="score">103%</div></div>
+            <div class="list-row" onclick="openDrill('Electronics','Product category',1040,38.7,99)"><div class="list-main"><div class="list-title">Electronics</div><div class="list-sub">High volume · Stable margin</div><div class="progress"><i style="width:82%"></i></div></div><div class="score">99%</div></div>
+            <div class="list-row" onclick="openDrill('Beauty','Product category',920,36.5,96)"><div class="list-main"><div class="list-title">Beauty</div><div class="list-sub">Growing repeat purchase</div><div class="progress"><i style="width:74%"></i></div></div><div class="score">96%</div></div>
+          </div>
+        </article>
+      </section>
+
+      <section id="regions" class="layout section-anchor">
+        <article class="panel">
+          <div class="panel-head"><div><h2>Regional detail</h2><p>Click any row for drill-through</p></div></div>
+          <table class="table"><thead><tr><th>Region</th><th>Revenue</th><th>Margin</th><th>Target</th><th>YoY</th></tr></thead><tbody>
+            <tr onclick="openDrill('North','Region',1420,39.8,102)"><td>North</td><td>$1.42M</td><td>39.8%</td><td>102%</td><td>+14.4%</td></tr>
+            <tr onclick="openDrill('East','Region',1180,36.1,94)"><td>East</td><td>$1.18M</td><td>36.1%</td><td>94%</td><td>+9.1%</td></tr>
+            <tr onclick="openDrill('Central','Region',1090,35.7,91)"><td>Central</td><td>$1.09M</td><td>35.7%</td><td>91%</td><td>+7.5%</td></tr>
+            <tr onclick="openDrill('South','Region',1130,38.2,98)"><td>South</td><td>$1.13M</td><td>38.2%</td><td>98%</td><td>+12.0%</td></tr>
+          </tbody></table>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><div><h2>Management signal</h2><p>What deserves attention</p></div></div>
+          <div class="list">
+            <div class="list-row"><div class="list-main"><div class="list-title">Central region target gap</div><div class="list-sub">Largest relative shortfall despite positive YoY growth.</div><div class="progress"><i style="width:58%"></i></div></div><div class="score">91%</div></div>
+            <div class="list-row"><div class="list-main"><div class="list-title">Home category margin</div><div class="list-sub">Best combination of volume and profitability.</div><div class="progress"><i style="width:92%"></i></div></div><div class="score">41.2%</div></div>
+            <div class="list-row"><div class="list-main"><div class="list-title">AOV momentum</div><div class="list-sub">Average order value is improving faster than transaction count.</div><div class="progress"><i style="width:76%"></i></div></div><div class="score">+6.2%</div></div>
+          </div>
+        </article>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="drawer-backdrop" id="backdrop" onclick="closeDrill()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-head"><div><small id="drillType">Drill-through</small><h3 id="drillTitle">Detail</h3></div><button class="close" onclick="closeDrill()">×</button></div>
+  <span class="drill-pill">↳ Filter context preserved</span>
+  <div class="detail-kpis">
+    <div class="detail-kpi"><span>Revenue</span><strong id="drillRevenue">—</strong></div>
+    <div class="detail-kpi"><span>Margin</span><strong id="drillMargin">—</strong></div>
+    <div class="detail-kpi"><span>Target attainment</span><strong id="drillTarget">—</strong></div>
+    <div class="detail-kpi"><span>Contribution</span><strong id="drillContribution">—</strong></div>
+  </div>
+  <h4>Interpretation</h4><p class="drawer-copy" id="drillCopy"></p>
+  <h4>Detail rows</h4>
+  <table class="table"><thead><tr><th>Period</th><th>Revenue</th><th>Target</th></tr></thead><tbody id="drillRows"></tbody></table>
+</aside>
+
 <script>
-Chart.defaults.font.family="Inter, Segoe UI, Arial";
-new Chart(document.getElementById("trend"),{type:"line",data:{labels:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug"],datasets:[{label:"Revenue",data:[510,544,575,598,622,635,651,685],borderWidth:3,tension:.35},{label:"Target",data:[530,550,585,610,630,650,670,690],borderDash:[6,5],borderWidth:2,tension:.2}]},options:{responsive:true,plugins:{legend:{position:"bottom"}},scales:{y:{ticks:{callback:function(v){return "$"+v+"K"}}}}}});
-new Chart(document.getElementById("region"),{type:"doughnut",data:{labels:["North","East","Central","South"],datasets:[{data:[29.5,24.5,22.6,23.4]}]},options:{plugins:{legend:{position:"bottom"}}}});
-new Chart(document.getElementById("product"),{type:"bar",data:{labels:["Home","Electronics","Beauty","Sports","Kids"],datasets:[{label:"Revenue $K",data:[1180,1040,920,870,810],borderWidth:0}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{callback:function(v){return "$"+v+"K"}}}}}});
-</script></body></html>
+Chart.defaults.font.family='Inter, ui-sans-serif, system-ui';
+Chart.defaults.color='#667085';
+Chart.defaults.borderColor='#eef1f5';
+const baseTrend=[510,544,575,598,622,635,651,685], baseTarget=[530,550,585,610,630,650,670,690];
+const regionVals=[1420,1180,1090,1130], productVals=[1180,1040,920,870,810];
+const regionNames=['North','East','Central','South'], productNames=['Home','Electronics','Beauty','Sports','Kids'];
+const trendChart=new Chart(document.getElementById('trendChart'),{type:'bar',data:{labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug'],datasets:[
+  {label:'Revenue',data:[...baseTrend],backgroundColor:'#4f7cff',borderRadius:7,barPercentage:.55},
+  {label:'Target',data:[...baseTarget],backgroundColor:'#e8eefc',borderRadius:7,barPercentage:.55}
+]},options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:9,usePointStyle:true}}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{callback:v=>'$'+v+'K'}}},onClick:(e)=>{const p=trendChart.getElementsAtEventForMode(e,'nearest',{intersect:true},true)[0];if(p)openDrill(trendChart.data.labels[p.index],'Month',trendChart.data.datasets[0].data[p.index],37.6,Math.round(trendChart.data.datasets[0].data[p.index]/trendChart.data.datasets[1].data[p.index]*100));}}});
+const regionChart=new Chart(document.getElementById('regionChart'),{type:'doughnut',data:{labels:regionNames,datasets:[{data:[...regionVals],backgroundColor:['#4f7cff','#7fa0ff','#a8bcff','#d2ddff'],borderWidth:0,hoverOffset:5}]},options:{maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{boxWidth:9,usePointStyle:true}}},onClick:(e)=>{const p=regionChart.getElementsAtEventForMode(e,'nearest',{intersect:true},true)[0];if(p){const i=p.index;openDrill(regionNames[i],'Region',regionVals[i],[39.8,36.1,35.7,38.2][i],[102,94,91,98][i]);}}}});
+const productChart=new Chart(document.getElementById('productChart'),{type:'bar',data:{labels:productNames,datasets:[{data:[...productVals],backgroundColor:'#6f91ff',borderRadius:7,barPercentage:.55}]},options:{maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{callback:v=>'$'+v+'K'}},y:{grid:{display:false}}},onClick:(e)=>{const p=productChart.getElementsAtEventForMode(e,'nearest',{intersect:true},true)[0];if(p){const i=p.index;openDrill(productNames[i],'Product category',productVals[i],[41.2,38.7,36.5,34.9,33.8][i],[103,99,96,93,90][i]);}}}});
+
+function factor(){return +period.value * +regionFilter.value * +categoryFilter.value}
+function applyFilters(){
+  const f=factor(), regional=regionFilter.value==='1'?1:1.04, cat=categoryFilter.value==='1'?1:.97;
+  document.getElementById('kpiRevenue').textContent='$'+(4.82*f).toFixed(f<.1?2:2)+'M';
+  document.getElementById('kpiMargin').textContent=(37.6*cat).toFixed(1)+'%';
+  document.getElementById('kpiTarget').textContent=(96.4*regional).toFixed(1)+'%';
+  document.getElementById('kpiGap').textContent='$'+Math.max(18,Math.round(181*f))+'K';
+  document.getElementById('kpiAov').textContent='$'+(84.2*(.98+f*.02)).toFixed(2);
+  trendChart.data.datasets[0].data=baseTrend.map(v=>Math.round(v*f)); trendChart.data.datasets[1].data=baseTarget.map(v=>Math.round(v*f)); trendChart.update();
+  regionChart.data.datasets[0].data=regionVals.map(v=>Math.round(v*(+period.value)*(+categoryFilter.value))); regionChart.update();
+  productChart.data.datasets[0].data=productVals.map(v=>Math.round(v*(+period.value)*(+regionFilter.value))); productChart.update();
+}
+['period','regionFilter','categoryFilter'].forEach(id=>document.getElementById(id).addEventListener('change',applyFilters));
+function resetFilters(){period.value='1';regionFilter.value='1';categoryFilter.value='1';applyFilters()}
+function openDrill(name,type,revenue,margin,target){
+  document.getElementById('drillTitle').textContent=name; document.getElementById('drillType').textContent=type+' drill-through';
+  document.getElementById('drillRevenue').textContent='$'+(revenue>=1000?(revenue/1000).toFixed(2)+'M':Math.round(revenue)+'K');
+  document.getElementById('drillMargin').textContent=margin.toFixed(1)+'%'; document.getElementById('drillTarget').textContent=target+'%';
+  document.getElementById('drillContribution').textContent=Math.min(100,Math.round(revenue/48.2))+'%';
+  document.getElementById('drillCopy').textContent=target>=100?name+' is outperforming target. The next question is whether the performance is driven by sustainable margin or temporary volume.':name+' is below target. Drill-through isolates the gap so management can distinguish volume, pricing and margin effects.';
+  const vals=[.18,.21,.25,.36].map(x=>Math.round(revenue*x));
+  document.getElementById('drillRows').innerHTML=['Q1','Q2','Q3','Q4'].map((q,i)=>'<tr><td>'+q+'</td><td>$'+vals[i]+'K</td><td>'+(target-3+i)+'%</td></tr>').join('');
+  drawer.classList.add('open');backdrop.classList.add('open');
+}
+function closeDrill(){drawer.classList.remove('open');backdrop.classList.remove('open')}
+</script>
+</body></html>
