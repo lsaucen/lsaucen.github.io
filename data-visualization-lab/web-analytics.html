@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Web Analytics Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{--bg:#0b1020;--card:#121a2c;--ink:#eef2ff;--muted:#98a2b3;--line:#263249}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+.shell{max-width:1220px;margin:auto;padding:26px}.top{display:flex;justify-content:space-between;gap:18px;align-items:flex-end;margin-bottom:24px}
+a,small{color:var(--muted)}a{text-decoration:none}.top h1{font-size:30px;margin:5px 0 0}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.kpi,.panel{background:var(--card);border:1px solid var(--line);border-radius:16px}.kpi{padding:18px}
+.label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}.value{font-size:29px;font-weight:800;margin-top:8px}.delta{font-size:12px;margin-top:5px;color:#75e0a7}
+.grid{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-top:14px}.panel{padding:18px;min-height:320px}.panel h2{font-size:16px;margin:0 0 4px}.panel p{font-size:12px;color:var(--muted);margin:0 0 16px}
+.pages{list-style:none;padding:0;margin:0}.pages li{display:grid;grid-template-columns:1fr auto;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);font-size:13px}.bar{height:5px;background:#2d3748;border-radius:10px;margin-top:6px;overflow:hidden}.bar i{display:block;height:100%;background:#84adff}
+.foot{margin-top:16px;color:var(--muted);font-size:12px}
+@media(max-width:850px){.kpis{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
+</style></head>
+<body><main class="shell">
+<div class="top"><div><a href="index.html">← Data Visualization Lab</a><small style="display:block;margin-top:14px">Digital analytics · synthetic data</small><h1>Web Analytics Dashboard</h1></div><small>Last 30 days</small></div>
+<section class="kpis">
+<div class="kpi"><div class="label">Sessions</div><div class="value">184.7K</div><div class="delta">+14.2%</div></div>
+<div class="kpi"><div class="label">Active users</div><div class="value">126.3K</div><div class="delta">+9.7%</div></div>
+<div class="kpi"><div class="label">Engagement rate</div><div class="value">61.8%</div><div class="delta">+4.1 pp</div></div>
+<div class="kpi"><div class="label">Conversion rate</div><div class="value">3.42%</div><div class="delta">+0.38 pp</div></div>
+</section>
+<section class="grid">
+<div class="panel"><h2>Daily sessions</h2><p>Traffic trend with campaign lift visible in week three.</p><canvas id="sessions"></canvas></div>
+<div class="panel"><h2>Acquisition channels</h2><p>Session share by channel.</p><canvas id="channels"></canvas></div>
+<div class="panel"><h2>Device behavior</h2><p>Sessions by device with conversion overlay.</p><canvas id="device"></canvas></div>
+<div class="panel"><h2>Top content</h2><p>Pages contributing most engaged sessions.</p>
+<ul class="pages">
+<li><span>/pricing<div class="bar"><i style="width:94%"></i></div></span><b>28.4K</b></li>
+<li><span>/product/analytics<div class="bar"><i style="width:82%"></i></div></span><b>24.7K</b></li>
+<li><span>/resources/reporting<div class="bar"><i style="width:66%"></i></div></span><b>19.8K</b></li>
+<li><span>/case-studies/retail<div class="bar"><i style="width:54%"></i></div></span><b>16.2K</b></li>
+<li><span>/blog/dashboard-design<div class="bar"><i style="width:43%"></i></div></span><b>12.9K</b></li>
+</ul></div>
+</section>
+<div class="foot">Portfolio demo. All values are synthetic. Focus: acquisition, engagement, content performance and conversion context.</div>
+</main>
+<script>
+Chart.defaults.color="#c7d0e0";Chart.defaults.borderColor="#263249";Chart.defaults.font.family="Inter, Segoe UI, Arial";
+new Chart(document.getElementById("sessions"),{type:"line",data:{labels:["1","3","5","7","9","11","13","15","17","19","21","23","25","27","29"],datasets:[{label:"Sessions",data:[5.1,5.4,5.9,5.6,6.0,6.2,5.8,6.4,6.8,7.5,8.0,7.7,6.9,7.2,7.4],borderWidth:3,tension:.35,fill:false}]},options:{plugins:{legend:{display:false}},scales:{y:{ticks:{callback:function(v){return v+"K"}}}}}});
+new Chart(document.getElementById("channels"),{type:"doughnut",data:{labels:["Organic","Paid","Direct","Referral","Email"],datasets:[{data:[38,24,18,12,8]}]},options:{plugins:{legend:{position:"bottom"}}}});
+new Chart(document.getElementById("device"),{data:{labels:["Mobile","Desktop","Tablet"],datasets:[{type:"bar",label:"Sessions K",data:[102,72,10]},{type:"line",label:"Conversion %",data:[2.8,4.2,3.1],yAxisID:"y1",borderWidth:3}]},options:{plugins:{legend:{position:"bottom"}},scales:{y:{beginAtZero:true},y1:{position:"right",grid:{drawOnChartArea:false},ticks:{callback:function(v){return v+"%"}}}}}});
+</script></body></html>
