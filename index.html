@@ -101,6 +101,7 @@
   .badge.pbi{background:var(--pbi-soft);color:var(--pbi)}
   .badge.sql{background:var(--sql-soft);color:var(--sql)}
   .badge.py{background:var(--py-soft);color:var(--py)}
+  .badge.viz{background:var(--viz-soft);color:var(--viz)}
   .org{font-family:var(--mono);font-size:.72rem;color:var(--muted)}
   .card h3{font-size:1.12rem;font-weight:700;letter-spacing:-.01em}
   .card p.desc{font-size:.92rem;color:var(--muted)}
@@ -146,6 +147,40 @@ const CONFIG = {
   linkedin: "",  // EDITAR: URL de LinkedIn
 
   projects: [
+    /* ===== Data Visualization ===== */
+    {
+      tool: "viz",
+      org: "Portfolio case study",
+      title: "Retail Performance — Executive Sales Command Center",
+      desc: "Interactive commercial performance dashboard built around the questions executives actually ask: what moved revenue, where target gaps sit, which products combine scale and margin, and where intervention is needed.",
+      problem: "Separate sales metrics made it difficult to explain why performance moved and where to act next",
+      stack: ["Data Visualization", "Interactive Filters", "Drill-through", "Chart.js"],
+      embedUrl: "",
+      imageUrl: "assets/thumb-retail-performance.svg",
+      link: "data-visualization-lab/retail-performance.html"
+    },
+    {
+      tool: "viz",
+      org: "Portfolio case study",
+      title: "Web Analytics — Acquisition & Journey Analysis",
+      desc: "Interactive digital analytics experience covering acquisition quality, engagement, conversion journeys, device behavior and content performance.",
+      problem: "Traffic volume alone did not explain which audiences, journeys and pages were producing meaningful outcomes",
+      stack: ["Digital Analytics", "Funnels", "Behavior Analysis", "Interactive Filters"],
+      embedUrl: "",
+      imageUrl: "assets/thumb-web-analytics.svg",
+      link: "data-visualization-lab/web-analytics.html"
+    },
+    {
+      tool: "viz",
+      org: "Portfolio case study",
+      title: "Customer Retention — Cohort & Churn Analysis",
+      desc: "Retention analysis centered on cohorts, churn timing, revenue retention and behavioral risk signals rather than a generic KPI dashboard.",
+      problem: "Aggregate churn hid when customers left, which segments were fragile and which early signals preceded cancellation",
+      stack: ["Cohort Analysis", "Retention", "Churn", "Customer Analytics"],
+      embedUrl: "",
+      imageUrl: "assets/thumb-customer-retention.svg",
+      link: "data-visualization-lab/customer-retention.html"
+    },
     {
       tool: "pbi",
       org: "Civic platform",
@@ -439,6 +474,7 @@ const CONFIG = {
 <nav class="sheettabs" aria-label="Filter projects">
   <div class="wrap" role="tablist">
     <button class="tab" role="tab" aria-selected="true" data-filter="all">All sheets</button>
+    <button class="tab" role="tab" aria-selected="false" data-filter="viz">Data Visualization</button>
     <button class="tab" role="tab" aria-selected="false" data-filter="pbi">Power BI</button>
     <button class="tab" role="tab" aria-selected="false" data-filter="excel">Excel</button>
     <button class="tab" role="tab" aria-selected="false" data-filter="sql">SQL</button>
@@ -490,6 +526,7 @@ const CONFIG = {
   // Project cards
   const grid = document.getElementById('projectGrid');
   const toolMeta = {
+    viz:{label:'Data Viz', cls:'viz', cta:'case study'},
     pbi:{label:'Power BI', cls:'pbi', cta:'report'},
     excel:{label:'Excel', cls:'excel', cta:'workbook'},
     sql:{label:'SQL', cls:'sql', cta:'project'},
