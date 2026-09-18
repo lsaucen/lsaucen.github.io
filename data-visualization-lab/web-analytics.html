@@ -2,46 +2,152 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Web Analytics Dashboard</title>
+<title>Web Analytics — Data Visualization Lab</title>
+<link rel="stylesheet" href="dashboard.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>
-:root{--bg:#0b1020;--card:#121a2c;--ink:#eef2ff;--muted:#98a2b3;--line:#263249}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-.shell{max-width:1220px;margin:auto;padding:26px}.top{display:flex;justify-content:space-between;gap:18px;align-items:flex-end;margin-bottom:24px}
-a,small{color:var(--muted)}a{text-decoration:none}.top h1{font-size:30px;margin:5px 0 0}
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.kpi,.panel{background:var(--card);border:1px solid var(--line);border-radius:16px}.kpi{padding:18px}
-.label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}.value{font-size:29px;font-weight:800;margin-top:8px}.delta{font-size:12px;margin-top:5px;color:#75e0a7}
-.grid{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-top:14px}.panel{padding:18px;min-height:320px}.panel h2{font-size:16px;margin:0 0 4px}.panel p{font-size:12px;color:var(--muted);margin:0 0 16px}
-.pages{list-style:none;padding:0;margin:0}.pages li{display:grid;grid-template-columns:1fr auto;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);font-size:13px}.bar{height:5px;background:#2d3748;border-radius:10px;margin-top:6px;overflow:hidden}.bar i{display:block;height:100%;background:#84adff}
-.foot{margin-top:16px;color:var(--muted);font-size:12px}
-@media(max-width:850px){.kpis{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
-</style></head>
-<body><main class="shell">
-<div class="top"><div><a href="index.html">← Data Visualization Lab</a><small style="display:block;margin-top:14px">Digital analytics · synthetic data</small><h1>Web Analytics Dashboard</h1></div><small>Last 30 days</small></div>
-<section class="kpis">
-<div class="kpi"><div class="label">Sessions</div><div class="value">184.7K</div><div class="delta">+14.2%</div></div>
-<div class="kpi"><div class="label">Active users</div><div class="value">126.3K</div><div class="delta">+9.7%</div></div>
-<div class="kpi"><div class="label">Engagement rate</div><div class="value">61.8%</div><div class="delta">+4.1 pp</div></div>
-<div class="kpi"><div class="label">Conversion rate</div><div class="value">3.42%</div><div class="delta">+0.38 pp</div></div>
-</section>
-<section class="grid">
-<div class="panel"><h2>Daily sessions</h2><p>Traffic trend with campaign lift visible in week three.</p><canvas id="sessions"></canvas></div>
-<div class="panel"><h2>Acquisition channels</h2><p>Session share by channel.</p><canvas id="channels"></canvas></div>
-<div class="panel"><h2>Device behavior</h2><p>Sessions by device with conversion overlay.</p><canvas id="device"></canvas></div>
-<div class="panel"><h2>Top content</h2><p>Pages contributing most engaged sessions.</p>
-<ul class="pages">
-<li><span>/pricing<div class="bar"><i style="width:94%"></i></div></span><b>28.4K</b></li>
-<li><span>/product/analytics<div class="bar"><i style="width:82%"></i></div></span><b>24.7K</b></li>
-<li><span>/resources/reporting<div class="bar"><i style="width:66%"></i></div></span><b>19.8K</b></li>
-<li><span>/case-studies/retail<div class="bar"><i style="width:54%"></i></div></span><b>16.2K</b></li>
-<li><span>/blog/dashboard-design<div class="bar"><i style="width:43%"></i></div></span><b>12.9K</b></li>
-</ul></div>
-</section>
-<div class="foot">Portfolio demo. All values are synthetic. Focus: acquisition, engagement, content performance and conversion context.</div>
-</main>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="brandmark">LN</div><div><strong>Data Lab</strong><span>Laura Nuñez Salcé</span></div></div>
+    <div class="navlabel">Dashboard</div>
+    <nav class="nav">
+      <a class="active" href="#overview"><span class="icon">⌁</span><span>Overview</span></a>
+      <a href="#acquisition"><span class="icon">↗</span><span>Acquisition</span></a>
+      <a href="#devices"><span class="icon">▤</span><span>Devices</span></a>
+      <a href="#content"><span class="icon">◫</span><span>Content</span></a>
+    </nav>
+    <div class="navlabel">Portfolio</div>
+    <nav class="nav">
+      <a href="index.html"><span class="icon">◫</span><span>Data Viz Lab</span></a>
+      <a href="../"><span class="icon">←</span><span>Main portfolio</span></a>
+    </nav>
+    <div class="sidebar-footer"><a href="retail-performance.html">Retail Performance →</a><a href="customer-retention.html">Retention →</a></div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="titleblock"><small>Digital analytics · synthetic data</small><h1>Web Analytics</h1></div>
+      <div class="actions"><button class="ghost-btn" onclick="resetFilters()">Reset filters</button><button class="ghost-btn" onclick="window.print()">Download view</button></div>
+    </header>
+
+    <div class="content">
+      <section id="overview" class="section-anchor">
+        <div class="filters">
+          <div class="filter"><label>Timeframe</label><select id="period"><option value="1">Last 30 days</option><option value=".5">Last 14 days</option><option value=".25">Last 7 days</option></select></div>
+          <div class="filter"><label>Channel</label><select id="channelFilter"><option value="1">All channels</option><option value=".38">Organic</option><option value=".24">Paid</option><option value=".18">Direct</option><option value=".12">Referral</option><option value=".08">Email</option></select></div>
+          <div class="filter"><label>Device</label><select id="deviceFilter"><option value="1">All devices</option><option value=".55">Mobile</option><option value=".39">Desktop</option><option value=".06">Tablet</option></select></div>
+          <button class="reset" onclick="resetFilters()">Clear</button>
+        </div>
+
+        <div class="kpis">
+          <article class="kpi"><div class="label">Sessions</div><div class="value" id="kpiSessions">184.7K</div><div class="delta up">+14.2% vs prior period</div></article>
+          <article class="kpi"><div class="label">Active users</div><div class="value" id="kpiUsers">126.3K</div><div class="delta up">+9.7%</div></article>
+          <article class="kpi"><div class="label">Engagement rate</div><div class="value" id="kpiEngagement">61.8%</div><div class="delta up">+4.1 pp</div></article>
+          <article class="kpi"><div class="label">Conversion rate</div><div class="value" id="kpiConversion">3.42%</div><div class="delta up">+0.38 pp</div></article>
+        </div>
+      </section>
+
+      <section id="acquisition" class="layout section-anchor">
+        <article class="panel">
+          <div class="panel-head"><div><h2>Traffic activity</h2><p>Daily sessions across the selected filter context</p></div><span class="panel-tag">Click a day</span></div>
+          <div class="chart-wrap tall"><canvas id="sessionsChart"></canvas></div>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><div><h2>Acquisition channels</h2><p>Share of sessions by source</p></div><span class="panel-tag">Drill-through enabled</span></div>
+          <div class="chart-wrap"><canvas id="channelChart"></canvas></div>
+        </article>
+      </section>
+
+      <section id="devices" class="layout section-anchor">
+        <article class="panel">
+          <div class="panel-head"><div><h2>Device behavior</h2><p>Traffic volume with conversion rate overlay</p></div><span class="panel-tag">Click a device</span></div>
+          <div class="chart-wrap"><canvas id="deviceChart"></canvas></div>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><div><h2>Behavior signals</h2><p>Where the quality of traffic differs</p></div></div>
+          <div class="list">
+            <div class="list-row" onclick="openDrill('Desktop','Device',72,67.2,4.2)"><div class="list-main"><div class="list-title">Desktop</div><div class="list-sub">Highest conversion and engagement</div><div class="progress"><i style="width:88%"></i></div></div><div class="score">4.2%</div></div>
+            <div class="list-row" onclick="openDrill('Mobile','Device',102,58.6,2.8)"><div class="list-main"><div class="list-title">Mobile</div><div class="list-sub">Largest audience, lower conversion</div><div class="progress"><i style="width:73%"></i></div></div><div class="score">2.8%</div></div>
+            <div class="list-row" onclick="openDrill('Tablet','Device',10,60.1,3.1)"><div class="list-main"><div class="list-title">Tablet</div><div class="list-sub">Small volume, stable quality</div><div class="progress"><i style="width:61%"></i></div></div><div class="score">3.1%</div></div>
+          </div>
+        </article>
+      </section>
+
+      <section id="content" class="layout section-anchor">
+        <article class="panel">
+          <div class="panel-head"><div><h2>Top content</h2><p>Pages contributing the most engaged sessions</p></div><span class="panel-tag">Click any row</span></div>
+          <table class="table"><thead><tr><th>Page</th><th>Sessions</th><th>Engagement</th><th>Conversion</th></tr></thead><tbody>
+            <tr onclick="openDrill('/pricing','Page',28.4,69.1,5.8)"><td>/pricing</td><td>28.4K</td><td>69.1%</td><td>5.8%</td></tr>
+            <tr onclick="openDrill('/product/analytics','Page',24.7,66.4,4.9)"><td>/product/analytics</td><td>24.7K</td><td>66.4%</td><td>4.9%</td></tr>
+            <tr onclick="openDrill('/resources/reporting','Page',19.8,63.0,2.7)"><td>/resources/reporting</td><td>19.8K</td><td>63.0%</td><td>2.7%</td></tr>
+            <tr onclick="openDrill('/case-studies/retail','Page',16.2,71.8,3.9)"><td>/case-studies/retail</td><td>16.2K</td><td>71.8%</td><td>3.9%</td></tr>
+            <tr onclick="openDrill('/blog/dashboard-design','Page',12.9,74.2,1.8)"><td>/blog/dashboard-design</td><td>12.9K</td><td>74.2%</td><td>1.8%</td></tr>
+          </tbody></table>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><div><h2>Decision signals</h2><p>What the traffic mix suggests</p></div></div>
+          <div class="list">
+            <div class="list-row"><div class="list-main"><div class="list-title">Pricing page intent</div><div class="list-sub">Highest combination of volume and conversion.</div><div class="progress"><i style="width:92%"></i></div></div><div class="score">5.8%</div></div>
+            <div class="list-row"><div class="list-main"><div class="list-title">Mobile conversion gap</div><div class="list-sub">Traffic is strong, but user intent leaks before conversion.</div><div class="progress"><i style="width:64%"></i></div></div><div class="score">-1.4 pp</div></div>
+            <div class="list-row"><div class="list-main"><div class="list-title">Organic efficiency</div><div class="list-sub">Largest acquisition source without media spend.</div><div class="progress"><i style="width:83%"></i></div></div><div class="score">38%</div></div>
+          </div>
+        </article>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="drawer-backdrop" id="backdrop" onclick="closeDrill()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-head"><div><small id="drillType">Drill-through</small><h3 id="drillTitle">Detail</h3></div><button class="close" onclick="closeDrill()">×</button></div>
+  <span class="drill-pill">↳ Selected context carried into detail</span>
+  <div class="detail-kpis">
+    <div class="detail-kpi"><span>Sessions</span><strong id="drillSessions">—</strong></div>
+    <div class="detail-kpi"><span>Engagement</span><strong id="drillEngagement">—</strong></div>
+    <div class="detail-kpi"><span>Conversion</span><strong id="drillConversion">—</strong></div>
+    <div class="detail-kpi"><span>Quality score</span><strong id="drillQuality">—</strong></div>
+  </div>
+  <h4>Interpretation</h4><p class="drawer-copy" id="drillCopy"></p>
+  <h4>Behavior detail</h4>
+  <table class="table"><thead><tr><th>Metric</th><th>Value</th><th>Vs avg.</th></tr></thead><tbody id="drillRows"></tbody></table>
+</aside>
+
 <script>
-Chart.defaults.color="#c7d0e0";Chart.defaults.borderColor="#263249";Chart.defaults.font.family="Inter, Segoe UI, Arial";
-new Chart(document.getElementById("sessions"),{type:"line",data:{labels:["1","3","5","7","9","11","13","15","17","19","21","23","25","27","29"],datasets:[{label:"Sessions",data:[5.1,5.4,5.9,5.6,6.0,6.2,5.8,6.4,6.8,7.5,8.0,7.7,6.9,7.2,7.4],borderWidth:3,tension:.35,fill:false}]},options:{plugins:{legend:{display:false}},scales:{y:{ticks:{callback:function(v){return v+"K"}}}}}});
-new Chart(document.getElementById("channels"),{type:"doughnut",data:{labels:["Organic","Paid","Direct","Referral","Email"],datasets:[{data:[38,24,18,12,8]}]},options:{plugins:{legend:{position:"bottom"}}}});
-new Chart(document.getElementById("device"),{data:{labels:["Mobile","Desktop","Tablet"],datasets:[{type:"bar",label:"Sessions K",data:[102,72,10]},{type:"line",label:"Conversion %",data:[2.8,4.2,3.1],yAxisID:"y1",borderWidth:3}]},options:{plugins:{legend:{position:"bottom"}},scales:{y:{beginAtZero:true},y1:{position:"right",grid:{drawOnChartArea:false},ticks:{callback:function(v){return v+"%"}}}}}});
-</script></body></html>
+Chart.defaults.font.family='Inter, ui-sans-serif, system-ui'; Chart.defaults.color='#667085'; Chart.defaults.borderColor='#eef1f5';
+const baseSessions=[5.1,5.4,5.9,5.6,6.0,6.2,5.8,6.4,6.8,7.5,8.0,7.7,6.9,7.2,7.4];
+const channelNames=['Organic','Paid','Direct','Referral','Email'], channelVals=[38,24,18,12,8], deviceNames=['Mobile','Desktop','Tablet'], deviceSessions=[102,72,10], deviceConv=[2.8,4.2,3.1];
+
+const sessionsChart=new Chart(document.getElementById('sessionsChart'),{type:'bar',data:{labels:['1','3','5','7','9','11','13','15','17','19','21','23','25','27','29'],datasets:[{label:'Sessions K',data:[...baseSessions],backgroundColor:'#4f7cff',borderRadius:7,barPercentage:.48}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{callback:v=>v+'K'}}},onClick:(e)=>{const p=sessionsChart.getElementsAtEventForMode(e,'nearest',{intersect:true},true)[0];if(p)openDrill('Day '+sessionsChart.data.labels[p.index],'Day',sessionsChart.data.datasets[0].data[p.index],61.8,3.42)}}});
+const channelChart=new Chart(document.getElementById('channelChart'),{type:'doughnut',data:{labels:channelNames,datasets:[{data:[...channelVals],backgroundColor:['#4f7cff','#7fa0ff','#a8bcff','#c4d2ff','#dce5ff'],borderWidth:0,hoverOffset:5}]},options:{maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{boxWidth:9,usePointStyle:true}}},onClick:(e)=>{const p=channelChart.getElementsAtEventForMode(e,'nearest',{intersect:true},true)[0];if(p){const i=p.index;openDrill(channelNames[i],'Acquisition channel',channelVals[i]*1.847,[64.3,57.8,63.2,61.0,66.4][i],[3.9,3.7,3.3,2.5,4.4][i])}}}});
+const deviceChart=new Chart(document.getElementById('deviceChart'),{data:{labels:deviceNames,datasets:[{type:'bar',label:'Sessions K',data:[...deviceSessions],backgroundColor:'#6f91ff',borderRadius:7,barPercentage:.48},{type:'line',label:'Conversion %',data:[...deviceConv],yAxisID:'y1',borderColor:'#20c997',backgroundColor:'#20c997',tension:.3,borderWidth:2.5,pointRadius:4}]},options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:9,usePointStyle:true}}},scales:{x:{grid:{display:false}},y:{beginAtZero:true},y1:{position:'right',grid:{drawOnChartArea:false},ticks:{callback:v=>v+'%'}}},onClick:(e)=>{const p=deviceChart.getElementsAtEventForMode(e,'nearest',{intersect:true},true)[0];if(p){const i=p.index;openDrill(deviceNames[i],'Device',deviceSessions[i],[58.6,67.2,60.1][i],deviceConv[i])}}}});
+
+function factor(){return +period.value * +channelFilter.value * +deviceFilter.value}
+function applyFilters(){
+  const f=factor();
+  kpiSessions.textContent=(184.7*f).toFixed(1)+'K'; kpiUsers.textContent=(126.3*f).toFixed(1)+'K';
+  kpiEngagement.textContent=(61.8+(deviceFilter.value==='1'?0:(+deviceFilter.value>.5?-2.4:3.2))).toFixed(1)+'%';
+  kpiConversion.textContent=(3.42+(channelFilter.value==='1'?0:(+channelFilter.value<.1?1.0:-.15))).toFixed(2)+'%';
+  sessionsChart.data.datasets[0].data=baseSessions.map(v=>+(v*f).toFixed(1));sessionsChart.update();
+  channelChart.data.datasets[0].data=channelVals.map(v=>+(v*(+period.value)*(+deviceFilter.value)).toFixed(1));channelChart.update();
+  deviceChart.data.datasets[0].data=deviceSessions.map(v=>+(v*(+period.value)*(+channelFilter.value)).toFixed(1));deviceChart.update();
+}
+['period','channelFilter','deviceFilter'].forEach(id=>document.getElementById(id).addEventListener('change',applyFilters));
+function resetFilters(){period.value='1';channelFilter.value='1';deviceFilter.value='1';applyFilters()}
+function openDrill(name,type,sessions,engagement,conversion){
+  drillTitle.textContent=name;drillType.textContent=type+' drill-through';
+  drillSessions.textContent=(sessions>=100?sessions.toFixed(1)+'K':sessions.toFixed(1)+'K');
+  drillEngagement.textContent=engagement.toFixed(1)+'%';drillConversion.textContent=conversion.toFixed(2)+'%';
+  const quality=Math.round((engagement/70*.55+conversion/5*.45)*100);drillQuality.textContent=Math.min(100,quality);
+  drillCopy.textContent=conversion>=4?name+' shows high commercial intent. The useful follow-up is to isolate which journeys or campaigns are producing this quality.':name+' contributes traffic but converts below the strongest benchmark. The drill-through view separates engagement from conversion so volume is not mistaken for quality.';
+  drillRows.innerHTML=[
+    ['Bounce proxy',(100-engagement).toFixed(1)+'%',engagement>62?'- better':'+ worse'],
+    ['Engaged session rate',engagement.toFixed(1)+'%',engagement>61.8?'+ above':'- below'],
+    ['Conversion rate',conversion.toFixed(2)+'%',conversion>3.42?'+ above':'- below'],
+    ['Relative volume',Math.round(sessions)+'K',sessions>30?'+ high':'- low']
+  ].map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>').join('');
+  drawer.classList.add('open');backdrop.classList.add('open');
+}
+function closeDrill(){drawer.classList.remove('open');backdrop.classList.remove('open')}
+</script>
+</body></html>
