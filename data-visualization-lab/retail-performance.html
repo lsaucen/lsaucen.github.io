@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Retail Performance Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--ink:#101828;--muted:#667085;--line:#e4e7ec;--blue:#175cd3}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+.shell{max-width:1220px;margin:auto;padding:26px}.top{display:flex;justify-content:space-between;gap:18px;align-items:flex-end;margin-bottom:24px}
+small,a{color:var(--muted)}h1{margin:5px 0 0;font-size:30px}.back{font-size:13px;text-decoration:none}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.kpi,.panel{background:#fff;border:1px solid var(--line);border-radius:16px}
+.kpi{padding:18px}.label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}.value{font-size:29px;font-weight:800;margin-top:8px}.delta{font-size:12px;margin-top:5px;color:#067647}
+.grid{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-top:14px}.panel{padding:18px;min-height:320px}.panel h2{font-size:16px;margin:0 0 4px}.panel p{font-size:12px;color:var(--muted);margin:0 0 16px}
+.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{padding:11px 8px;border-bottom:1px solid var(--line);text-align:left}.table th{font-size:11px;color:var(--muted);text-transform:uppercase}
+.foot{margin-top:16px;color:var(--muted);font-size:12px}
+@media(max-width:850px){.kpis{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
+</style></head>
+<body><main class="shell">
+<div class="top"><div><a class="back" href="index.html">← Data Visualization Lab</a><small style="display:block;margin-top:14px">Executive analytics · synthetic data</small><h1>Retail Performance Dashboard</h1></div><small>FY 2026 · YTD through Aug</small></div>
+<section class="kpis">
+<div class="kpi"><div class="label">Revenue</div><div class="value">$4.82M</div><div class="delta">+11.8% vs prior year</div></div>
+<div class="kpi"><div class="label">Gross margin</div><div class="value">37.6%</div><div class="delta">+1.9 pp vs prior year</div></div>
+<div class="kpi"><div class="label">Target attainment</div><div class="value">96.4%</div><div class="delta">Gap: $181K</div></div>
+<div class="kpi"><div class="label">Avg. order value</div><div class="value">$84.20</div><div class="delta">+6.2% vs prior year</div></div>
+</section>
+<section class="grid">
+<div class="panel"><h2>Revenue trend vs target</h2><p>Monthly actual revenue compared with management target.</p><canvas id="trend"></canvas></div>
+<div class="panel"><h2>Revenue by region</h2><p>Contribution to total YTD revenue.</p><canvas id="region"></canvas></div>
+<div class="panel"><h2>Product mix</h2><p>Revenue and margin by category.</p><canvas id="product"></canvas></div>
+<div class="panel"><h2>Regional detail</h2><p>Where the performance gap is concentrated.</p>
+<table class="table"><thead><tr><th>Region</th><th>Revenue</th><th>Margin</th><th>Target</th></tr></thead><tbody>
+<tr><td>North</td><td>$1.42M</td><td>39.8%</td><td>102%</td></tr>
+<tr><td>East</td><td>$1.18M</td><td>36.1%</td><td>94%</td></tr>
+<tr><td>Central</td><td>$1.09M</td><td>35.7%</td><td>91%</td></tr>
+<tr><td>South</td><td>$1.13M</td><td>38.2%</td><td>98%</td></tr>
+</tbody></table></div>
+</section>
+<div class="foot">Portfolio demo. All values are synthetic. Focus: hierarchy, target comparison, contribution and exception identification.</div>
+</main>
+<script>
+Chart.defaults.font.family="Inter, Segoe UI, Arial";
+new Chart(document.getElementById("trend"),{type:"line",data:{labels:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug"],datasets:[{label:"Revenue",data:[510,544,575,598,622,635,651,685],borderWidth:3,tension:.35},{label:"Target",data:[530,550,585,610,630,650,670,690],borderDash:[6,5],borderWidth:2,tension:.2}]},options:{responsive:true,plugins:{legend:{position:"bottom"}},scales:{y:{ticks:{callback:function(v){return "$"+v+"K"}}}}}});
+new Chart(document.getElementById("region"),{type:"doughnut",data:{labels:["North","East","Central","South"],datasets:[{data:[29.5,24.5,22.6,23.4]}]},options:{plugins:{legend:{position:"bottom"}}}});
+new Chart(document.getElementById("product"),{type:"bar",data:{labels:["Home","Electronics","Beauty","Sports","Kids"],datasets:[{label:"Revenue $K",data:[1180,1040,920,870,810],borderWidth:0}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{callback:function(v){return "$"+v+"K"}}}}}});
+</script></body></html>
