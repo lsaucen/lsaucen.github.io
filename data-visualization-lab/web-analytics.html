@@ -3,65 +3,65 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Web Analytics — Data Visualization Lab</title>
-<link rel="stylesheet" href="dashboard.css">
+<link rel="stylesheet" href="dashboard.css">\n<script src="https://code.iconify.design/iconify-icon/3.0.3/iconify-icon.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 <div class="app">
   <aside class="sidebar">
-    <div class="brand"><div class="brandmark">LN</div><div><strong>Data Lab</strong><span>Laura Nuñez Salcé</span></div></div>
+    <div class="brand"><div class="brandmark"><iconify-icon icon="lucide:chart-no-axes-combined"></iconify-icon></div><div><strong>Data Lab</strong><span>Laura Nuñez Salcé</span></div></div>
     <div class="navlabel">Dashboard</div>
     <nav class="nav">
-      <a class="active" href="#overview"><span class="icon">⌁</span><span>Overview</span></a>
-      <a href="#acquisition"><span class="icon">↗</span><span>Acquisition</span></a>
+      <a class="active" href="#overview"><span class="icon"><iconify-icon icon="lucide:layout-dashboard"></iconify-icon></span><span>Overview</span></a>
+      <a href="#acquisition"><span class="icon"><iconify-icon icon="lucide:chart-no-axes-column-increasing"></iconify-icon></span><span>Acquisition</span></a>
       <a href="#devices"><span class="icon">▤</span><span>Devices</span></a>
-      <a href="#content"><span class="icon">◫</span><span>Content</span></a>
+      <a href="#content"><span class="icon"><iconify-icon icon="lucide:gallery-horizontal-end"></iconify-icon></span><span>Content</span></a>
     </nav>
     <div class="navlabel">Portfolio</div>
     <nav class="nav">
-      <a href="index.html"><span class="icon">◫</span><span>Data Viz Lab</span></a>
-      <a href="../"><span class="icon">←</span><span>Main portfolio</span></a>
+      <a href="index.html"><span class="icon"><iconify-icon icon="lucide:gallery-horizontal-end"></iconify-icon></span><span>Data Viz Lab</span></a>
+      <a href="../"><span class="icon"><iconify-icon icon="lucide:arrow-left"></iconify-icon></span><span>Main portfolio</span></a>
     </nav>
-    <div class="sidebar-footer"><a href="retail-performance.html">Retail Performance →</a><a href="customer-retention.html">Retention →</a></div>
+    <div class="sidebar-footer"><a href="retail-performance.html">Retail Performance <iconify-icon icon="lucide:arrow-right"></iconify-icon></a><a href="customer-retention.html">Retention <iconify-icon icon="lucide:arrow-right"></iconify-icon></a></div>
   </aside>
 
   <main class="main">
     <header class="topbar">
       <div class="titleblock"><small>Digital analytics · synthetic data</small><h1>Web Analytics</h1></div>
-      <div class="actions"><button class="ghost-btn" onclick="resetFilters()">Reset filters</button><button class="ghost-btn" onclick="window.print()">Download view</button></div>
+      <div class="actions"><button class="ghost-btn" onclick="resetFilters()"><iconify-icon icon="lucide:rotate-ccw"></iconify-icon>Reset filters</button><button class="ghost-btn" onclick="window.print()"><iconify-icon icon="lucide:download"></iconify-icon>Download view</button></div>
     </header>
 
     <div class="content">
       <section id="overview" class="section-anchor">
         <div class="filters">
-          <div class="filter"><label>Timeframe</label><select id="period"><option value="1">Last 30 days</option><option value=".5">Last 14 days</option><option value=".25">Last 7 days</option></select></div>
-          <div class="filter"><label>Channel</label><select id="channelFilter"><option value="1">All channels</option><option value=".38">Organic</option><option value=".24">Paid</option><option value=".18">Direct</option><option value=".12">Referral</option><option value=".08">Email</option></select></div>
-          <div class="filter"><label>Device</label><select id="deviceFilter"><option value="1">All devices</option><option value=".55">Mobile</option><option value=".39">Desktop</option><option value=".06">Tablet</option></select></div>
-          <button class="reset" onclick="resetFilters()">Clear</button>
+          <div class="filter"><label><iconify-icon icon="lucide:calendar-range"></iconify-icon>Timeframe</label><select id="period"><option value="1">Last 30 days</option><option value=".5">Last 14 days</option><option value=".25">Last 7 days</option></select></div>
+          <div class="filter"><label><iconify-icon icon="lucide:radio-tower"></iconify-icon>Channel</label><select id="channelFilter"><option value="1">All channels</option><option value=".38">Organic</option><option value=".24">Paid</option><option value=".18">Direct</option><option value=".12">Referral</option><option value=".08">Email</option></select></div>
+          <div class="filter"><label><iconify-icon icon="lucide:monitor-smartphone"></iconify-icon>Device</label><select id="deviceFilter"><option value="1">All devices</option><option value=".55">Mobile</option><option value=".39">Desktop</option><option value=".06">Tablet</option></select></div>
+          <button class="reset" onclick="resetFilters()"><iconify-icon icon="lucide:x"></iconify-icon>Clear</button>
         </div>
 
         <div class="kpis">
-          <article class="kpi"><div class="label">Sessions</div><div class="value" id="kpiSessions">184.7K</div><div class="delta up">+14.2% vs prior period</div></article>
-          <article class="kpi"><div class="label">Active users</div><div class="value" id="kpiUsers">126.3K</div><div class="delta up">+9.7%</div></article>
-          <article class="kpi"><div class="label">Engagement rate</div><div class="value" id="kpiEngagement">61.8%</div><div class="delta up">+4.1 pp</div></article>
-          <article class="kpi"><div class="label">Conversion rate</div><div class="value" id="kpiConversion">3.42%</div><div class="delta up">+0.38 pp</div></article>
+          <article class="kpi"><div class="kpi-head"><span class="kpi-icon"><iconify-icon icon="lucide:mouse-pointer-2"></iconify-icon></span><div class="label">Sessions</div></div><div class="value" id="kpiSessions">184.7K</div><div class="delta up">+14.2% vs prior period</div></article>
+          <article class="kpi"><div class="kpi-head"><span class="kpi-icon"><iconify-icon icon="lucide:users"></iconify-icon></span><div class="label">Active users</div></div><div class="value" id="kpiUsers">126.3K</div><div class="delta up">+9.7%</div></article>
+          <article class="kpi"><div class="kpi-head"><span class="kpi-icon"><iconify-icon icon="lucide:gauge"></iconify-icon></span><div class="label">Engagement rate</div></div><div class="value" id="kpiEngagement">61.8%</div><div class="delta up">+4.1 pp</div></article>
+          <article class="kpi"><div class="kpi-head"><span class="kpi-icon"><iconify-icon icon="lucide:badge-check"></iconify-icon></span><div class="label">Conversion rate</div></div><div class="value" id="kpiConversion">3.42%</div><div class="delta up">+0.38 pp</div></article>
         </div>
       </section>
 
       <section id="acquisition" class="layout section-anchor">
         <article class="panel">
-          <div class="panel-head"><div><h2>Traffic activity</h2><p>Daily sessions across the selected filter context</p></div><span class="panel-tag">Click a day</span></div>
+          <div class="panel-head"><div><h2>Traffic activity</h2><p>Daily sessions across the selected filter context</p></div><span class="panel-tag"><iconify-icon icon="lucide:mouse-pointer-click"></iconify-icon>Click a day</span></div>
           <div class="chart-wrap tall"><canvas id="sessionsChart"></canvas></div>
         </article>
         <article class="panel">
-          <div class="panel-head"><div><h2>Acquisition channels</h2><p>Share of sessions by source</p></div><span class="panel-tag">Drill-through enabled</span></div>
+          <div class="panel-head"><div><h2>Acquisition channels</h2><p>Share of sessions by source</p></div><span class="panel-tag"><iconify-icon icon="lucide:split"></iconify-icon>Drill-through enabled</span></div>
           <div class="chart-wrap"><canvas id="channelChart"></canvas></div>
         </article>
       </section>
 
       <section id="devices" class="layout section-anchor">
         <article class="panel">
-          <div class="panel-head"><div><h2>Device behavior</h2><p>Traffic volume with conversion rate overlay</p></div><span class="panel-tag">Click a device</span></div>
+          <div class="panel-head"><div><h2>Device behavior</h2><p>Traffic volume with conversion rate overlay</p></div><span class="panel-tag"><iconify-icon icon="lucide:mouse-pointer-click"></iconify-icon>Click a device</span></div>
           <div class="chart-wrap"><canvas id="deviceChart"></canvas></div>
         </article>
         <article class="panel">
@@ -76,7 +76,7 @@
 
       <section id="content" class="layout section-anchor">
         <article class="panel">
-          <div class="panel-head"><div><h2>Top content</h2><p>Pages contributing the most engaged sessions</p></div><span class="panel-tag">Click any row</span></div>
+          <div class="panel-head"><div><h2>Top content</h2><p>Pages contributing the most engaged sessions</p></div><span class="panel-tag"><iconify-icon icon="lucide:mouse-pointer-click"></iconify-icon>Click any row</span></div>
           <table class="table"><thead><tr><th>Page</th><th>Sessions</th><th>Engagement</th><th>Conversion</th></tr></thead><tbody>
             <tr onclick="openDrill('/pricing','Page',28.4,69.1,5.8)"><td>/pricing</td><td>28.4K</td><td>69.1%</td><td>5.8%</td></tr>
             <tr onclick="openDrill('/product/analytics','Page',24.7,66.4,4.9)"><td>/product/analytics</td><td>24.7K</td><td>66.4%</td><td>4.9%</td></tr>
@@ -100,8 +100,8 @@
 
 <div class="drawer-backdrop" id="backdrop" onclick="closeDrill()"></div>
 <aside class="drawer" id="drawer">
-  <div class="drawer-head"><div><small id="drillType">Drill-through</small><h3 id="drillTitle">Detail</h3></div><button class="close" onclick="closeDrill()">×</button></div>
-  <span class="drill-pill">↳ Selected context carried into detail</span>
+  <div class="drawer-head"><div><small id="drillType">Drill-through</small><h3 id="drillTitle">Detail</h3></div><button class="close" onclick="closeDrill()" aria-label="Close detail"><iconify-icon icon="lucide:x"></iconify-icon></button></div>
+  <span class="drill-pill"><iconify-icon icon="lucide:filter"></iconify-icon>Selected context carried into detail</span>
   <div class="detail-kpis">
     <div class="detail-kpi"><span>Sessions</span><strong id="drillSessions">—</strong></div>
     <div class="detail-kpi"><span>Engagement</span><strong id="drillEngagement">—</strong></div>
