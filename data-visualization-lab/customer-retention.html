@@ -2,47 +2,158 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Customer Retention Dashboard</title>
+<title>Customer Retention — Data Visualization Lab</title>
+<link rel="stylesheet" href="dashboard.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>
-:root{--bg:#f7f8fa;--card:#fff;--ink:#1d2939;--muted:#667085;--line:#e4e7ec}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-.shell{max-width:1220px;margin:auto;padding:26px}.top{display:flex;justify-content:space-between;gap:18px;align-items:flex-end;margin-bottom:24px}
-a,small{color:var(--muted)}a{text-decoration:none}h1{font-size:30px;margin:5px 0 0}
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.kpi,.panel{background:var(--card);border:1px solid var(--line);border-radius:16px}.kpi{padding:18px}
-.label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}.value{font-size:29px;font-weight:800;margin-top:8px}.delta{font-size:12px;margin-top:5px}
-.grid{display:grid;grid-template-columns:1.35fr 1fr;gap:14px;margin-top:14px}.panel{padding:18px;min-height:320px}.panel h2{font-size:16px;margin:0 0 4px}.panel p{font-size:12px;color:var(--muted);margin:0 0 16px}
-.cohort{display:grid;grid-template-columns:92px repeat(6,1fr);gap:5px;font-size:11px}.cohort div{padding:10px 6px;text-align:center;border-radius:6px;background:#f2f4f7}.cohort .head{font-weight:700;background:transparent}.cohort .c1{background:#d1fadf}.cohort .c2{background:#a6f4c5}.cohort .c3{background:#73e2a3}.cohort .c4{background:#47cd89}.cohort .c5{background:#17b26a;color:#fff}.cohort .c6{background:#079455;color:#fff}
-.foot{margin-top:16px;color:var(--muted);font-size:12px}
-@media(max-width:850px){.kpis{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}.cohort{overflow:auto}}
-</style></head>
-<body><main class="shell">
-<div class="top"><div><a href="index.html">← Data Visualization Lab</a><small style="display:block;margin-top:14px">Retention analytics · synthetic data</small><h1>Customer Retention Dashboard</h1></div><small>Subscription product · 2026</small></div>
-<section class="kpis">
-<div class="kpi"><div class="label">90-day retention</div><div class="value">72.4%</div><div class="delta">+3.6 pp QoQ</div></div>
-<div class="kpi"><div class="label">Monthly churn</div><div class="value">3.1%</div><div class="delta">-0.7 pp QoQ</div></div>
-<div class="kpi"><div class="label">Net revenue retention</div><div class="value">108.6%</div><div class="delta">Expansion offsets churn</div></div>
-<div class="kpi"><div class="label">At-risk customers</div><div class="value">842</div><div class="delta">9.4% of active base</div></div>
-</section>
-<section class="grid">
-<div class="panel"><h2>Retention by acquisition cohort</h2><p>Share of customers still active after each month.</p>
-<div class="cohort">
-<div class="head">Cohort</div><div class="head">M0</div><div class="head">M1</div><div class="head">M2</div><div class="head">M3</div><div class="head">M4</div><div class="head">M5</div>
-<div class="head">Jan</div><div class="c6">100%</div><div class="c5">88%</div><div class="c4">80%</div><div class="c4">75%</div><div class="c3">72%</div><div class="c3">69%</div>
-<div class="head">Feb</div><div class="c6">100%</div><div class="c5">89%</div><div class="c5">82%</div><div class="c4">77%</div><div class="c4">73%</div><div class="c3">70%</div>
-<div class="head">Mar</div><div class="c6">100%</div><div class="c5">91%</div><div class="c5">84%</div><div class="c5">79%</div><div class="c4">76%</div><div class="c4">73%</div>
-<div class="head">Apr</div><div class="c6">100%</div><div class="c5">92%</div><div class="c5">86%</div><div class="c5">81%</div><div class="c4">78%</div><div class="c4">75%</div>
-<div class="head">May</div><div class="c6">100%</div><div class="c5">93%</div><div class="c5">87%</div><div class="c5">83%</div><div class="c4">79%</div><div class="c4">76%</div>
-</div></div>
-<div class="panel"><h2>Churn by segment</h2><p>Monthly churn rate highlights concentration of risk.</p><canvas id="segment"></canvas></div>
-<div class="panel"><h2>Retention trend</h2><p>90-day retention improves as onboarding changes roll out.</p><canvas id="trend"></canvas></div>
-<div class="panel"><h2>Risk distribution</h2><p>Customers classified from behavioral signals.</p><canvas id="risk"></canvas></div>
-</section>
-<div class="foot">Portfolio demo. All values are synthetic. Focus: cohort analysis, churn concentration and decision-oriented retention storytelling.</div>
-</main>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="brandmark">LN</div><div><strong>Data Lab</strong><span>Laura Nuñez Salcé</span></div></div>
+    <div class="navlabel">Dashboard</div>
+    <nav class="nav">
+      <a class="active" href="#overview"><span class="icon">⌁</span><span>Overview</span></a>
+      <a href="#cohorts"><span class="icon">▦</span><span>Cohorts</span></a>
+      <a href="#segments"><span class="icon">◎</span><span>Segments</span></a>
+      <a href="#risk"><span class="icon">!</span><span>Risk</span></a>
+    </nav>
+    <div class="navlabel">Portfolio</div>
+    <nav class="nav">
+      <a href="index.html"><span class="icon">◫</span><span>Data Viz Lab</span></a>
+      <a href="../"><span class="icon">←</span><span>Main portfolio</span></a>
+    </nav>
+    <div class="sidebar-footer"><a href="retail-performance.html">Retail Performance →</a><a href="web-analytics.html">Web Analytics →</a></div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="titleblock"><small>Retention analytics · synthetic data</small><h1>Customer Retention</h1></div>
+      <div class="actions"><button class="ghost-btn" onclick="resetFilters()">Reset filters</button><button class="ghost-btn" onclick="window.print()">Download view</button></div>
+    </header>
+
+    <div class="content">
+      <section id="overview" class="section-anchor">
+        <div class="filters">
+          <div class="filter"><label>Plan</label><select id="planFilter"><option value="1">All plans</option><option value=".36">Starter</option><option value=".31">Growth</option><option value=".22">Business</option><option value=".11">Enterprise</option></select></div>
+          <div class="filter"><label>Tenure</label><select id="tenureFilter"><option value="1">All tenure</option><option value=".28">&lt; 3 months</option><option value=".34">3–6 months</option><option value=".38">6+ months</option></select></div>
+          <div class="filter"><label>Acquisition</label><select id="sourceFilter"><option value="1">All sources</option><option value=".42">Organic</option><option value=".26">Paid</option><option value=".18">Partner</option><option value=".14">Referral</option></select></div>
+          <button class="reset" onclick="resetFilters()">Clear</button>
+        </div>
+
+        <div class="kpis">
+          <article class="kpi"><div class="label">90-day retention</div><div class="value" id="kpiRetention">72.4%</div><div class="delta up">+3.6 pp QoQ</div></article>
+          <article class="kpi"><div class="label">Monthly churn</div><div class="value" id="kpiChurn">3.1%</div><div class="delta up">-0.7 pp QoQ</div></article>
+          <article class="kpi"><div class="label">Net revenue retention</div><div class="value" id="kpiNrr">108.6%</div><div class="delta up">Expansion offsets churn</div></article>
+          <article class="kpi"><div class="label">At-risk customers</div><div class="value" id="kpiRisk">842</div><div class="delta">9.4% of active base</div></article>
+        </div>
+      </section>
+
+      <section id="cohorts" class="layout section-anchor">
+        <article class="panel">
+          <div class="panel-head"><div><h2>Retention by acquisition cohort</h2><p>Share of customers remaining active by month</p></div><span class="panel-tag">Click a cohort row</span></div>
+          <div style="overflow:auto">
+            <table class="table" id="cohortTable">
+              <thead><tr><th>Cohort</th><th>M0</th><th>M1</th><th>M2</th><th>M3</th><th>M4</th><th>M5</th></tr></thead>
+              <tbody>
+                <tr onclick="openCohort('January',[100,88,80,75,72,69])"><td>January</td><td>100%</td><td>88%</td><td>80%</td><td>75%</td><td>72%</td><td>69%</td></tr>
+                <tr onclick="openCohort('February',[100,89,82,77,73,70])"><td>February</td><td>100%</td><td>89%</td><td>82%</td><td>77%</td><td>73%</td><td>70%</td></tr>
+                <tr onclick="openCohort('March',[100,91,84,79,76,73])"><td>March</td><td>100%</td><td>91%</td><td>84%</td><td>79%</td><td>76%</td><td>73%</td></tr>
+                <tr onclick="openCohort('April',[100,92,86,81,78,75])"><td>April</td><td>100%</td><td>92%</td><td>86%</td><td>81%</td><td>78%</td><td>75%</td></tr>
+                <tr onclick="openCohort('May',[100,93,87,83,79,76])"><td>May</td><td>100%</td><td>93%</td><td>87%</td><td>83%</td><td>79%</td><td>76%</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><div><h2>Retention trend</h2><p>90-day retention after onboarding changes</p></div></div>
+          <div class="chart-wrap"><canvas id="retentionChart"></canvas></div>
+        </article>
+      </section>
+
+      <section id="segments" class="layout section-anchor">
+        <article class="panel">
+          <div class="panel-head"><div><h2>Churn by plan</h2><p>Monthly churn rate by commercial segment</p></div><span class="panel-tag">Click a bar</span></div>
+          <div class="chart-wrap"><canvas id="segmentChart"></canvas></div>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><div><h2>Best retention signals</h2><p>Segments showing the strongest durability</p></div></div>
+          <div class="list">
+            <div class="list-row" onclick="openDrill('Enterprise','Plan',0.9,84.1,117.8,74)"><div class="list-main"><div class="list-title">Enterprise</div><div class="list-sub">Low churn · High expansion</div><div class="progress"><i style="width:94%"></i></div></div><div class="score">0.9%</div></div>
+            <div class="list-row" onclick="openDrill('Business','Plan',2.1,78.6,111.4,163)"><div class="list-main"><div class="list-title">Business</div><div class="list-sub">Stable retention · Positive NRR</div><div class="progress"><i style="width:84%"></i></div></div><div class="score">2.1%</div></div>
+            <div class="list-row" onclick="openDrill('Growth','Plan',3.4,71.9,104.2,252)"><div class="list-main"><div class="list-title">Growth</div><div class="list-sub">Moderate churn · Good expansion</div><div class="progress"><i style="width:72%"></i></div></div><div class="score">3.4%</div></div>
+          </div>
+        </article>
+      </section>
+
+      <section id="risk" class="layout section-anchor">
+        <article class="panel">
+          <div class="panel-head"><div><h2>Risk distribution</h2><p>Behavioral classification of the active customer base</p></div><span class="panel-tag">Click a risk band</span></div>
+          <div class="chart-wrap"><canvas id="riskChart"></canvas></div>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><div><h2>Retention priorities</h2><p>Where intervention is likely to matter most</p></div></div>
+          <div class="list">
+            <div class="list-row"><div class="list-main"><div class="list-title">Starter first 90 days</div><div class="list-sub">Highest churn concentration occurs early in tenure.</div><div class="progress"><i style="width:86%"></i></div></div><div class="score">5.8%</div></div>
+            <div class="list-row"><div class="list-main"><div class="list-title">Watch → At risk migration</div><div class="list-sub">Behavioral decline is visible before cancellation.</div><div class="progress"><i style="width:70%"></i></div></div><div class="score">12%</div></div>
+            <div class="list-row"><div class="list-main"><div class="list-title">Enterprise expansion</div><div class="list-sub">Expansion revenue more than offsets logo churn.</div><div class="progress"><i style="width:92%"></i></div></div><div class="score">117.8%</div></div>
+          </div>
+        </article>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="drawer-backdrop" id="backdrop" onclick="closeDrill()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-head"><div><small id="drillType">Drill-through</small><h3 id="drillTitle">Detail</h3></div><button class="close" onclick="closeDrill()">×</button></div>
+  <span class="drill-pill">↳ Customer context preserved</span>
+  <div class="detail-kpis">
+    <div class="detail-kpi"><span>Monthly churn</span><strong id="drillChurn">—</strong></div>
+    <div class="detail-kpi"><span>90-day retention</span><strong id="drillRetention">—</strong></div>
+    <div class="detail-kpi"><span>Net revenue retention</span><strong id="drillNrr">—</strong></div>
+    <div class="detail-kpi"><span>At risk</span><strong id="drillRisk">—</strong></div>
+  </div>
+  <h4>Interpretation</h4><p class="drawer-copy" id="drillCopy"></p>
+  <h4>Detail metrics</h4>
+  <table class="table"><thead><tr><th>Signal</th><th>Value</th><th>Status</th></tr></thead><tbody id="drillRows"></tbody></table>
+</aside>
+
 <script>
-Chart.defaults.font.family="Inter, Segoe UI, Arial";
-new Chart(document.getElementById("segment"),{type:"bar",data:{labels:["Starter","Growth","Business","Enterprise"],datasets:[{label:"Monthly churn %",data:[5.8,3.4,2.1,0.9]}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{callback:function(v){return v+"%"}}}}}});
-new Chart(document.getElementById("trend"),{type:"line",data:{labels:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug"],datasets:[{label:"90-day retention",data:[66.8,67.4,68.2,69.3,70.1,71.0,71.8,72.4],borderWidth:3,tension:.35}]},options:{plugins:{legend:{display:false}},scales:{y:{min:62,max:76,ticks:{callback:function(v){return v+"%"}}}}}});
-new Chart(document.getElementById("risk"),{type:"doughnut",data:{labels:["Healthy","Watch","At risk","Critical"],datasets:[{data:[61,22,12,5]}]},options:{plugins:{legend:{position:"bottom"}}}});
-</script></body></html>
+Chart.defaults.font.family='Inter, ui-sans-serif, system-ui'; Chart.defaults.color='#667085'; Chart.defaults.borderColor='#eef1f5';
+const retentionBase=[66.8,67.4,68.2,69.3,70.1,71.0,71.8,72.4], segmentNames=['Starter','Growth','Business','Enterprise'], churnBase=[5.8,3.4,2.1,.9], riskNames=['Healthy','Watch','At risk','Critical'], riskBase=[61,22,12,5];
+
+const retentionChart=new Chart(document.getElementById('retentionChart'),{type:'line',data:{labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug'],datasets:[{data:[...retentionBase],borderColor:'#4f7cff',backgroundColor:'rgba(79,124,255,.08)',fill:true,tension:.35,borderWidth:2.5,pointRadius:3}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{min:62,max:76,ticks:{callback:v=>v+'%'}}}}});
+const segmentChart=new Chart(document.getElementById('segmentChart'),{type:'bar',data:{labels:segmentNames,datasets:[{data:[...churnBase],backgroundColor:['#ff9a9a','#f5b942','#76a1ff','#20c997'],borderRadius:7,barPercentage:.52}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{callback:v=>v+'%'}}},onClick:(e)=>{const p=segmentChart.getElementsAtEventForMode(e,'nearest',{intersect:true},true)[0];if(p){const i=p.index;openDrill(segmentNames[i],'Plan',churnBase[i],[65.2,71.9,78.6,84.1][i],[96.8,104.2,111.4,117.8][i],[353,252,163,74][i])}}}});
+const riskChart=new Chart(document.getElementById('riskChart'),{type:'doughnut',data:{labels:riskNames,datasets:[{data:[...riskBase],backgroundColor:['#20c997','#f5b942','#ff8b6a','#ff5f5f'],borderWidth:0,hoverOffset:5}]},options:{maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{boxWidth:9,usePointStyle:true}}},onClick:(e)=>{const p=riskChart.getElementsAtEventForMode(e,'nearest',{intersect:true},true)[0];if(p){const i=p.index;openDrill(riskNames[i],'Risk band',[1.1,3.0,7.4,14.8][i],[87.4,74.3,56.2,31.5][i],[115,107,91,72][i],Math.round(842*riskBase[i]/100))}}}});
+
+function factor(){return +planFilter.value * +tenureFilter.value * +sourceFilter.value}
+function applyFilters(){
+  const f=factor(), planAdj=planFilter.value==='1'?0:(+planFilter.value<.2?9:-3), tenureAdj=tenureFilter.value==='1'?0:(+tenureFilter.value>.35?4:-5);
+  kpiRetention.textContent=Math.max(48,72.4+planAdj+tenureAdj).toFixed(1)+'%';
+  kpiChurn.textContent=Math.max(.6,3.1-planAdj*.12-tenureAdj*.08).toFixed(1)+'%';
+  kpiNrr.textContent=(108.6+planAdj*.7+tenureAdj*.4).toFixed(1)+'%';
+  kpiRisk.textContent=Math.max(25,Math.round(842*f));
+  retentionChart.data.datasets[0].data=retentionBase.map(v=>+(Math.max(48,v+planAdj+tenureAdj)).toFixed(1));retentionChart.update();
+  segmentChart.data.datasets[0].data=churnBase.map(v=>+(Math.max(.5,v*(.9+(1-f)*.25))).toFixed(1));segmentChart.update();
+  riskChart.data.datasets[0].data=riskBase.map(v=>+(v*(+sourceFilter.value)).toFixed(1));riskChart.update();
+}
+['planFilter','tenureFilter','sourceFilter'].forEach(id=>document.getElementById(id).addEventListener('change',applyFilters));
+function resetFilters(){planFilter.value='1';tenureFilter.value='1';sourceFilter.value='1';applyFilters()}
+function openCohort(name,vals){
+  openDrill(name+' cohort','Acquisition cohort',+(100-vals[1]).toFixed(1),vals[3],104.8,Math.round((100-vals[5])*7.1));
+  drillRows.innerHTML=vals.map((v,i)=>'<tr><td>Month '+i+'</td><td>'+v+'%</td><td>'+(v>=75?'Healthy':v>=65?'Watch':'At risk')+'</td></tr>').join('');
+}
+function openDrill(name,type,churn,retention,nrr,risk){
+  drillTitle.textContent=name;drillType.textContent=type+' drill-through';drillChurn.textContent=churn.toFixed(1)+'%';drillRetention.textContent=retention.toFixed(1)+'%';drillNrr.textContent=nrr.toFixed(1)+'%';drillRisk.textContent=risk;
+  drillCopy.textContent=churn<=2.2?name+' has durable retention. The important next step is to understand which behaviors or product experiences are associated with that durability.':name+' shows elevated churn. Drill-through keeps the selected segment context so intervention can be targeted rather than treating the whole customer base the same.';
+  drillRows.innerHTML=[
+    ['Activation',retention>75?'Strong':'Moderate',retention>75?'Healthy':'Watch'],
+    ['Expansion',nrr.toFixed(1)+'%',nrr>=100?'Positive':'Negative'],
+    ['Churn pressure',churn.toFixed(1)+'%',churn<3?'Controlled':'Elevated'],
+    ['Customers at risk',risk,risk<150?'Low':'High']
+  ].map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>').join('');
+  drawer.classList.add('open');backdrop.classList.add('open');
+}
+function closeDrill(){drawer.classList.remove('open');backdrop.classList.remove('open')}
+</script>
+</body></html>
