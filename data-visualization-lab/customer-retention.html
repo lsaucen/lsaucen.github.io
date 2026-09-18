@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Customer Retention Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{--bg:#f7f8fa;--card:#fff;--ink:#1d2939;--muted:#667085;--line:#e4e7ec}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+.shell{max-width:1220px;margin:auto;padding:26px}.top{display:flex;justify-content:space-between;gap:18px;align-items:flex-end;margin-bottom:24px}
+a,small{color:var(--muted)}a{text-decoration:none}h1{font-size:30px;margin:5px 0 0}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.kpi,.panel{background:var(--card);border:1px solid var(--line);border-radius:16px}.kpi{padding:18px}
+.label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}.value{font-size:29px;font-weight:800;margin-top:8px}.delta{font-size:12px;margin-top:5px}
+.grid{display:grid;grid-template-columns:1.35fr 1fr;gap:14px;margin-top:14px}.panel{padding:18px;min-height:320px}.panel h2{font-size:16px;margin:0 0 4px}.panel p{font-size:12px;color:var(--muted);margin:0 0 16px}
+.cohort{display:grid;grid-template-columns:92px repeat(6,1fr);gap:5px;font-size:11px}.cohort div{padding:10px 6px;text-align:center;border-radius:6px;background:#f2f4f7}.cohort .head{font-weight:700;background:transparent}.cohort .c1{background:#d1fadf}.cohort .c2{background:#a6f4c5}.cohort .c3{background:#73e2a3}.cohort .c4{background:#47cd89}.cohort .c5{background:#17b26a;color:#fff}.cohort .c6{background:#079455;color:#fff}
+.foot{margin-top:16px;color:var(--muted);font-size:12px}
+@media(max-width:850px){.kpis{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}.cohort{overflow:auto}}
+</style></head>
+<body><main class="shell">
+<div class="top"><div><a href="index.html">← Data Visualization Lab</a><small style="display:block;margin-top:14px">Retention analytics · synthetic data</small><h1>Customer Retention Dashboard</h1></div><small>Subscription product · 2026</small></div>
+<section class="kpis">
+<div class="kpi"><div class="label">90-day retention</div><div class="value">72.4%</div><div class="delta">+3.6 pp QoQ</div></div>
+<div class="kpi"><div class="label">Monthly churn</div><div class="value">3.1%</div><div class="delta">-0.7 pp QoQ</div></div>
+<div class="kpi"><div class="label">Net revenue retention</div><div class="value">108.6%</div><div class="delta">Expansion offsets churn</div></div>
+<div class="kpi"><div class="label">At-risk customers</div><div class="value">842</div><div class="delta">9.4% of active base</div></div>
+</section>
+<section class="grid">
+<div class="panel"><h2>Retention by acquisition cohort</h2><p>Share of customers still active after each month.</p>
+<div class="cohort">
+<div class="head">Cohort</div><div class="head">M0</div><div class="head">M1</div><div class="head">M2</div><div class="head">M3</div><div class="head">M4</div><div class="head">M5</div>
+<div class="head">Jan</div><div class="c6">100%</div><div class="c5">88%</div><div class="c4">80%</div><div class="c4">75%</div><div class="c3">72%</div><div class="c3">69%</div>
+<div class="head">Feb</div><div class="c6">100%</div><div class="c5">89%</div><div class="c5">82%</div><div class="c4">77%</div><div class="c4">73%</div><div class="c3">70%</div>
+<div class="head">Mar</div><div class="c6">100%</div><div class="c5">91%</div><div class="c5">84%</div><div class="c5">79%</div><div class="c4">76%</div><div class="c4">73%</div>
+<div class="head">Apr</div><div class="c6">100%</div><div class="c5">92%</div><div class="c5">86%</div><div class="c5">81%</div><div class="c4">78%</div><div class="c4">75%</div>
+<div class="head">May</div><div class="c6">100%</div><div class="c5">93%</div><div class="c5">87%</div><div class="c5">83%</div><div class="c4">79%</div><div class="c4">76%</div>
+</div></div>
+<div class="panel"><h2>Churn by segment</h2><p>Monthly churn rate highlights concentration of risk.</p><canvas id="segment"></canvas></div>
+<div class="panel"><h2>Retention trend</h2><p>90-day retention improves as onboarding changes roll out.</p><canvas id="trend"></canvas></div>
+<div class="panel"><h2>Risk distribution</h2><p>Customers classified from behavioral signals.</p><canvas id="risk"></canvas></div>
+</section>
+<div class="foot">Portfolio demo. All values are synthetic. Focus: cohort analysis, churn concentration and decision-oriented retention storytelling.</div>
+</main>
+<script>
+Chart.defaults.font.family="Inter, Segoe UI, Arial";
+new Chart(document.getElementById("segment"),{type:"bar",data:{labels:["Starter","Growth","Business","Enterprise"],datasets:[{label:"Monthly churn %",data:[5.8,3.4,2.1,0.9]}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{callback:function(v){return v+"%"}}}}}});
+new Chart(document.getElementById("trend"),{type:"line",data:{labels:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug"],datasets:[{label:"90-day retention",data:[66.8,67.4,68.2,69.3,70.1,71.0,71.8,72.4],borderWidth:3,tension:.35}]},options:{plugins:{legend:{display:false}},scales:{y:{min:62,max:76,ticks:{callback:function(v){return v+"%"}}}}}});
+new Chart(document.getElementById("risk"),{type:"doughnut",data:{labels:["Healthy","Watch","At risk","Critical"],datasets:[{data:[61,22,12,5]}]},options:{plugins:{legend:{position:"bottom"}}}});
+</script></body></html>
