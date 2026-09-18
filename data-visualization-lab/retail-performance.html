@@ -1,173 +1,155 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Retail Performance — Laura Nuñez Salcé</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Retail Performance — Data Visualization Lab</title>
+<link rel="stylesheet" href="dashboard.css">\n<script src="https://code.iconify.design/iconify-icon/3.0.3/iconify-icon.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://code.iconify.design/iconify-icon/3.0.3/iconify-icon.min.js"></script>
-<style>
-:root{
-  --paper:#f5f3ee;--surface:#ffffff;--surface-2:#faf9f6;--ink:#17213b;--muted:#767b86;
-  --line:#e6e1d8;--green:#0f766e;--green2:#34a38f;--gold:#b8893d;--red:#b85c4b;
-  --navy:#17213b;--shadow:0 14px 36px rgba(29,35,52,.06);--r:18px
-}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-a{text-decoration:none;color:inherit}button,select{font:inherit}iconify-icon{vertical-align:-.14em}
-.top{height:66px;border-bottom:1px solid var(--line);background:rgba(245,243,238,.94);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-between;padding:0 34px;position:sticky;top:0;z-index:20}
-.brand{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700}.brand i{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--navy);color:#fff;font-style:normal}
-.topnav{display:flex;gap:22px;font-size:12px;color:#626875}.topnav a:hover{color:var(--ink)}
-.shell{max-width:1460px;margin:auto;padding:34px}
-.head{display:flex;justify-content:space-between;gap:30px;align-items:flex-end;margin-bottom:22px}
-.kicker{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--green);font-weight:800}
-h1{font-family:Georgia,"Times New Roman",serif;font-size:42px;line-height:1.02;margin:7px 0 8px;letter-spacing:-.035em}.sub{color:var(--muted);font-size:13px;max-width:680px;line-height:1.6}
-.filters{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.filter{background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 12px;display:flex;align-items:center;gap:7px}.filter label{font-size:10px;color:#999385}.filter select{border:0;outline:0;background:transparent;color:var(--ink);font-size:11px;min-width:95px}
-.hero-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:14px}.hero-metric{background:var(--navy);border-radius:24px;padding:28px 30px;color:#fff;min-height:220px;position:relative;overflow:hidden}.hero-metric:after{content:"";position:absolute;width:260px;height:260px;border-radius:50%;right:-90px;top:-70px;background:rgba(255,255,255,.045)}
-.hero-label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#aab4c8}.hero-value{font-family:Georgia,serif;font-size:64px;letter-spacing:-.05em;margin:14px 0 5px}.hero-delta{display:flex;align-items:center;gap:8px;font-size:12px;color:#7ee0c5}.hero-copy{font-size:11px;line-height:1.6;color:#bac3d3;max-width:490px;margin-top:20px}
-.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.metric{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px;min-height:103px;box-shadow:var(--shadow)}.metric-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#8a8f98}.metric-value{font-family:Georgia,serif;font-size:30px;margin:9px 0 4px}.metric-note{font-size:10px;color:var(--muted)}
-.insight-strip{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;background:#e8f1ee;border:1px solid #cfe1db;border-radius:16px;padding:14px 17px;margin:14px 0}.insight-strip .icon{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#fff;color:var(--green)}.insight-strip strong{font-size:12px}.insight-strip p{font-size:11px;color:#577067;margin:2px 0 0}.insight-strip button{border:0;background:transparent;color:var(--green);font-size:11px;font-weight:700;cursor:pointer}
-.section{margin-top:14px}.grid-main{display:grid;grid-template-columns:1.45fr .95fr;gap:14px}.grid-equal{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.card{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:18px 19px;box-shadow:var(--shadow);min-width:0}.card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}.card h2{font-size:13px;margin:0 0 3px}.card p{font-size:10px;color:var(--muted);margin:0}.tag{font-size:9px;color:#756b59;background:#f5f1e9;border:1px solid #ebe3d6;padding:5px 8px;border-radius:999px}.chart-lg{height:310px}.chart-md{height:255px}
-.waterfall-note{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:9px}.driver{padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2)}.driver b{font-size:11px;display:block}.driver span{font-size:9px;color:var(--muted)}.driver.pos b{color:var(--green)}.driver.neg b{color:var(--red)}
-.bullets{display:flex;flex-direction:column;gap:17px;margin-top:18px}.bullet{cursor:pointer}.bullet-top{display:flex;justify-content:space-between;align-items:center;font-size:11px;margin-bottom:7px}.bullet-top strong{font-size:12px}.bullet-track{height:10px;background:#ebe9e4;border-radius:999px;position:relative;overflow:visible}.bullet-fill{height:100%;border-radius:999px;background:var(--green)}.bullet-target{position:absolute;top:-4px;width:2px;height:18px;background:var(--gold);left:95%}.bullet-sub{display:flex;justify-content:space-between;font-size:9px;color:#999385;margin-top:5px}
-.mix{display:grid;grid-template-columns:1.4fr 1fr 1fr;grid-template-rows:105px 105px;gap:8px}.mix div{border-radius:14px;padding:13px;color:#fff;display:flex;flex-direction:column;justify-content:flex-end;cursor:pointer}.mix strong{font-size:13px}.mix span{font-size:9px;opacity:.8}.mix .home{grid-row:1/3;background:#17372e}.mix .electronics{background:#355d58}.mix .beauty{background:#bb7a62}.mix .sports{background:#b99b62}.mix .kids{background:#7e8a6a}
-.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;font-size:10px}.table th{text-align:left;font-size:9px;color:#999385;text-transform:uppercase;letter-spacing:.05em;padding:10px 9px;border-bottom:1px solid var(--line)}.table td{padding:11px 9px;border-bottom:1px solid #f0ede7;color:#5b606a}.table tbody tr{cursor:pointer}.table tbody tr:hover{background:#faf9f6}.prod{font-weight:700;color:var(--ink)}.spark{width:90px;height:26px}
-.badge{display:inline-block;padding:4px 7px;border-radius:999px;font-size:9px}.good{background:#e8f1ee;color:#0f766e}.warn{background:#f6eddd;color:#9a6e21}.bad{background:#f7e6e1;color:#a44f40}
-.modal-bg{position:fixed;inset:0;background:rgba(23,33,59,.28);opacity:0;pointer-events:none;transition:.18s;z-index:40}.modal-bg.open{opacity:1;pointer-events:auto}.modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-46%) scale(.98);width:min(760px,92vw);max-height:82vh;overflow:auto;background:#fff;border-radius:22px;border:1px solid var(--line);box-shadow:0 30px 80px rgba(23,33,59,.22);padding:24px;opacity:0;pointer-events:none;transition:.18s;z-index:41}.modal.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}.modal-head{display:flex;justify-content:space-between;gap:20px}.modal h3{font-family:Georgia,serif;font-size:28px;margin:4px 0}.close{border:1px solid var(--line);width:34px;height:34px;border-radius:50%;background:#fff;cursor:pointer}.detail-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:18px 0}.detail{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px}.detail span{font-size:9px;color:#999385}.detail b{display:block;font-family:Georgia,serif;font-size:20px;margin-top:5px}.modal-copy{font-size:11px;line-height:1.65;color:#686e78}
-@media(max-width:1050px){.hero-grid,.grid-main,.grid-equal{grid-template-columns:1fr}.head{align-items:flex-start;flex-direction:column}.filters{justify-content:flex-start}.chart-lg{height:280px}}
-@media(max-width:650px){.shell{padding:20px 14px}.top{padding:0 15px}.topnav{display:none}h1{font-size:34px}.metric-grid{grid-template-columns:1fr 1fr}.hero-value{font-size:52px}.waterfall-note{grid-template-columns:1fr 1fr}.detail-grid{grid-template-columns:1fr 1fr}.mix{grid-template-columns:1fr 1fr}.mix .home{grid-row:auto}}
-</style>
 </head>
 <body>
-<header class="top">
-  <a class="brand" href="../"><i>LN</i><span>Laura Nuñez Salcé</span></a>
-  <nav class="topnav"><a href="#performance">Performance</a><a href="#drivers">Drivers</a><a href="#portfolio">Product portfolio</a><a href="#detail">Detail</a></nav>
-</header>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="brandmark"><iconify-icon icon="lucide:chart-no-axes-combined"></iconify-icon></div><div><strong>Data Lab</strong><span>Laura Nuñez Salcé</span></div></div>
+    <div class="navlabel">Dashboard</div>
+    <nav class="nav">
+      <a class="active" href="#overview"><span class="icon"><iconify-icon icon="lucide:layout-dashboard"></iconify-icon></span><span>Overview</span></a>
+      <a href="#trends"><span class="icon"><iconify-icon icon="lucide:chart-no-axes-column-increasing"></iconify-icon></span><span>Trends</span></a>
+      <a href="#products"><span class="icon"><iconify-icon icon="lucide:blocks"></iconify-icon></span><span>Products</span></a>
+      <a href="#regions"><span class="icon"><iconify-icon icon="lucide:scan-search"></iconify-icon></span><span>Regions</span></a>
+    </nav>
+    <div class="navlabel">Portfolio</div>
+    <nav class="nav">
+      <a href="index.html"><span class="icon"><iconify-icon icon="lucide:gallery-horizontal-end"></iconify-icon></span><span>Data Viz Lab</span></a>
+      <a href="../"><span class="icon"><iconify-icon icon="lucide:arrow-left"></iconify-icon></span><span>Main portfolio</span></a>
+    </nav>
+    <div class="sidebar-footer"><a href="web-analytics.html">Web Analytics <iconify-icon icon="lucide:arrow-right"></iconify-icon></a><a href="customer-retention.html">Retention <iconify-icon icon="lucide:arrow-right"></iconify-icon></a></div>
+  </aside>
 
-<main class="shell">
-  <section class="head">
-    <div><div class="kicker">Executive sales command center</div><h1>Retail Performance</h1><p class="sub">A commercial performance view designed to explain not only whether sales moved, but what caused the movement and where management attention should go next.</p></div>
-    <div class="filters">
-      <div class="filter"><label>Period</label><select id="period"><option value="1">YTD 2026</option><option value=".56">H1 2026</option><option value=".44">H2 2025</option></select></div>
-      <div class="filter"><label>Region</label><select id="region"><option value="1">All regions</option><option value=".295">North</option><option value=".245">East</option><option value=".226">Central</option><option value=".234">South</option></select></div>
-      <div class="filter"><label>Category</label><select id="category"><option value="1">All categories</option><option value=".245">Home</option><option value=".216">Electronics</option><option value=".191">Beauty</option><option value=".181">Sports</option><option value=".167">Kids</option></select></div>
+  <main class="main">
+    <header class="topbar">
+      <div class="titleblock"><small>Executive analytics · synthetic data</small><h1>Retail Performance</h1></div>
+      <div class="actions"><button class="ghost-btn" onclick="resetFilters()"><iconify-icon icon="lucide:rotate-ccw"></iconify-icon>Reset filters</button><button class="ghost-btn" onclick="window.print()"><iconify-icon icon="lucide:download"></iconify-icon>Download view</button></div>
+    </header>
+
+    <div class="content">
+      <section id="overview" class="section-anchor">
+        <div class="filters">
+          <div class="filter"><label><iconify-icon icon="lucide:calendar-range"></iconify-icon>Timeframe</label><select id="period"><option value="1">YTD 2026</option><option value=".78">Last 6 months</option><option value=".39">Last 90 days</option></select></div>
+          <div class="filter"><label><iconify-icon icon="lucide:map-pin"></iconify-icon>Region</label><select id="regionFilter"><option value="1">All regions</option><option value=".295">North</option><option value=".245">East</option><option value=".226">Central</option><option value=".234">South</option></select></div>
+          <div class="filter"><label><iconify-icon icon="lucide:tags"></iconify-icon>Category</label><select id="categoryFilter"><option value="1">All categories</option><option value=".245">Home</option><option value=".216">Electronics</option><option value=".191">Beauty</option><option value=".181">Sports</option><option value=".167">Kids</option></select></div>
+          <button class="reset" onclick="resetFilters()"><iconify-icon icon="lucide:x"></iconify-icon>Clear</button>
+        </div>
+
+        <div class="kpis">
+          <article class="kpi"><div class="kpi-head"><span class="kpi-icon"><iconify-icon icon="lucide:badge-dollar-sign"></iconify-icon></span><div class="label">Revenue</div></div><div class="value" id="kpiRevenue">$4.82M</div><div class="delta up">+11.8% vs prior year</div></article>
+          <article class="kpi"><div class="kpi-head"><span class="kpi-icon"><iconify-icon icon="lucide:percent"></iconify-icon></span><div class="label">Gross margin</div></div><div class="value" id="kpiMargin">37.6%</div><div class="delta up">+1.9 pp vs prior year</div></article>
+          <article class="kpi"><div class="kpi-head"><span class="kpi-icon"><iconify-icon icon="lucide:target"></iconify-icon></span><div class="label">Target attainment</div></div><div class="value" id="kpiTarget">96.4%</div><div class="delta">Gap: <span id="kpiGap">$181K</span></div></article>
+          <article class="kpi"><div class="kpi-head"><span class="kpi-icon"><iconify-icon icon="lucide:shopping-cart"></iconify-icon></span><div class="label">Average order value</div></div><div class="value" id="kpiAov">$84.20</div><div class="delta up">+6.2% vs prior year</div></article>
+        </div>
+      </section>
+
+      <section id="trends" class="layout section-anchor">
+        <article class="panel">
+          <div class="panel-head"><div><h2>Revenue activity</h2><p>Actual revenue against target by month</p></div><span class="panel-tag"><iconify-icon icon="lucide:mouse-pointer-click"></iconify-icon>Click a month</span></div>
+          <div class="chart-wrap tall"><canvas id="trendChart"></canvas></div>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><div><h2>Regional performance</h2><p>Contribution and target attainment</p></div><span class="panel-tag"><iconify-icon icon="lucide:split"></iconify-icon>Drill-through enabled</span></div>
+          <div class="chart-wrap"><canvas id="regionChart"></canvas></div>
+        </article>
+      </section>
+
+      <section id="products" class="layout section-anchor">
+        <article class="panel">
+          <div class="panel-head"><div><h2>Product mix</h2><p>Revenue by category</p></div><span class="panel-tag"><iconify-icon icon="lucide:mouse-pointer-click"></iconify-icon>Click a bar</span></div>
+          <div class="chart-wrap"><canvas id="productChart"></canvas></div>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><div><h2>Strongest categories</h2><p>Revenue quality, not just volume</p></div></div>
+          <div class="list" id="strongList">
+            <div class="list-row" onclick="openDrill('Home','Product category',1180,41.2,103)"><div class="list-main"><div class="list-title">Home</div><div class="list-sub">High margin · Above target</div><div class="progress"><i style="width:91%"></i></div></div><div class="score">103%</div></div>
+            <div class="list-row" onclick="openDrill('Electronics','Product category',1040,38.7,99)"><div class="list-main"><div class="list-title">Electronics</div><div class="list-sub">High volume · Stable margin</div><div class="progress"><i style="width:82%"></i></div></div><div class="score">99%</div></div>
+            <div class="list-row" onclick="openDrill('Beauty','Product category',920,36.5,96)"><div class="list-main"><div class="list-title">Beauty</div><div class="list-sub">Growing repeat purchase</div><div class="progress"><i style="width:74%"></i></div></div><div class="score">96%</div></div>
+          </div>
+        </article>
+      </section>
+
+      <section id="regions" class="layout section-anchor">
+        <article class="panel">
+          <div class="panel-head"><div><h2>Regional detail</h2><p>Click any row for drill-through</p></div></div>
+          <table class="table"><thead><tr><th>Region</th><th>Revenue</th><th>Margin</th><th>Target</th><th>YoY</th></tr></thead><tbody>
+            <tr onclick="openDrill('North','Region',1420,39.8,102)"><td>North</td><td>$1.42M</td><td>39.8%</td><td>102%</td><td>+14.4%</td></tr>
+            <tr onclick="openDrill('East','Region',1180,36.1,94)"><td>East</td><td>$1.18M</td><td>36.1%</td><td>94%</td><td>+9.1%</td></tr>
+            <tr onclick="openDrill('Central','Region',1090,35.7,91)"><td>Central</td><td>$1.09M</td><td>35.7%</td><td>91%</td><td>+7.5%</td></tr>
+            <tr onclick="openDrill('South','Region',1130,38.2,98)"><td>South</td><td>$1.13M</td><td>38.2%</td><td>98%</td><td>+12.0%</td></tr>
+          </tbody></table>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><div><h2>Management signal</h2><p>What deserves attention</p></div></div>
+          <div class="list">
+            <div class="list-row"><div class="list-main"><div class="list-title">Central region target gap</div><div class="list-sub">Largest relative shortfall despite positive YoY growth.</div><div class="progress"><i style="width:58%"></i></div></div><div class="score">91%</div></div>
+            <div class="list-row"><div class="list-main"><div class="list-title">Home category margin</div><div class="list-sub">Best combination of volume and profitability.</div><div class="progress"><i style="width:92%"></i></div></div><div class="score">41.2%</div></div>
+            <div class="list-row"><div class="list-main"><div class="list-title">AOV momentum</div><div class="list-sub">Average order value is improving faster than transaction count.</div><div class="progress"><i style="width:76%"></i></div></div><div class="score">+6.2%</div></div>
+          </div>
+        </article>
+      </section>
     </div>
-  </section>
+  </main>
+</div>
 
-  <section class="hero-grid" id="performance">
-    <article class="hero-metric">
-      <div class="hero-label">Net revenue</div><div class="hero-value" id="revenue">$4.82M</div>
-      <div class="hero-delta"><iconify-icon icon="lucide:trending-up"></iconify-icon><span id="growth">+11.8% vs prior year</span></div>
-      <div class="hero-copy">Revenue is ahead of last year, but still slightly below management target. Growth is concentrated in North and in the Home category, while Central remains the largest target gap.</div>
-    </article>
-    <div class="metric-grid">
-      <article class="metric"><div class="metric-label">Gross margin</div><div class="metric-value" id="margin">37.6%</div><div class="metric-note">+1.9 pp vs LY</div></article>
-      <article class="metric"><div class="metric-label">Target attainment</div><div class="metric-value" id="attain">96.4%</div><div class="metric-note" id="gap">Gap: $181K</div></article>
-      <article class="metric"><div class="metric-label">Average order value</div><div class="metric-value" id="aov">$84.20</div><div class="metric-note">+6.2% vs LY</div></article>
-      <article class="metric"><div class="metric-label">Units sold</div><div class="metric-value" id="units">57.3K</div><div class="metric-note">+5.1% vs LY</div></article>
-    </div>
-  </section>
-
-  <div class="insight-strip"><div class="icon"><iconify-icon icon="lucide:lightbulb"></iconify-icon></div><div><strong>What changed?</strong><p>Price and product mix added more revenue than pure unit growth. Discounting and returns erased roughly 20% of those gains.</p></div><button onclick="openDetail('Revenue bridge','Commercial driver',4820,37.6,96.4)">Inspect drivers →</button></div>
-
-  <section class="grid-main section" id="drivers">
-    <article class="card">
-      <div class="card-head"><div><h2>Revenue vs target vs prior year</h2><p>Monthly performance, January to August</p></div><span class="tag">12-month context</span></div>
-      <div class="chart-lg"><canvas id="trendChart"></canvas></div>
-    </article>
-    <article class="card">
-      <div class="card-head"><div><h2>Revenue bridge</h2><p>What moved revenue from LY to current YTD</p></div><span class="tag">Waterfall</span></div>
-      <div class="chart-md"><canvas id="waterfallChart"></canvas></div>
-      <div class="waterfall-note"><div class="driver pos"><b>+$380K</b><span>Volume</span></div><div class="driver pos"><b>+$220K</b><span>Price</span></div><div class="driver pos"><b>+$110K</b><span>Mix</span></div><div class="driver neg"><b>-$70K</b><span>Discount</span></div><div class="driver neg"><b>-$130K</b><span>Returns</span></div></div>
-    </article>
-  </section>
-
-  <section class="grid-equal section">
-    <article class="card">
-      <div class="card-head"><div><h2>Target attainment by region</h2><p>Actual revenue relative to assigned commercial target</p></div><span class="tag">Gold marker = target</span></div>
-      <div class="bullets">
-        <div class="bullet" onclick="openDetail('North','Region',1420,39.8,102)"><div class="bullet-top"><strong>North</strong><span>102%</span></div><div class="bullet-track"><div class="bullet-fill" style="width:100%"></div><span class="bullet-target"></span></div><div class="bullet-sub"><span>$1.42M revenue</span><span>39.8% margin</span></div></div>
-        <div class="bullet" onclick="openDetail('East','Region',1180,36.1,94)"><div class="bullet-top"><strong>East</strong><span>94%</span></div><div class="bullet-track"><div class="bullet-fill" style="width:94%"></div><span class="bullet-target"></span></div><div class="bullet-sub"><span>$1.18M revenue</span><span>36.1% margin</span></div></div>
-        <div class="bullet" onclick="openDetail('Central','Region',1090,35.7,91)"><div class="bullet-top"><strong>Central</strong><span>91%</span></div><div class="bullet-track"><div class="bullet-fill" style="width:91%;background:#b85c4b"></div><span class="bullet-target"></span></div><div class="bullet-sub"><span>$1.09M revenue</span><span>35.7% margin</span></div></div>
-        <div class="bullet" onclick="openDetail('South','Region',1130,38.2,98)"><div class="bullet-top"><strong>South</strong><span>98%</span></div><div class="bullet-track"><div class="bullet-fill" style="width:98%"></div><span class="bullet-target"></span></div><div class="bullet-sub"><span>$1.13M revenue</span><span>38.2% margin</span></div></div>
-      </div>
-    </article>
-    <article class="card">
-      <div class="card-head"><div><h2>Scale vs profitability</h2><p>Product revenue plotted against gross margin; bubble size = units sold</p></div><span class="tag">Click a product</span></div>
-      <div class="chart-md"><canvas id="scatterChart"></canvas></div>
-    </article>
-  </section>
-
-  <section class="grid-main section" id="portfolio">
-    <article class="card">
-      <div class="card-head"><div><h2>Category mix</h2><p>Share of revenue and commercial role</p></div></div>
-      <div class="mix">
-        <div class="home" onclick="openDetail('Home','Category',1180,41.2,103)"><span>24.5% of revenue</span><strong>Home · $1.18M</strong></div>
-        <div class="electronics" onclick="openDetail('Electronics','Category',1040,38.7,99)"><span>21.6%</span><strong>Electronics</strong></div>
-        <div class="beauty" onclick="openDetail('Beauty','Category',920,36.5,96)"><span>19.1%</span><strong>Beauty</strong></div>
-        <div class="sports" onclick="openDetail('Sports','Category',870,34.9,93)"><span>18.1%</span><strong>Sports</strong></div>
-        <div class="kids" onclick="openDetail('Kids','Category',810,33.8,90)"><span>16.7%</span><strong>Kids</strong></div>
-      </div>
-    </article>
-    <article class="card">
-      <div class="card-head"><div><h2>Portfolio read</h2><p>Commercial interpretation by category</p></div></div>
-      <div class="waterfall-note" style="grid-template-columns:1fr 1fr;margin-top:0">
-        <div class="driver pos"><b>Home</b><span>Scale + margin leader. Protect availability.</span></div>
-        <div class="driver pos"><b>Electronics</b><span>Strong scale. Watch discount pressure.</span></div>
-        <div class="driver"><b>Beauty</b><span>Mid-scale with improving repeat purchase.</span></div>
-        <div class="driver neg"><b>Sports / Kids</b><span>Below target. Review assortment and pricing.</span></div>
-      </div>
-    </article>
-  </section>
-
-  <section class="card section" id="detail">
-    <div class="card-head"><div><h2>Product performance detail</h2><p>Ranked on revenue, with margin, target status and 8-week sparkline</p></div><span class="tag">Click a row for drill-through</span></div>
-    <div class="table-wrap"><table class="table"><thead><tr><th>Product</th><th>Category</th><th>Revenue</th><th>Margin</th><th>Target</th><th>8-week trend</th></tr></thead><tbody id="productRows"></tbody></table></div>
-  </section>
-</main>
-
-<div class="modal-bg" id="modalBg" onclick="closeDetail()"></div>
-<section class="modal" id="modal">
-  <div class="modal-head"><div><div class="kicker" id="detailType">Drill-through</div><h3 id="detailTitle">Detail</h3></div><button class="close" onclick="closeDetail()"><iconify-icon icon="lucide:x"></iconify-icon></button></div>
-  <div class="detail-grid"><div class="detail"><span>Revenue</span><b id="dRevenue">—</b></div><div class="detail"><span>Gross margin</span><b id="dMargin">—</b></div><div class="detail"><span>Target attainment</span><b id="dTarget">—</b></div><div class="detail"><span>Commercial status</span><b id="dStatus">—</b></div></div>
-  <p class="modal-copy" id="detailCopy"></p>
-</section>
+<div class="drawer-backdrop" id="backdrop" onclick="closeDrill()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-head"><div><small id="drillType">Drill-through</small><h3 id="drillTitle">Detail</h3></div><button class="close" onclick="closeDrill()" aria-label="Close detail"><iconify-icon icon="lucide:x"></iconify-icon></button></div>
+  <span class="drill-pill"><iconify-icon icon="lucide:filter"></iconify-icon>Filter context preserved</span>
+  <div class="detail-kpis">
+    <div class="detail-kpi"><span>Revenue</span><strong id="drillRevenue">—</strong></div>
+    <div class="detail-kpi"><span>Margin</span><strong id="drillMargin">—</strong></div>
+    <div class="detail-kpi"><span>Target attainment</span><strong id="drillTarget">—</strong></div>
+    <div class="detail-kpi"><span>Contribution</span><strong id="drillContribution">—</strong></div>
+  </div>
+  <h4>Interpretation</h4><p class="drawer-copy" id="drillCopy"></p>
+  <h4>Detail rows</h4>
+  <table class="table"><thead><tr><th>Period</th><th>Revenue</th><th>Target</th></tr></thead><tbody id="drillRows"></tbody></table>
+</aside>
 
 <script>
-Chart.defaults.font.family='Inter, ui-sans-serif, system-ui';Chart.defaults.color='#747984';Chart.defaults.borderColor='#ebe7df';
-const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug'];
-const actual=[510,544,575,598,622,635,651,685], target=[530,550,585,610,630,650,670,690], prior=[468,486,501,527,548,563,591,626];
-const products=[
-{name:'Oak Dining Set',cat:'Home',rev:410,margin:43.2,target:107,units:3800,spark:[42,45,44,49,52,51,55,59]},
-{name:'Air Fryer Pro',cat:'Home',rev:355,margin:39.8,target:101,units:5200,spark:[37,39,42,41,46,49,51,54]},
-{name:'Nova Headphones',cat:'Electronics',rev:338,margin:36.9,target:98,units:4700,spark:[48,46,49,52,50,54,56,55]},
-{name:'Smart Display',cat:'Electronics',rev:292,margin:40.5,target:101,units:2800,spark:[31,33,35,38,37,41,43,47]},
-{name:'Hydra Serum',cat:'Beauty',rev:275,margin:45.1,target:104,units:6100,spark:[32,34,36,39,43,47,50,53]},
-{name:'Daily Essentials',cat:'Beauty',rev:244,margin:34.2,target:92,units:6900,spark:[41,42,40,39,43,44,45,46]},
-{name:'Trail Runner X',cat:'Sports',rev:230,margin:31.8,target:89,units:3400,spark:[37,35,34,36,35,38,40,39]},
-{name:'Core Yoga Kit',cat:'Sports',rev:205,margin:38.3,target:96,units:4500,spark:[30,32,31,34,37,38,40,43]},
-{name:'PlayLab Blocks',cat:'Kids',rev:194,margin:35.7,target:93,units:5100,spark:[27,29,31,30,33,35,34,36]},
-{name:'Mini Explorer',cat:'Kids',rev:178,margin:30.6,target:87,units:3900,spark:[32,30,29,28,30,31,33,32]},
-{name:'Linen Collection',cat:'Home',rev:168,margin:44.0,target:105,units:2500,spark:[20,23,25,24,28,30,32,35]},
-{name:'Pocket Speaker',cat:'Electronics',rev:157,margin:32.1,target:91,units:4200,spark:[29,31,28,30,32,31,34,35]}
-];
-const trendChart=new Chart(document.getElementById('trendChart'),{type:'line',data:{labels:months,datasets:[
-{label:'Actual',data:actual,borderColor:'#0f766e',backgroundColor:'rgba(15,118,110,.07)',fill:true,tension:.32,borderWidth:3,pointRadius:2},
-{label:'Target',data:target,borderColor:'#b8893d',borderDash:[7,6],tension:.25,borderWidth:2,pointRadius:0},
-{label:'Prior year',data:prior,borderColor:'#aeb2b9',tension:.25,borderWidth:1.5,pointRadius:0}
-]},options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:8}}},scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>'$'+v+'K'}}}}});
-const wfLabels=['Prior year','Volume','Price','Mix','Discount','Returns','Current'];
-const wfData=[[0,4.31],[4.31,4.69],[4.69,4.91],[4.91,5.02],[4.95,5.02],[4.82,4.95],[0,4.82]];
-const waterfallChart=new Chart(document.getElementById('waterfallChart'),{type:'bar',data:{labels:wfLabels,datasets:[{data:wfData,backgroundColor:(c)=>{const i=c.dataIndex;if(i===0||i===6)return '#17213b';return [1,2,3].includes(i)?'#0f766e':'#b85c4b'},borderRadius:5}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:(ctx)=>{const v=ctx.raw;return '$'+Math.abs(v[1]-v[0]).toFixed(2)+'M'}}}},scales:{x:{grid:{display:false}},y:{min:0,max:5.5,ticks:{callback:v=>'$'+v+'M'}}}}});
-const scatterChart=new Chart(document.getElementById('scatterChart'),{type:'scatter',data:{datasets:[{label:'Products',data:products.map(p=>({x:p.rev,y:p.margin,product:p})),backgroundColor:'#0f766e',borderColor:'#fff',borderWidth:1.5,pointRadius:(ctx)=>Math.max(5,Math.min(13,ctx.raw.product.units/550))}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:(ctx)=>ctx.raw.product.name+' · $'+ctx.raw.x+'K · '+ctx.raw.y+'% margin'}}},scales:{x:{title:{display:true,text:'Revenue ($K)'},grid:{display:false}},y:{title:{display:true,text:'Gross margin %'},min:25,max:48}},onClick:(e)=>{const p=scatterChart.getElementsAtEventForMode(e,'nearest',{intersect:true},true)[0];if(p){const x=scatterChart.data.datasets[0].data[p.index].product;openDetail(x.name,'Product',x.rev,x.margin,x.target)}}}});
-function sparkSvg(vals){const min=Math.min(...vals),max=Math.max(...vals);const pts=vals.map((v,i)=>{const x=4+i*(82/(vals.length-1));const y=22-((v-min)/(max-min||1))*17;return x.toFixed(1)+','+y.toFixed(1)}).join(' ');return '<svg class="spark" viewBox="0 0 90 26"><polyline points="'+pts+'" fill="none" stroke="#0f766e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'}
-function renderRows(){productRows.innerHTML=products.slice().sort((a,b)=>b.rev-a.rev).map(p=>'<tr onclick="openDetail(\''+p.name+'\',\'Product\','+p.rev+','+p.margin+','+p.target+')"><td class="prod">'+p.name+'</td><td>'+p.cat+'</td><td>$'+p.rev+'K</td><td>'+p.margin.toFixed(1)+'%</td><td><span class="badge '+(p.target>=100?'good':p.target>=93?'warn':'bad')+'">'+p.target+'%</span></td><td>'+sparkSvg(p.spark)+'</td></tr>').join('')}
-renderRows();
-function factor(){return +period.value * +region.value * +category.value}
-function applyFilters(){const f=factor();revenue.textContent='$'+(4.82*f).toFixed(2)+'M';units.textContent=(57.3*f).toFixed(1)+'K';margin.textContent=(37.6+(category.value==='1'?0:(+category.value>.2?1.1:-1.2))).toFixed(1)+'%';attain.textContent=(96.4+(region.value==='1'?0:(+region.value>.27?3.8:-2.1))).toFixed(1)+'%';gap.textContent='Gap: $'+Math.max(22,Math.round(181*f))+'K';aov.textContent='$'+(84.2*(.98+f*.02)).toFixed(2);trendChart.data.datasets[0].data=actual.map(v=>Math.round(v*f));trendChart.data.datasets[1].data=target.map(v=>Math.round(v*f));trendChart.data.datasets[2].data=prior.map(v=>Math.round(v*f));trendChart.update()}
-[period,region,category].forEach(el=>el.addEventListener('change',applyFilters));
-function openDetail(name,type,rev,mar,tgt){detailTitle.textContent=name;detailType.textContent=type+' drill-through';dRevenue.textContent='$'+(rev>=1000?(rev/1000).toFixed(2)+'M':rev+'K');dMargin.textContent=mar.toFixed(1)+'%';dTarget.textContent=tgt.toFixed(0)+'%';dStatus.textContent=tgt>=100?'Ahead':tgt>=95?'Near':'Below';detailCopy.textContent=tgt>=100?name+' is above target. The management question is whether the outperformance is sustainable without margin dilution or inventory pressure.':name+' is below target. The useful next cut is to separate volume, price, discounting and assortment effects rather than treating the shortfall as one problem.';modal.classList.add('open');modalBg.classList.add('open')}
-function closeDetail(){modal.classList.remove('open');modalBg.classList.remove('open')}
+Chart.defaults.font.family='Inter, ui-sans-serif, system-ui';
+Chart.defaults.color='#667085';
+Chart.defaults.borderColor='#eef1f5';
+const baseTrend=[510,544,575,598,622,635,651,685], baseTarget=[530,550,585,610,630,650,670,690];
+const regionVals=[1420,1180,1090,1130], productVals=[1180,1040,920,870,810];
+const regionNames=['North','East','Central','South'], productNames=['Home','Electronics','Beauty','Sports','Kids'];
+const trendChart=new Chart(document.getElementById('trendChart'),{type:'bar',data:{labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug'],datasets:[
+  {label:'Revenue',data:[...baseTrend],backgroundColor:'#4f7cff',borderRadius:7,barPercentage:.55},
+  {label:'Target',data:[...baseTarget],backgroundColor:'#e8eefc',borderRadius:7,barPercentage:.55}
+]},options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:9,usePointStyle:true}}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{callback:v=>'$'+v+'K'}}},onClick:(e)=>{const p=trendChart.getElementsAtEventForMode(e,'nearest',{intersect:true},true)[0];if(p)openDrill(trendChart.data.labels[p.index],'Month',trendChart.data.datasets[0].data[p.index],37.6,Math.round(trendChart.data.datasets[0].data[p.index]/trendChart.data.datasets[1].data[p.index]*100));}}});
+const regionChart=new Chart(document.getElementById('regionChart'),{type:'doughnut',data:{labels:regionNames,datasets:[{data:[...regionVals],backgroundColor:['#4f7cff','#7fa0ff','#a8bcff','#d2ddff'],borderWidth:0,hoverOffset:5}]},options:{maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{boxWidth:9,usePointStyle:true}}},onClick:(e)=>{const p=regionChart.getElementsAtEventForMode(e,'nearest',{intersect:true},true)[0];if(p){const i=p.index;openDrill(regionNames[i],'Region',regionVals[i],[39.8,36.1,35.7,38.2][i],[102,94,91,98][i]);}}}});
+const productChart=new Chart(document.getElementById('productChart'),{type:'bar',data:{labels:productNames,datasets:[{data:[...productVals],backgroundColor:'#6f91ff',borderRadius:7,barPercentage:.55}]},options:{maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{callback:v=>'$'+v+'K'}},y:{grid:{display:false}}},onClick:(e)=>{const p=productChart.getElementsAtEventForMode(e,'nearest',{intersect:true},true)[0];if(p){const i=p.index;openDrill(productNames[i],'Product category',productVals[i],[41.2,38.7,36.5,34.9,33.8][i],[103,99,96,93,90][i]);}}}});
+
+function factor(){return +period.value * +regionFilter.value * +categoryFilter.value}
+function applyFilters(){
+  const f=factor(), regional=regionFilter.value==='1'?1:1.04, cat=categoryFilter.value==='1'?1:.97;
+  document.getElementById('kpiRevenue').textContent='$'+(4.82*f).toFixed(f<.1?2:2)+'M';
+  document.getElementById('kpiMargin').textContent=(37.6*cat).toFixed(1)+'%';
+  document.getElementById('kpiTarget').textContent=(96.4*regional).toFixed(1)+'%';
+  document.getElementById('kpiGap').textContent='$'+Math.max(18,Math.round(181*f))+'K';
+  document.getElementById('kpiAov').textContent='$'+(84.2*(.98+f*.02)).toFixed(2);
+  trendChart.data.datasets[0].data=baseTrend.map(v=>Math.round(v*f)); trendChart.data.datasets[1].data=baseTarget.map(v=>Math.round(v*f)); trendChart.update();
+  regionChart.data.datasets[0].data=regionVals.map(v=>Math.round(v*(+period.value)*(+categoryFilter.value))); regionChart.update();
+  productChart.data.datasets[0].data=productVals.map(v=>Math.round(v*(+period.value)*(+regionFilter.value))); productChart.update();
+}
+['period','regionFilter','categoryFilter'].forEach(id=>document.getElementById(id).addEventListener('change',applyFilters));
+function resetFilters(){period.value='1';regionFilter.value='1';categoryFilter.value='1';applyFilters()}
+function openDrill(name,type,revenue,margin,target){
+  document.getElementById('drillTitle').textContent=name; document.getElementById('drillType').textContent=type+' drill-through';
+  document.getElementById('drillRevenue').textContent='$'+(revenue>=1000?(revenue/1000).toFixed(2)+'M':Math.round(revenue)+'K');
+  document.getElementById('drillMargin').textContent=margin.toFixed(1)+'%'; document.getElementById('drillTarget').textContent=target+'%';
+  document.getElementById('drillContribution').textContent=Math.min(100,Math.round(revenue/48.2))+'%';
+  document.getElementById('drillCopy').textContent=target>=100?name+' is outperforming target. The next question is whether the performance is driven by sustainable margin or temporary volume.':name+' is below target. Drill-through isolates the gap so management can distinguish volume, pricing and margin effects.';
+  const vals=[.18,.21,.25,.36].map(x=>Math.round(revenue*x));
+  document.getElementById('drillRows').innerHTML=['Q1','Q2','Q3','Q4'].map((q,i)=>'<tr><td>'+q+'</td><td>$'+vals[i]+'K</td><td>'+(target-3+i)+'%</td></tr>').join('');
+  drawer.classList.add('open');backdrop.classList.add('open');
+}
+function closeDrill(){drawer.classList.remove('open');backdrop.classList.remove('open')}
 </script>
-</body>
-</html>
+</body></html>
