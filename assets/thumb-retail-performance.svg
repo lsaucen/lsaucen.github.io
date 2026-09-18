@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675">
+<rect width="1200" height="675" fill="#F5F3EE"/>
+<rect x="55" y="48" width="1090" height="579" rx="26" fill="#fff" stroke="#E5E1D8"/>
+<text x="95" y="102" font-family="Arial,sans-serif" font-size="24" font-weight="700" fill="#17213B">Retail Performance</text>
+<text x="95" y="132" font-family="Arial,sans-serif" font-size="13" fill="#7B8190">Executive sales command center</text>
+<rect x="95" y="169" width="330" height="126" rx="18" fill="#17213B"/>
+<text x="120" y="205" font-family="Arial,sans-serif" font-size="13" fill="#AEB8CC">NET REVENUE</text>
+<text x="120" y="254" font-family="Arial,sans-serif" font-size="42" font-weight="700" fill="#fff">$4.82M</text>
+<text x="318" y="254" font-family="Arial,sans-serif" font-size="15" fill="#63D4BD">+11.8%</text>
+<rect x="445" y="169" width="200" height="126" rx="18" fill="#FAFAF8" stroke="#E8E4DC"/>
+<text x="470" y="206" font-family="Arial,sans-serif" font-size="12" fill="#858A96">GROSS MARGIN</text>
+<text x="470" y="252" font-family="Arial,sans-serif" font-size="32" font-weight="700" fill="#17213B">37.6%</text>
+<rect x="665" y="169" width="200" height="126" rx="18" fill="#FAFAF8" stroke="#E8E4DC"/>
+<text x="690" y="206" font-family="Arial,sans-serif" font-size="12" fill="#858A96">TARGET</text>
+<text x="690" y="252" font-family="Arial,sans-serif" font-size="32" font-weight="700" fill="#17213B">96.4%</text>
+<rect x="885" y="169" width="220" height="126" rx="18" fill="#FAFAF8" stroke="#E8E4DC"/>
+<text x="910" y="206" font-family="Arial,sans-serif" font-size="12" fill="#858A96">AVG. ORDER</text>
+<text x="910" y="252" font-family="Arial,sans-serif" font-size="32" font-weight="700" fill="#17213B">$84.20</text>
+<rect x="95" y="318" width="610" height="265" rx="20" fill="#FAFAF8" stroke="#E8E4DC"/>
+<text x="120" y="353" font-family="Arial,sans-serif" font-size="14" font-weight="700" fill="#17213B">Revenue vs target</text>
+<path d="M130 530 C190 505,215 512,270 470 S365 490,420 430 S525 450,580 390 S640 410,675 352" fill="none" stroke="#0F766E" stroke-width="7" stroke-linecap="round"/>
+<path d="M130 548 C205 520,270 502,340 482 S480 446,550 418 S620 388,675 370" fill="none" stroke="#C3A35B" stroke-width="4" stroke-dasharray="10 10"/>
+<rect x="730" y="318" width="375" height="265" rx="20" fill="#FAFAF8" stroke="#E8E4DC"/>
+<text x="755" y="353" font-family="Arial,sans-serif" font-size="14" font-weight="700" fill="#17213B">Target by region</text>
+<g font-family="Arial,sans-serif" font-size="12" fill="#6F7480">
+<text x="755" y="402">North</text><text x="755" y="449">East</text><text x="755" y="496">Central</text><text x="755" y="543">South</text>
+</g>
+<g fill="#E3E6E9"><rect x="820" y="390" width="230" height="12" rx="6"/><rect x="820" y="437" width="230" height="12" rx="6"/><rect x="820" y="484" width="230" height="12" rx="6"/><rect x="820" y="531" width="230" height="12" rx="6"/></g>
+<g fill="#0F766E"><rect x="820" y="390" width="230" height="12" rx="6"/><rect x="820" y="437" width="211" height="12" rx="6"/><rect x="820" y="484" width="199" height="12" rx="6"/><rect x="820" y="531" width="223" height="12" rx="6"/></g>
+</svg>
