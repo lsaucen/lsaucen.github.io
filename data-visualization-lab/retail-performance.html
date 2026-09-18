@@ -3,65 +3,65 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Retail Performance — Data Visualization Lab</title>
-<link rel="stylesheet" href="dashboard.css">
+<link rel="stylesheet" href="dashboard.css">\n<script src="https://code.iconify.design/iconify-icon/3.0.3/iconify-icon.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 <div class="app">
   <aside class="sidebar">
-    <div class="brand"><div class="brandmark">LN</div><div><strong>Data Lab</strong><span>Laura Nuñez Salcé</span></div></div>
+    <div class="brand"><div class="brandmark"><iconify-icon icon="lucide:chart-no-axes-combined"></iconify-icon></div><div><strong>Data Lab</strong><span>Laura Nuñez Salcé</span></div></div>
     <div class="navlabel">Dashboard</div>
     <nav class="nav">
-      <a class="active" href="#overview"><span class="icon">⌁</span><span>Overview</span></a>
-      <a href="#trends"><span class="icon">↗</span><span>Trends</span></a>
-      <a href="#products"><span class="icon">▦</span><span>Products</span></a>
-      <a href="#regions"><span class="icon">◎</span><span>Regions</span></a>
+      <a class="active" href="#overview"><span class="icon"><iconify-icon icon="lucide:layout-dashboard"></iconify-icon></span><span>Overview</span></a>
+      <a href="#trends"><span class="icon"><iconify-icon icon="lucide:chart-no-axes-column-increasing"></iconify-icon></span><span>Trends</span></a>
+      <a href="#products"><span class="icon"><iconify-icon icon="lucide:blocks"></iconify-icon></span><span>Products</span></a>
+      <a href="#regions"><span class="icon"><iconify-icon icon="lucide:scan-search"></iconify-icon></span><span>Regions</span></a>
     </nav>
     <div class="navlabel">Portfolio</div>
     <nav class="nav">
-      <a href="index.html"><span class="icon">◫</span><span>Data Viz Lab</span></a>
-      <a href="../"><span class="icon">←</span><span>Main portfolio</span></a>
+      <a href="index.html"><span class="icon"><iconify-icon icon="lucide:gallery-horizontal-end"></iconify-icon></span><span>Data Viz Lab</span></a>
+      <a href="../"><span class="icon"><iconify-icon icon="lucide:arrow-left"></iconify-icon></span><span>Main portfolio</span></a>
     </nav>
-    <div class="sidebar-footer"><a href="web-analytics.html">Web Analytics →</a><a href="customer-retention.html">Retention →</a></div>
+    <div class="sidebar-footer"><a href="web-analytics.html">Web Analytics <iconify-icon icon="lucide:arrow-right"></iconify-icon></a><a href="customer-retention.html">Retention <iconify-icon icon="lucide:arrow-right"></iconify-icon></a></div>
   </aside>
 
   <main class="main">
     <header class="topbar">
       <div class="titleblock"><small>Executive analytics · synthetic data</small><h1>Retail Performance</h1></div>
-      <div class="actions"><button class="ghost-btn" onclick="resetFilters()">Reset filters</button><button class="ghost-btn" onclick="window.print()">Download view</button></div>
+      <div class="actions"><button class="ghost-btn" onclick="resetFilters()"><iconify-icon icon="lucide:rotate-ccw"></iconify-icon>Reset filters</button><button class="ghost-btn" onclick="window.print()"><iconify-icon icon="lucide:download"></iconify-icon>Download view</button></div>
     </header>
 
     <div class="content">
       <section id="overview" class="section-anchor">
         <div class="filters">
-          <div class="filter"><label>Timeframe</label><select id="period"><option value="1">YTD 2026</option><option value=".78">Last 6 months</option><option value=".39">Last 90 days</option></select></div>
-          <div class="filter"><label>Region</label><select id="regionFilter"><option value="1">All regions</option><option value=".295">North</option><option value=".245">East</option><option value=".226">Central</option><option value=".234">South</option></select></div>
-          <div class="filter"><label>Category</label><select id="categoryFilter"><option value="1">All categories</option><option value=".245">Home</option><option value=".216">Electronics</option><option value=".191">Beauty</option><option value=".181">Sports</option><option value=".167">Kids</option></select></div>
-          <button class="reset" onclick="resetFilters()">Clear</button>
+          <div class="filter"><label><iconify-icon icon="lucide:calendar-range"></iconify-icon>Timeframe</label><select id="period"><option value="1">YTD 2026</option><option value=".78">Last 6 months</option><option value=".39">Last 90 days</option></select></div>
+          <div class="filter"><label><iconify-icon icon="lucide:map-pin"></iconify-icon>Region</label><select id="regionFilter"><option value="1">All regions</option><option value=".295">North</option><option value=".245">East</option><option value=".226">Central</option><option value=".234">South</option></select></div>
+          <div class="filter"><label><iconify-icon icon="lucide:tags"></iconify-icon>Category</label><select id="categoryFilter"><option value="1">All categories</option><option value=".245">Home</option><option value=".216">Electronics</option><option value=".191">Beauty</option><option value=".181">Sports</option><option value=".167">Kids</option></select></div>
+          <button class="reset" onclick="resetFilters()"><iconify-icon icon="lucide:x"></iconify-icon>Clear</button>
         </div>
 
         <div class="kpis">
-          <article class="kpi"><div class="label">Revenue</div><div class="value" id="kpiRevenue">$4.82M</div><div class="delta up">+11.8% vs prior year</div></article>
-          <article class="kpi"><div class="label">Gross margin</div><div class="value" id="kpiMargin">37.6%</div><div class="delta up">+1.9 pp vs prior year</div></article>
-          <article class="kpi"><div class="label">Target attainment</div><div class="value" id="kpiTarget">96.4%</div><div class="delta">Gap: <span id="kpiGap">$181K</span></div></article>
-          <article class="kpi"><div class="label">Average order value</div><div class="value" id="kpiAov">$84.20</div><div class="delta up">+6.2% vs prior year</div></article>
+          <article class="kpi"><div class="kpi-head"><span class="kpi-icon"><iconify-icon icon="lucide:badge-dollar-sign"></iconify-icon></span><div class="label">Revenue</div></div><div class="value" id="kpiRevenue">$4.82M</div><div class="delta up">+11.8% vs prior year</div></article>
+          <article class="kpi"><div class="kpi-head"><span class="kpi-icon"><iconify-icon icon="lucide:percent"></iconify-icon></span><div class="label">Gross margin</div></div><div class="value" id="kpiMargin">37.6%</div><div class="delta up">+1.9 pp vs prior year</div></article>
+          <article class="kpi"><div class="kpi-head"><span class="kpi-icon"><iconify-icon icon="lucide:target"></iconify-icon></span><div class="label">Target attainment</div></div><div class="value" id="kpiTarget">96.4%</div><div class="delta">Gap: <span id="kpiGap">$181K</span></div></article>
+          <article class="kpi"><div class="kpi-head"><span class="kpi-icon"><iconify-icon icon="lucide:shopping-cart"></iconify-icon></span><div class="label">Average order value</div></div><div class="value" id="kpiAov">$84.20</div><div class="delta up">+6.2% vs prior year</div></article>
         </div>
       </section>
 
       <section id="trends" class="layout section-anchor">
         <article class="panel">
-          <div class="panel-head"><div><h2>Revenue activity</h2><p>Actual revenue against target by month</p></div><span class="panel-tag">Click a month</span></div>
+          <div class="panel-head"><div><h2>Revenue activity</h2><p>Actual revenue against target by month</p></div><span class="panel-tag"><iconify-icon icon="lucide:mouse-pointer-click"></iconify-icon>Click a month</span></div>
           <div class="chart-wrap tall"><canvas id="trendChart"></canvas></div>
         </article>
         <article class="panel">
-          <div class="panel-head"><div><h2>Regional performance</h2><p>Contribution and target attainment</p></div><span class="panel-tag">Drill-through enabled</span></div>
+          <div class="panel-head"><div><h2>Regional performance</h2><p>Contribution and target attainment</p></div><span class="panel-tag"><iconify-icon icon="lucide:split"></iconify-icon>Drill-through enabled</span></div>
           <div class="chart-wrap"><canvas id="regionChart"></canvas></div>
         </article>
       </section>
 
       <section id="products" class="layout section-anchor">
         <article class="panel">
-          <div class="panel-head"><div><h2>Product mix</h2><p>Revenue by category</p></div><span class="panel-tag">Click a bar</span></div>
+          <div class="panel-head"><div><h2>Product mix</h2><p>Revenue by category</p></div><span class="panel-tag"><iconify-icon icon="lucide:mouse-pointer-click"></iconify-icon>Click a bar</span></div>
           <div class="chart-wrap"><canvas id="productChart"></canvas></div>
         </article>
         <article class="panel">
@@ -99,8 +99,8 @@
 
 <div class="drawer-backdrop" id="backdrop" onclick="closeDrill()"></div>
 <aside class="drawer" id="drawer">
-  <div class="drawer-head"><div><small id="drillType">Drill-through</small><h3 id="drillTitle">Detail</h3></div><button class="close" onclick="closeDrill()">×</button></div>
-  <span class="drill-pill">↳ Filter context preserved</span>
+  <div class="drawer-head"><div><small id="drillType">Drill-through</small><h3 id="drillTitle">Detail</h3></div><button class="close" onclick="closeDrill()" aria-label="Close detail"><iconify-icon icon="lucide:x"></iconify-icon></button></div>
+  <span class="drill-pill"><iconify-icon icon="lucide:filter"></iconify-icon>Filter context preserved</span>
   <div class="detail-kpis">
     <div class="detail-kpi"><span>Revenue</span><strong id="drillRevenue">—</strong></div>
     <div class="detail-kpi"><span>Margin</span><strong id="drillMargin">—</strong></div>
