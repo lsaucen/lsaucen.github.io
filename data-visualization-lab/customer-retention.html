@@ -3,54 +3,54 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Customer Retention — Data Visualization Lab</title>
-<link rel="stylesheet" href="dashboard.css">
+<link rel="stylesheet" href="dashboard.css">\n<script src="https://code.iconify.design/iconify-icon/3.0.3/iconify-icon.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 <div class="app">
   <aside class="sidebar">
-    <div class="brand"><div class="brandmark">LN</div><div><strong>Data Lab</strong><span>Laura Nuñez Salcé</span></div></div>
+    <div class="brand"><div class="brandmark"><iconify-icon icon="lucide:chart-no-axes-combined"></iconify-icon></div><div><strong>Data Lab</strong><span>Laura Nuñez Salcé</span></div></div>
     <div class="navlabel">Dashboard</div>
     <nav class="nav">
-      <a class="active" href="#overview"><span class="icon">⌁</span><span>Overview</span></a>
-      <a href="#cohorts"><span class="icon">▦</span><span>Cohorts</span></a>
-      <a href="#segments"><span class="icon">◎</span><span>Segments</span></a>
-      <a href="#risk"><span class="icon">!</span><span>Risk</span></a>
+      <a class="active" href="#overview"><span class="icon"><iconify-icon icon="lucide:layout-dashboard"></iconify-icon></span><span>Overview</span></a>
+      <a href="#cohorts"><span class="icon"><iconify-icon icon="lucide:blocks"></iconify-icon></span><span>Cohorts</span></a>
+      <a href="#segments"><span class="icon"><iconify-icon icon="lucide:scan-search"></iconify-icon></span><span>Segments</span></a>
+      <a href="#risk"><span class="icon"><iconify-icon icon="lucide:triangle-alert"></iconify-icon></span><span>Risk</span></a>
     </nav>
     <div class="navlabel">Portfolio</div>
     <nav class="nav">
-      <a href="index.html"><span class="icon">◫</span><span>Data Viz Lab</span></a>
-      <a href="../"><span class="icon">←</span><span>Main portfolio</span></a>
+      <a href="index.html"><span class="icon"><iconify-icon icon="lucide:gallery-horizontal-end"></iconify-icon></span><span>Data Viz Lab</span></a>
+      <a href="../"><span class="icon"><iconify-icon icon="lucide:arrow-left"></iconify-icon></span><span>Main portfolio</span></a>
     </nav>
-    <div class="sidebar-footer"><a href="retail-performance.html">Retail Performance →</a><a href="web-analytics.html">Web Analytics →</a></div>
+    <div class="sidebar-footer"><a href="retail-performance.html">Retail Performance <iconify-icon icon="lucide:arrow-right"></iconify-icon></a><a href="web-analytics.html">Web Analytics <iconify-icon icon="lucide:arrow-right"></iconify-icon></a></div>
   </aside>
 
   <main class="main">
     <header class="topbar">
       <div class="titleblock"><small>Retention analytics · synthetic data</small><h1>Customer Retention</h1></div>
-      <div class="actions"><button class="ghost-btn" onclick="resetFilters()">Reset filters</button><button class="ghost-btn" onclick="window.print()">Download view</button></div>
+      <div class="actions"><button class="ghost-btn" onclick="resetFilters()"><iconify-icon icon="lucide:rotate-ccw"></iconify-icon>Reset filters</button><button class="ghost-btn" onclick="window.print()"><iconify-icon icon="lucide:download"></iconify-icon>Download view</button></div>
     </header>
 
     <div class="content">
       <section id="overview" class="section-anchor">
         <div class="filters">
-          <div class="filter"><label>Plan</label><select id="planFilter"><option value="1">All plans</option><option value=".36">Starter</option><option value=".31">Growth</option><option value=".22">Business</option><option value=".11">Enterprise</option></select></div>
-          <div class="filter"><label>Tenure</label><select id="tenureFilter"><option value="1">All tenure</option><option value=".28">&lt; 3 months</option><option value=".34">3–6 months</option><option value=".38">6+ months</option></select></div>
-          <div class="filter"><label>Acquisition</label><select id="sourceFilter"><option value="1">All sources</option><option value=".42">Organic</option><option value=".26">Paid</option><option value=".18">Partner</option><option value=".14">Referral</option></select></div>
-          <button class="reset" onclick="resetFilters()">Clear</button>
+          <div class="filter"><label><iconify-icon icon="lucide:layers-3"></iconify-icon>Plan</label><select id="planFilter"><option value="1">All plans</option><option value=".36">Starter</option><option value=".31">Growth</option><option value=".22">Business</option><option value=".11">Enterprise</option></select></div>
+          <div class="filter"><label><iconify-icon icon="lucide:clock-3"></iconify-icon>Tenure</label><select id="tenureFilter"><option value="1">All tenure</option><option value=".28">&lt; 3 months</option><option value=".34">3–6 months</option><option value=".38">6+ months</option></select></div>
+          <div class="filter"><label><iconify-icon icon="lucide:route"></iconify-icon>Acquisition</label><select id="sourceFilter"><option value="1">All sources</option><option value=".42">Organic</option><option value=".26">Paid</option><option value=".18">Partner</option><option value=".14">Referral</option></select></div>
+          <button class="reset" onclick="resetFilters()"><iconify-icon icon="lucide:x"></iconify-icon>Clear</button>
         </div>
 
         <div class="kpis">
-          <article class="kpi"><div class="label">90-day retention</div><div class="value" id="kpiRetention">72.4%</div><div class="delta up">+3.6 pp QoQ</div></article>
-          <article class="kpi"><div class="label">Monthly churn</div><div class="value" id="kpiChurn">3.1%</div><div class="delta up">-0.7 pp QoQ</div></article>
-          <article class="kpi"><div class="label">Net revenue retention</div><div class="value" id="kpiNrr">108.6%</div><div class="delta up">Expansion offsets churn</div></article>
-          <article class="kpi"><div class="label">At-risk customers</div><div class="value" id="kpiRisk">842</div><div class="delta">9.4% of active base</div></article>
+          <article class="kpi"><div class="kpi-head"><span class="kpi-icon"><iconify-icon icon="lucide:user-round-check"></iconify-icon></span><div class="label">90-day retention</div></div><div class="value" id="kpiRetention">72.4%</div><div class="delta up">+3.6 pp QoQ</div></article>
+          <article class="kpi"><div class="kpi-head"><span class="kpi-icon"><iconify-icon icon="lucide:user-round-x"></iconify-icon></span><div class="label">Monthly churn</div></div><div class="value" id="kpiChurn">3.1%</div><div class="delta up">-0.7 pp QoQ</div></article>
+          <article class="kpi"><div class="kpi-head"><span class="kpi-icon"><iconify-icon icon="lucide:chart-spline"></iconify-icon></span><div class="label">Net revenue retention</div></div><div class="value" id="kpiNrr">108.6%</div><div class="delta up">Expansion offsets churn</div></article>
+          <article class="kpi"><div class="kpi-head"><span class="kpi-icon"><iconify-icon icon="lucide:triangle-alert"></iconify-icon></span><div class="label">At-risk customers</div></div><div class="value" id="kpiRisk">842</div><div class="delta">9.4% of active base</div></article>
         </div>
       </section>
 
       <section id="cohorts" class="layout section-anchor">
         <article class="panel">
-          <div class="panel-head"><div><h2>Retention by acquisition cohort</h2><p>Share of customers remaining active by month</p></div><span class="panel-tag">Click a cohort row</span></div>
+          <div class="panel-head"><div><h2>Retention by acquisition cohort</h2><p>Share of customers remaining active by month</p></div><span class="panel-tag"><iconify-icon icon="lucide:mouse-pointer-click"></iconify-icon>Click a cohort row</span></div>
           <div style="overflow:auto">
             <table class="table" id="cohortTable">
               <thead><tr><th>Cohort</th><th>M0</th><th>M1</th><th>M2</th><th>M3</th><th>M4</th><th>M5</th></tr></thead>
@@ -72,7 +72,7 @@
 
       <section id="segments" class="layout section-anchor">
         <article class="panel">
-          <div class="panel-head"><div><h2>Churn by plan</h2><p>Monthly churn rate by commercial segment</p></div><span class="panel-tag">Click a bar</span></div>
+          <div class="panel-head"><div><h2>Churn by plan</h2><p>Monthly churn rate by commercial segment</p></div><span class="panel-tag"><iconify-icon icon="lucide:mouse-pointer-click"></iconify-icon>Click a bar</span></div>
           <div class="chart-wrap"><canvas id="segmentChart"></canvas></div>
         </article>
         <article class="panel">
@@ -87,7 +87,7 @@
 
       <section id="risk" class="layout section-anchor">
         <article class="panel">
-          <div class="panel-head"><div><h2>Risk distribution</h2><p>Behavioral classification of the active customer base</p></div><span class="panel-tag">Click a risk band</span></div>
+          <div class="panel-head"><div><h2>Risk distribution</h2><p>Behavioral classification of the active customer base</p></div><span class="panel-tag"><iconify-icon icon="lucide:mouse-pointer-click"></iconify-icon>Click a risk band</span></div>
           <div class="chart-wrap"><canvas id="riskChart"></canvas></div>
         </article>
         <article class="panel">
@@ -105,8 +105,8 @@
 
 <div class="drawer-backdrop" id="backdrop" onclick="closeDrill()"></div>
 <aside class="drawer" id="drawer">
-  <div class="drawer-head"><div><small id="drillType">Drill-through</small><h3 id="drillTitle">Detail</h3></div><button class="close" onclick="closeDrill()">×</button></div>
-  <span class="drill-pill">↳ Customer context preserved</span>
+  <div class="drawer-head"><div><small id="drillType">Drill-through</small><h3 id="drillTitle">Detail</h3></div><button class="close" onclick="closeDrill()" aria-label="Close detail"><iconify-icon icon="lucide:x"></iconify-icon></button></div>
+  <span class="drill-pill"><iconify-icon icon="lucide:filter"></iconify-icon>Customer context preserved</span>
   <div class="detail-kpis">
     <div class="detail-kpi"><span>Monthly churn</span><strong id="drillChurn">—</strong></div>
     <div class="detail-kpi"><span>90-day retention</span><strong id="drillRetention">—</strong></div>
