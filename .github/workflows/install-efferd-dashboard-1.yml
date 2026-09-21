@@ -49,9 +49,10 @@ jobs:
         working-directory: retail-efferd-src
         run: npx --yes shadcn@latest add @efferd/dashboard-1 --yes
 
-      - name: Verify build
+      - name: Fix upstream sidebar typo
         working-directory: retail-efferd-src
-        run: npm run build
+        run: |
+          sed -i 's/collapsible="offExamples"/collapsible="offcanvas"/g' src/components/app-sidebar.tsx
 
       - name: Commit installed source
         run: |
@@ -65,3 +66,7 @@ jobs:
             git commit -m "Install Efferd dashboard-1 prototype"
             git push origin HEAD:efferd-dashboard-1
           fi
+
+      - name: Verify build
+        working-directory: retail-efferd-src
+        run: npm run build
