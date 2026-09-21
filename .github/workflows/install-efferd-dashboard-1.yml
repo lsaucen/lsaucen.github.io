@@ -23,23 +23,15 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Install shadcn skill
-        run: npx --yes skills add shadcn/ui
+        run: npx --yes skills add shadcn/ui --skill shadcn -y
 
-      - name: Create Vite React app
+      - name: Scaffold shadcn Vite project
         run: |
           rm -rf retail-efferd-src
-          npm create vite@latest retail-efferd-src -- --template react-ts
-
-      - name: Install dependencies
-        working-directory: retail-efferd-src
-        run: npm install
-
-      - name: Initialize shadcn
-        working-directory: retail-efferd-src
-        run: npx --yes shadcn@latest init -d
+          npx --yes shadcn@latest init -t vite -n retail-efferd-src -y --no-monorepo
 
       - name: Add Efferd registry
         working-directory: retail-efferd-src
@@ -57,12 +49,16 @@ jobs:
         working-directory: retail-efferd-src
         run: npx --yes shadcn@latest add @efferd/dashboard-1 --yes
 
+      - name: Verify build
+        working-directory: retail-efferd-src
+        run: npm run build
+
       - name: Commit installed source
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .agents .claude .cursor .github retail-efferd-src 2>/dev/null || true
-          git add retail-efferd-src .github/workflows/install-efferd-dashboard-1.yml
+          git add .agents .claude .cursor retail-efferd-src 2>/dev/null || true
+          git add retail-efferd-src
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
