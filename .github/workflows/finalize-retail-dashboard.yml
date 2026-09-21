@@ -1,0 +1,159 @@
+name: Finalize Retail Dashboard
+
+on:
+  push:
+    branches:
+      - retail-dashboard
+    paths:
+      - .github/workflows/finalize-retail-dashboard.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout retail branch
+        uses: actions/checkout@v4
+        with:
+          ref: retail-dashboard
+          fetch-depth: 0
+
+      - name: Clean source naming
+        run: |
+          if [ -d retail-efferd-src ]; then
+            mv retail-efferd-src retail-dashboard-src
+          fi
+
+          node <<'NODE'
+          const fs = require('fs')
+          const p = 'retail-dashboard-src/components.json'
+          const data = JSON.parse(fs.readFileSync(p, 'utf8'))
+          if (data.registries) {
+            delete data.registries['@efferd']
+            if (Object.keys(data.registries).length === 0) delete data.registries
+          }
+          fs.writeFileSync(p, JSON.stringify(data, null, 2) + '\n')
+          NODE
+
+          rm -f .github/workflows/install-efferd-dashboard-1.yml
+          rm -f .github/workflows/publish-retail-preview.yml
+          rm -f .github/workflows/finalize-retail-dashboard.yml
+
+          cat > .github/workflows/validate-retail-dashboard.yml <<'YAML'
+          name: Validate Retail Dashboard
+
+          on:
+            push:
+              branches:
+                - retail-dashboard
+              paths:
+                - retail-dashboard-src/**
+                - .github/workflows/validate-retail-dashboard.yml
+            workflow_dispatch:
+
+          permissions:
+            contents: read
+
+          jobs:
+            build:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: actions/checkout@v4
+                  with:
+                    ref: retail-dashboard
+                - uses: actions/setup-node@v4
+                  with:
+                    node-version: 24
+                    cache: npm
+                    cache-dependency-path: retail-dashboard-src/package-lock.json
+                - name: Install dependencies
+                  working-directory: retail-dashboard-src
+                  run: npm ci
+                - name: Typecheck and build
+                  working-directory: retail-dashboard-src
+                  run: npm run build
+          YAML
+
+          if grep -Rni --exclude-dir=node_modules --exclude-dir=.git -i 'efferd' retail-dashboard-src .github/workflows/validate-retail-dashboard.yml; then
+            echo "Unwanted reference remains in final source"
+            exit 1
+          fi
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: retail-dashboard-src/package-lock.json
+
+      - name: Install dependencies
+        working-directory: retail-dashboard-src
+        run: npm ci
+
+      - name: Build final dashboard
+        working-directory: retail-dashboard-src
+        run: npm run build -- --base=/retail-performance/
+
+      - name: Stage final build
+        run: |
+          rm -rf /tmp/retail-final
+          mkdir -p /tmp/retail-final
+          cp -R retail-dashboard-src/dist/. /tmp/retail-final/
+
+      - name: Commit clean source branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "Finalize retail dashboard source"
+            git push origin HEAD:retail-dashboard
+          fi
+
+      - name: Publish final dashboard to main
+        run: |
+          git fetch origin main
+          git checkout main
+          git reset --hard origin/main
+
+          rm -rf retail-efferd-preview
+          rm -rf retail-performance
+          mkdir -p retail-performance
+          cp -R /tmp/retail-final/. retail-performance/
+
+          python <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          s=s.replace('data-visualization-lab/retail-performance.html','retail-performance/')
+          p.write_text(s)
+
+          old=Path('data-visualization-lab/retail-performance.html')
+          if old.exists():
+              old.write_text("""<!doctype html>
+          <html lang="en">
+          <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width,initial-scale=1">
+          <meta http-equiv="refresh" content="0; url=/retail-performance/">
+          <title>Retail Performance Dashboard — Laura Nuñez Salcé</title>
+          <link rel="canonical" href="/retail-performance/">
+          </head>
+          <body>
+          <p>Redirecting to <a href="/retail-performance/">Retail Performance Dashboard</a>…</p>
+          <script>location.replace('/retail-performance/');</script>
+          </body>
+          </html>""")
+          PY
+
+          if grep -Rni --exclude-dir=.git -i 'efferd' .; then
+            echo "Unwanted reference remains in production tree"
+            exit 1
+          fi
+
+          git add -A
+          git commit -m "Publish final retail performance dashboard"
+          git push origin main
