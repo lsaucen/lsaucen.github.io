@@ -2,8 +2,6 @@
 
 import { useMemo, useState, type ReactNode } from "react"
 import {
-  Area,
-  AreaChart,
   Bar,
   CartesianGrid,
   ComposedChart,
