@@ -1,83 +1,90 @@
-"use client";
+"use client"
 
-import { Logo } from "@/components/logo";
 import {
-	Sidebar,
-	SidebarContent,
-	SidebarFooter,
-	SidebarGroup,
-	SidebarGroupLabel,
-	SidebarHeader,
-	SidebarMenu,
-	SidebarMenuButton,
-	SidebarMenuItem,
-} from "@/components/ui/sidebar";
-import { footerNavLinks, navGroups } from "@/components/app-shared";
-import { NavUser } from "@/components/nav-user";
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar"
+import {
+  dashboardIdentity,
+  footerNavLinks,
+  navGroups,
+} from "@/components/app-shared"
 
 export function AppSidebar() {
-	return (
-		<Sidebar
-			className="static min-h-full *:data-[slot=sidebar-inner]:bg-background"
-			collapsible="offcanvas"
-			variant="sidebar"
-		>
-			<SidebarHeader className="relative h-14 justify-center px-2 py-0">
-				<a
-					className="rounded-lg flex h-10 w-max items-center justify-center px-3 hover:bg-muted dark:hover:bg-muted/50"
-					href="#link"
-				>
-					<Logo className="h-4" />
-					<span className="sr-only">Efferd</span>
-				</a>
-			</SidebarHeader>
-			<SidebarContent>
-				{navGroups.map((group, index) => (
-					<SidebarGroup key={`sidebar-group-${index}`}>
-						{group.label && (
-							<SidebarGroupLabel className="font-normal">
-								{group.label}
-							</SidebarGroupLabel>
-						)}
-						<SidebarMenu>
-							{group.items.map((item) => (
-								<SidebarMenuItem key={item.title}>
-									<SidebarMenuButton
-										asChild
-										isActive={item.isActive}
-										tooltip={item.title}
-									>
-										<a href={item.url}>
-											{item.icon}
-											<span>{item.title}</span>
-										</a>
-									</SidebarMenuButton>
-								</SidebarMenuItem>
-							))}
-						</SidebarMenu>
-					</SidebarGroup>
-				))}
-			</SidebarContent>
-			<SidebarFooter className="gap-0 p-0">
-				<SidebarMenu className="border-t p-2">
-					{footerNavLinks.map((item) => (
-						<SidebarMenuItem key={item.title}>
-							<SidebarMenuButton
-								asChild
-								className="text-muted-foreground"
-								isActive={item.isActive}
-								size="sm"
-							>
-								<a href={item.url}>
-									{item.icon}
-									<span>{item.title}</span>
-								</a>
-							</SidebarMenuButton>
-						</SidebarMenuItem>
-					))}
-				</SidebarMenu>
-				<NavUser />
-			</SidebarFooter>
-		</Sidebar>
-	);
+  return (
+    <Sidebar
+      className="static min-h-full *:data-[slot=sidebar-inner]:bg-background"
+      collapsible="offcanvas"
+      variant="sidebar"
+    >
+      <SidebarHeader className="h-16 justify-center border-b px-3 py-0">
+        <a
+          className="flex h-11 items-center gap-3 rounded-lg px-2 transition-colors hover:bg-muted"
+          href="#overview"
+        >
+          <div className="grid size-8 place-items-center rounded-lg bg-primary text-primary-foreground [&>svg]:size-4">
+            {dashboardIdentity.icon}
+          </div>
+          <div className="min-w-0">
+            <div className="truncate text-sm font-semibold">{dashboardIdentity.name}</div>
+            <div className="truncate text-xs text-muted-foreground">
+              {dashboardIdentity.subtitle}
+            </div>
+          </div>
+        </a>
+      </SidebarHeader>
+
+      <SidebarContent>
+        {navGroups.map((group, index) => (
+          <SidebarGroup key={"sidebar-group-" + index}>
+            {group.label && (
+              <SidebarGroupLabel className="font-normal">
+                {group.label}
+              </SidebarGroupLabel>
+            )}
+            <SidebarMenu>
+              {group.items.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild isActive={item.isActive} tooltip={item.title}>
+                    <a href={item.url}>
+                      {item.icon}
+                      <span>{item.title}</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroup>
+        ))}
+      </SidebarContent>
+
+      <SidebarFooter className="gap-0 border-t p-2">
+        <div className="mb-2 rounded-lg border bg-muted/35 p-3">
+          <p className="text-[11px] font-medium">Portfolio case study</p>
+          <p className="mt-1 text-[10px] leading-4 text-muted-foreground">
+            Interactive retail dataset created for visualization and UX demonstration.
+          </p>
+        </div>
+        <SidebarMenu>
+          {footerNavLinks.map((item) => (
+            <SidebarMenuItem key={item.title}>
+              <SidebarMenuButton asChild className="text-muted-foreground" size="sm">
+                <a href={item.url}>
+                  {item.icon}
+                  <span>{item.title}</span>
+                </a>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarFooter>
+    </Sidebar>
+  )
 }
