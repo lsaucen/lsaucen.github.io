@@ -22,7 +22,6 @@ import {
   ArrowDownRightIcon,
   ArrowUpRightIcon,
   BadgeCheckIcon,
-  Clock3Icon,
   CompassIcon,
   FilterIcon,
   GaugeIcon,
@@ -409,7 +408,7 @@ export function Dashboard() {
               <MetricCard icon={<GaugeIcon />} label="Engagement rate" value={engagement.toFixed(1) + "%"} delta={4.1} sublabel="engaged sessions" />
               <MetricCard icon={<BadgeCheckIcon />} label="Conversion rate" value={conversion.toFixed(2) + "%"} delta={0.38} sublabel="primary conversion" />
               <MetricCard icon={<CompassIcon />} label="Conversions" value={compact(conversions)} delta={12.8} sublabel="completed goals" />
-              <MetricCard icon={<RouteIcon />} label="Returning users" value={returningRate.toFixed(1) + "%"} delta={3.4} sublabel="audience mix" />
+              <MetricCard icon={<RouteIcon />} label="Revenue" value={moneyK(revenue)} delta={11.6} sublabel={returningRate.toFixed(1) + "% returning users"} />
             </div>
           </div>
 
