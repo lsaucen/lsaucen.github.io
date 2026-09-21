@@ -31,7 +31,7 @@ jobs:
       - name: Scaffold shadcn Vite project
         run: |
           rm -rf retail-efferd-src
-          npx --yes shadcn@latest init -t vite -n retail-efferd-src -y --no-monorepo
+          npx --yes shadcn@latest init -t vite -b radix -p nova -n retail-efferd-src -y --no-monorepo
 
       - name: Add Efferd registry
         working-directory: retail-efferd-src
