@@ -38,6 +38,9 @@ jobs:
           fs.writeFileSync(p, JSON.stringify(data, null, 2) + '\n')
           NODE
 
+          sed -i 's/retail-efferd-src/retail-dashboard-src/g' retail-dashboard-src/package.json retail-dashboard-src/package-lock.json
+          rm -f retail-dashboard-src/src/components/nav-user.tsx
+
           rm -f .github/workflows/install-efferd-dashboard-1.yml
           rm -f .github/workflows/publish-retail-preview.yml
           rm -f .github/workflows/finalize-retail-dashboard.yml
