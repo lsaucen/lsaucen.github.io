@@ -16,11 +16,14 @@ import {
   footerNavLinks,
   navGroups,
 } from "@/components/app-shared"
+import { useActiveSection } from "@/hooks/use-active-section"
 
 export function AppSidebar() {
+  const activeSection = useActiveSection()
+
   return (
     <Sidebar
-      className="static min-h-full *:data-[slot=sidebar-inner]:bg-background"
+      className="*:data-[slot=sidebar-inner]:bg-background"
       collapsible="offcanvas"
       variant="sidebar"
     >
@@ -50,16 +53,21 @@ export function AppSidebar() {
               </SidebarGroupLabel>
             )}
             <SidebarMenu>
-              {group.items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={item.isActive} tooltip={item.title}>
-                    <a href={item.url}>
-                      {item.icon}
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {group.items.map((item) => {
+                const sectionId = item.url.replace("#", "")
+                const isActive = sectionId === activeSection
+
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
+                      <a href={item.url}>
+                        {item.icon}
+                        <span>{item.title}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })}
             </SidebarMenu>
           </SidebarGroup>
         ))}
@@ -75,7 +83,12 @@ export function AppSidebar() {
         <SidebarMenu>
           {footerNavLinks.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild className="text-muted-foreground" size="sm">
+              <SidebarMenuButton
+                asChild
+                className="text-muted-foreground"
+                isActive={item.url === "#methodology" && activeSection === "methodology"}
+                size="sm"
+              >
                 <a href={item.url}>
                   {item.icon}
                   <span>{item.title}</span>
