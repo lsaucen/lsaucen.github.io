@@ -1,14 +1,20 @@
+"use client"
+
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { AppBreadcrumbs } from "@/components/app-breadcrumbs"
 import { navLinks } from "@/components/app-shared"
+import { useActiveSection } from "@/hooks/use-active-section"
 import { ArrowUpRightIcon } from "lucide-react"
 
-const activeItem = navLinks.find((item) => item.isActive)
-
 export function AppHeader() {
+  const activeSection = useActiveSection()
+  const activeItem =
+    navLinks.find((item) => item.url === "#" + activeSection) ??
+    navLinks.find((item) => item.url === "#overview")
+
   return (
     <header className="sticky top-0 z-50 flex h-14 shrink-0 items-center justify-between gap-3 border-b bg-background/95 px-4 backdrop-blur md:px-6">
       <div className="flex min-w-0 items-center gap-2">
