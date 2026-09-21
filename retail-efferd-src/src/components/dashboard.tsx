@@ -138,10 +138,10 @@ const channels: ChannelRow[] = [
 ]
 
 const channelTrend = [
-  { week: "W1", Organic: 15.4, "Paid Search": 10.2, Direct: 7.2, Referral: 4.8, Email: 3.1 },
-  { week: "W2", Organic: 16.2, "Paid Search": 10.6, Direct: 7.8, Referral: 5.0, Email: 3.2 },
-  { week: "W3", Organic: 17.8, "Paid Search": 11.1, Direct: 8.4, Referral: 5.5, Email: 3.6 },
-  { week: "W4", Organic: 20.8, "Paid Search": 12.4, Direct: 9.8, Referral: 6.9, Email: 4.9 },
+  { week: "W1", organic: 15.4, paidSearch: 10.2, direct: 7.2, referral: 4.8, email: 3.1 },
+  { week: "W2", organic: 16.2, paidSearch: 10.6, direct: 7.8, referral: 5.0, email: 3.2 },
+  { week: "W3", organic: 17.8, paidSearch: 11.1, direct: 8.4, referral: 5.5, email: 3.6 },
+  { week: "W4", organic: 20.8, paidSearch: 12.4, direct: 9.8, referral: 6.9, email: 4.9 },
 ]
 
 const funnelBase = [
@@ -201,11 +201,11 @@ const trendConfig = {
 } satisfies ChartConfig
 
 const channelConfig = {
-  Organic: { label: "Organic", color: "var(--chart-1)" },
-  "Paid Search": { label: "Paid Search", color: "var(--chart-2)" },
-  Direct: { label: "Direct", color: "var(--chart-3)" },
-  Referral: { label: "Referral", color: "var(--chart-4)" },
-  Email: { label: "Email", color: "var(--chart-5)" },
+  organic: { label: "Organic", color: "var(--chart-1)" },
+  paidSearch: { label: "Paid Search", color: "var(--chart-2)" },
+  direct: { label: "Direct", color: "var(--chart-3)" },
+  referral: { label: "Referral", color: "var(--chart-4)" },
+  email: { label: "Email", color: "var(--chart-5)" },
 } satisfies ChartConfig
 
 const emptyConfig = {} satisfies ChartConfig
@@ -468,11 +468,11 @@ export function Dashboard() {
                     <YAxis hide />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Legend />
-                    <Bar dataKey="Organic" stackId="a" fill="var(--color-Organic)" />
-                    <Bar dataKey="Paid Search" stackId="a" fill="var(--color-Paid Search)" />
-                    <Bar dataKey="Direct" stackId="a" fill="var(--color-Direct)" />
-                    <Bar dataKey="Referral" stackId="a" fill="var(--color-Referral)" />
-                    <Bar dataKey="Email" stackId="a" fill="var(--color-Email)" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="organic" stackId="a" fill="var(--color-organic)" />
+                    <Bar dataKey="paidSearch" stackId="a" fill="var(--color-paidSearch)" />
+                    <Bar dataKey="direct" stackId="a" fill="var(--color-direct)" />
+                    <Bar dataKey="referral" stackId="a" fill="var(--color-referral)" />
+                    <Bar dataKey="email" stackId="a" fill="var(--color-email)" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ChartContainer>
               </CardContent>
