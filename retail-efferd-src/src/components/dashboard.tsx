@@ -224,7 +224,9 @@ export function Dashboard() {
     const offset = planRetentionAdjustment * 0.25 + sourceRetentionAdjustment * 0.25
     return rows.map((row) => ({
       ...row,
-      values: row.values.map((value, index) => index === 0 ? 100 : Math.min(98, Math.max(40, +(value + offset).toFixed(1))),
+      values: row.values.map((value, index) =>
+        index === 0 ? 100 : Math.min(98, Math.max(40, Number((value + offset).toFixed(1))))
+      ),
     }))
   }, [windowKey, planRetentionAdjustment, sourceRetentionAdjustment])
 
