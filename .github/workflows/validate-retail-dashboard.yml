@@ -1,0 +1,32 @@
+name: Validate Retail Dashboard
+
+on:
+  push:
+    branches:
+      - efferd-dashboard-1
+    paths:
+      - retail-efferd-src/**
+      - .github/workflows/validate-retail-dashboard.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: efferd-dashboard-1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: retail-efferd-src/package-lock.json
+      - name: Install dependencies
+        working-directory: retail-efferd-src
+        run: npm ci
+      - name: Typecheck and build
+        working-directory: retail-efferd-src
+        run: npm run build
