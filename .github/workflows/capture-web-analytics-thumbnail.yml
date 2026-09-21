@@ -1,0 +1,95 @@
+name: Capture Web Analytics Thumbnail
+
+on:
+  push:
+    branches:
+      - web-analytics-dashboard
+    paths:
+      - .github/workflows/capture-web-analytics-thumbnail.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source branch
+        uses: actions/checkout@v4
+        with:
+          ref: web-analytics-dashboard
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+
+      - name: Capture approved Devices view
+        run: |
+          cat > /tmp/capture.mjs <<'EOF'
+          import { chromium } from "playwright";
+
+          const browser = await chromium.launch({ headless: true });
+          const page = await browser.newPage({
+            viewport: { width: 1898, height: 874 },
+            deviceScaleFactor: 1,
+          });
+
+          await page.goto("https://lsaucen.github.io/web-analytics-preview/#devices", {
+            waitUntil: "networkidle",
+          });
+
+          await page.evaluate(() => {
+            localStorage.setItem("web-analytics-theme", "light");
+          });
+          await page.reload({ waitUntil: "networkidle" });
+          await page.goto("https://lsaucen.github.io/web-analytics-preview/#devices", {
+            waitUntil: "networkidle",
+          });
+
+          await page.waitForTimeout(1500);
+          await page.screenshot({
+            path: "/tmp/web-analytics-dashboard.png",
+            fullPage: false,
+          });
+          await browser.close();
+          EOF
+          node /tmp/capture.mjs
+
+      - name: Publish thumbnail to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin main
+          git checkout main
+          git reset --hard origin/main
+
+          mkdir -p assets
+          cp /tmp/web-analytics-dashboard.png assets/web-analytics-dashboard.png
+
+          python <<'PY'
+          from pathlib import Path
+          p = Path("index.html")
+          s = p.read_text()
+          s = s.replace(
+              'imageUrl: "assets/web-analytics-dashboard.webp"',
+              'imageUrl: "assets/web-analytics-dashboard.png"'
+          )
+          p.write_text(s)
+          PY
+
+          git add assets/web-analytics-dashboard.png index.html
+          if git diff --cached --quiet; then
+            echo "Thumbnail already current"
+          else
+            git commit -m "Use approved Web Analytics portfolio screenshot"
+            git push origin main
+          fi
