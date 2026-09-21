@@ -1,0 +1,71 @@
+name: Publish Customer Retention Final
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - customer-retention-dashboard
+    paths:
+      - .github/workflows/publish-customer-retention-final.yml
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout approved source
+        uses: actions/checkout@v4
+        with:
+          ref: customer-retention-dashboard
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: retail-efferd-src/package-lock.json
+
+      - name: Install dependencies
+        working-directory: retail-efferd-src
+        run: npm ci
+
+      - name: Build final dashboard
+        working-directory: retail-efferd-src
+        run: npm run build -- --base=/customer-retention/
+
+      - name: Stage final build
+        run: |
+          rm -rf /tmp/customer-retention-final
+          mkdir -p /tmp/customer-retention-final
+          cp -R retail-efferd-src/dist/. /tmp/customer-retention-final/
+
+      - name: Publish final route and fix portfolio link
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout main
+          git reset --hard origin/main
+
+          rm -rf customer-retention
+          mkdir -p customer-retention
+          cp -R /tmp/customer-retention-final/. customer-retention/
+
+          python <<'PY'
+          from pathlib import Path
+          p=Path("index.html")
+          s=p.read_text()
+          s=s.replace('link: "data-visualization-lab/customer-retention.html"', 'link: "customer-retention/"')
+          p.write_text(s)
+          PY
+
+          git add customer-retention index.html
+          if git diff --cached --quiet; then
+            echo "Customer Retention final route already current"
+          else
+            git commit -m "Publish final Customer Retention dashboard"
+            git push origin main
+          fi
