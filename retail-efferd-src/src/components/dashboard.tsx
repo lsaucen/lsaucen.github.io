@@ -3,7 +3,6 @@
 import { useMemo, useState, type ReactNode } from "react"
 import {
   CartesianGrid,
-  ReferenceLine,
   Scatter,
   ScatterChart,
   XAxis,
@@ -12,11 +11,8 @@ import {
 } from "recharts"
 import {
   ActivityIcon,
-  ArrowDownRightIcon,
-  ArrowUpRightIcon,
   BadgeCheckIcon,
   ChartNoAxesCombinedIcon,
-  CircleDollarSignIcon,
   DatabaseIcon,
   LandmarkIcon,
   ShieldAlertIcon,
@@ -24,7 +20,6 @@ import {
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -214,8 +209,6 @@ const riskConfig = {
   sharpe: { label: "Sharpe", color: "var(--chart-1)" },
   ret: { label: "Annual return", color: "var(--chart-2)" },
 } satisfies ChartConfig
-
-const emptyConfig = {} satisfies ChartConfig
 
 export function Dashboard() {
   const [riskMetric, setRiskMetric] = useState<RiskMetric>("sharpe")
