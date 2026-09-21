@@ -2,25 +2,25 @@
 
 import { useEffect, useState } from "react"
 
-export const ANALYTICS_SECTION_IDS = [
+export const RETENTION_SECTION_IDS = [
   "overview",
-  "acquisition",
-  "funnel",
-  "journeys",
-  "content",
-  "devices",
+  "cohorts",
+  "churn",
+  "lifecycle",
+  "economics",
+  "segments",
   "methodology",
 ] as const
 
-export type AnalyticsSectionId = (typeof ANALYTICS_SECTION_IDS)[number]
+export type RetentionSectionId = (typeof RETENTION_SECTION_IDS)[number]
 
-function sectionFromHash(): AnalyticsSectionId {
-  const hash = window.location.hash.replace("#", "") as AnalyticsSectionId
-  return ANALYTICS_SECTION_IDS.includes(hash) ? hash : "overview"
+function sectionFromHash(): RetentionSectionId {
+  const hash = window.location.hash.replace("#", "") as RetentionSectionId
+  return RETENTION_SECTION_IDS.includes(hash) ? hash : "overview"
 }
 
 export function useActiveSection() {
-  const [activeSection, setActiveSection] = useState<AnalyticsSectionId>(() =>
+  const [activeSection, setActiveSection] = useState<RetentionSectionId>(() =>
     typeof window === "undefined" ? "overview" : sectionFromHash()
   )
 
@@ -31,9 +31,9 @@ export function useActiveSection() {
       cancelAnimationFrame(frame)
       frame = requestAnimationFrame(() => {
         const marker = window.scrollY + 110
-        let next: AnalyticsSectionId = "overview"
+        let next: RetentionSectionId = "overview"
 
-        for (const id of ANALYTICS_SECTION_IDS) {
+        for (const id of RETENTION_SECTION_IDS) {
           const section = document.getElementById(id)
           if (section && section.offsetTop <= marker) next = id
         }
@@ -43,7 +43,7 @@ export function useActiveSection() {
           document.documentElement.scrollHeight - 24
 
         if (nearBottom) {
-          const lastVisible = [...ANALYTICS_SECTION_IDS]
+          const lastVisible = [...RETENTION_SECTION_IDS]
             .reverse()
             .find((id) => document.getElementById(id))
           if (lastVisible) next = lastVisible
