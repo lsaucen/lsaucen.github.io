@@ -1,0 +1,71 @@
+name: Publish Web Analytics Final
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - web-analytics-dashboard
+    paths:
+      - .github/workflows/publish-web-analytics-final.yml
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout approved source
+        uses: actions/checkout@v4
+        with:
+          ref: web-analytics-dashboard
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: retail-efferd-src/package-lock.json
+
+      - name: Install dependencies
+        working-directory: retail-efferd-src
+        run: npm ci
+
+      - name: Build final dashboard
+        working-directory: retail-efferd-src
+        run: npm run build -- --base=/web-analytics/
+
+      - name: Stage build
+        run: |
+          rm -rf /tmp/web-analytics-final
+          mkdir -p /tmp/web-analytics-final
+          cp -R retail-efferd-src/dist/. /tmp/web-analytics-final/
+
+      - name: Publish final route and fix portfolio link
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout main
+          git reset --hard origin/main
+
+          rm -rf web-analytics
+          mkdir -p web-analytics
+          cp -R /tmp/web-analytics-final/. web-analytics/
+
+          python <<'PY'
+          from pathlib import Path
+          p=Path("index.html")
+          s=p.read_text()
+          s=s.replace('link: "data-visualization-lab/web-analytics.html"', 'link: "web-analytics/"')
+          p.write_text(s)
+          PY
+
+          git add web-analytics index.html
+          if git diff --cached --quiet; then
+            echo "Web Analytics final route already current"
+          else
+            git commit -m "Publish final Web Analytics dashboard and fix portfolio link"
+            git push origin main
+          fi
