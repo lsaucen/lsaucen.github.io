@@ -2,24 +2,25 @@
 
 import { useEffect, useState } from "react"
 
-export const RETAIL_SECTION_IDS = [
+export const ANALYTICS_SECTION_IDS = [
   "overview",
-  "sales",
-  "products",
-  "regions",
-  "orders",
+  "acquisition",
+  "funnel",
+  "journeys",
+  "content",
+  "devices",
   "methodology",
 ] as const
 
-export type RetailSectionId = (typeof RETAIL_SECTION_IDS)[number]
+export type AnalyticsSectionId = (typeof ANALYTICS_SECTION_IDS)[number]
 
-function sectionFromHash(): RetailSectionId {
-  const hash = window.location.hash.replace("#", "") as RetailSectionId
-  return RETAIL_SECTION_IDS.includes(hash) ? hash : "overview"
+function sectionFromHash(): AnalyticsSectionId {
+  const hash = window.location.hash.replace("#", "") as AnalyticsSectionId
+  return ANALYTICS_SECTION_IDS.includes(hash) ? hash : "overview"
 }
 
 export function useActiveSection() {
-  const [activeSection, setActiveSection] = useState<RetailSectionId>(() =>
+  const [activeSection, setActiveSection] = useState<AnalyticsSectionId>(() =>
     typeof window === "undefined" ? "overview" : sectionFromHash()
   )
 
@@ -30,13 +31,11 @@ export function useActiveSection() {
       cancelAnimationFrame(frame)
       frame = requestAnimationFrame(() => {
         const marker = window.scrollY + 110
-        let next: RetailSectionId = "overview"
+        let next: AnalyticsSectionId = "overview"
 
-        for (const id of RETAIL_SECTION_IDS) {
+        for (const id of ANALYTICS_SECTION_IDS) {
           const section = document.getElementById(id)
-          if (section && section.offsetTop <= marker) {
-            next = id
-          }
+          if (section && section.offsetTop <= marker) next = id
         }
 
         const nearBottom =
@@ -44,7 +43,7 @@ export function useActiveSection() {
           document.documentElement.scrollHeight - 24
 
         if (nearBottom) {
-          const lastVisible = [...RETAIL_SECTION_IDS]
+          const lastVisible = [...ANALYTICS_SECTION_IDS]
             .reverse()
             .find((id) => document.getElementById(id))
           if (lastVisible) next = lastVisible
@@ -62,7 +61,6 @@ export function useActiveSection() {
     window.addEventListener("scroll", updateActiveSection, { passive: true })
     window.addEventListener("resize", updateActiveSection)
     window.addEventListener("hashchange", updateFromHash)
-
     updateActiveSection()
 
     return () => {
