@@ -1,0 +1,62 @@
+name: Publish Web Analytics Preview
+
+on:
+  push:
+    branches:
+      - web-analytics-dashboard
+    paths:
+      - retail-efferd-src/**
+      - .github/workflows/publish-web-analytics-preview.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout web analytics branch
+        uses: actions/checkout@v4
+        with:
+          ref: web-analytics-dashboard
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: retail-efferd-src/package-lock.json
+
+      - name: Install dependencies
+        working-directory: retail-efferd-src
+        run: npm ci
+
+      - name: Build preview
+        working-directory: retail-efferd-src
+        run: npm run build -- --base=/web-analytics-preview/
+
+      - name: Stage preview
+        run: |
+          rm -rf /tmp/web-analytics-preview
+          mkdir -p /tmp/web-analytics-preview
+          cp -R retail-efferd-src/dist/. /tmp/web-analytics-preview/
+
+      - name: Publish preview to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout main
+          git reset --hard origin/main
+          rm -rf web-analytics-preview
+          mkdir -p web-analytics-preview
+          cp -R /tmp/web-analytics-preview/. web-analytics-preview/
+          git add web-analytics-preview
+          if git diff --cached --quiet; then
+            echo "Preview already current"
+          else
+            git commit -m "Publish web analytics dashboard preview"
+            git push origin main
+          fi
