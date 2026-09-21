@@ -1,0 +1,64 @@
+name: Publish Customer Retention Preview
+
+on:
+  push:
+    branches:
+      - customer-retention-dashboard
+    paths:
+      - retail-efferd-src/**
+      - .github/workflows/publish-customer-retention-preview.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Customer Retention branch
+        uses: actions/checkout@v4
+        with:
+          ref: customer-retention-dashboard
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: retail-efferd-src/package-lock.json
+
+      - name: Install dependencies
+        working-directory: retail-efferd-src
+        run: npm ci
+
+      - name: Build preview
+        working-directory: retail-efferd-src
+        run: npm run build -- --base=/customer-retention-preview/
+
+      - name: Stage preview
+        run: |
+          rm -rf /tmp/customer-retention-preview
+          mkdir -p /tmp/customer-retention-preview
+          cp -R retail-efferd-src/dist/. /tmp/customer-retention-preview/
+
+      - name: Publish preview to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout main
+          git reset --hard origin/main
+
+          rm -rf customer-retention-preview
+          mkdir -p customer-retention-preview
+          cp -R /tmp/customer-retention-preview/. customer-retention-preview/
+
+          git add customer-retention-preview
+          if git diff --cached --quiet; then
+            echo "Preview already current"
+          else
+            git commit -m "Publish Customer Retention dashboard preview"
+            git push origin main
+          fi
