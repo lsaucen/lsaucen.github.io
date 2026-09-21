@@ -10,11 +10,17 @@ import {
   PolarGrid,
   Radar,
   RadarChart,
+  ResponsiveContainer,
+  Sankey,
+  Tooltip as RechartsTooltip,
+  Layer,
+  Rectangle,
   Scatter,
   ScatterChart,
   XAxis,
   YAxis,
   ZAxis,
+  type SankeyNodeProps,
 } from "recharts"
 import {
   ArrowDownRightIcon,
@@ -172,30 +178,32 @@ const radarConfig = {
   previous: { label: "Previous period", color: "var(--chart-2)" },
 } satisfies ChartConfig
 
-const journeyNodes = [
-  { id: "landing", label: "Landing", x: 36, y: 74, h: 110 },
-  { id: "blog", label: "Blog", x: 36, y: 220, h: 70 },
-  { id: "campaign", label: "Campaign", x: 36, y: 324, h: 64 },
-  { id: "product", label: "Product", x: 290, y: 94, h: 132 },
-  { id: "search", label: "Search", x: 290, y: 270, h: 66 },
-  { id: "pricing", label: "Pricing", x: 544, y: 116, h: 118 },
-  { id: "exit", label: "Exit", x: 798, y: 264, h: 90 },
-  { id: "checkout", label: "Checkout", x: 798, y: 92, h: 108 },
-  { id: "conversion", label: "Conversion", x: 1038, y: 104, h: 88 },
-]
-
-const journeyLinks = [
-  { from: "landing", to: "product", value: 52, color: "var(--chart-1)", fromOffset: 28, toOffset: 34 },
-  { from: "blog", to: "product", value: 31, color: "var(--chart-2)", fromOffset: 30, toOffset: 86 },
-  { from: "campaign", to: "product", value: 22, color: "var(--chart-3)", fromOffset: 26, toOffset: 112 },
-  { from: "landing", to: "search", value: 24, color: "var(--chart-4)", fromOffset: 80, toOffset: 28 },
-  { from: "product", to: "pricing", value: 78, color: "var(--chart-1)", fromOffset: 54, toOffset: 54 },
-  { from: "search", to: "exit", value: 22, color: "var(--chart-4)", fromOffset: 32, toOffset: 42 },
-  { from: "pricing", to: "checkout", value: 39, color: "var(--chart-2)", fromOffset: 46, toOffset: 44 },
-  { from: "pricing", to: "exit", value: 27, color: "var(--chart-5)", fromOffset: 86, toOffset: 74 },
-  { from: "checkout", to: "conversion", value: 25, color: "var(--chart-3)", fromOffset: 52, toOffset: 42 },
-  { from: "checkout", to: "exit", value: 14, color: "var(--chart-5)", fromOffset: 84, toOffset: 20 },
-]
+const journeySankeyData = {
+  nodes: [
+    { name: "Landing", color: "var(--chart-1)" },
+    { name: "Blog", color: "var(--chart-2)" },
+    { name: "Campaign", color: "var(--chart-3)" },
+    { name: "Product", color: "var(--chart-1)" },
+    { name: "Search", color: "var(--chart-4)" },
+    { name: "Pricing", color: "var(--chart-2)" },
+    { name: "Checkout", color: "var(--chart-3)" },
+    { name: "Conversion", color: "var(--chart-1)" },
+    { name: "Exit", color: "var(--chart-5)" },
+  ],
+  links: [
+    { source: 0, target: 3, value: 52 },
+    { source: 0, target: 4, value: 24 },
+    { source: 1, target: 3, value: 31 },
+    { source: 2, target: 3, value: 22 },
+    { source: 3, target: 5, value: 78 },
+    { source: 3, target: 8, value: 27 },
+    { source: 4, target: 8, value: 24 },
+    { source: 5, target: 6, value: 50 },
+    { source: 5, target: 8, value: 28 },
+    { source: 6, target: 7, value: 32 },
+    { source: 6, target: 8, value: 18 },
+  ],
+}
 
 const pages: PageRow[] = [
   { page: "/pricing", title: "Pricing", sessions: 28.4, engagement: 69.1, conversion: 5.8, exitRate: 24.1, avgTime: 176 },
@@ -575,7 +583,7 @@ export function Dashboard() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-base">Journey flow</CardTitle>
-              <CardDescription>Ribbon width approximates path volume.</CardDescription>
+              <CardDescription>True Sankey layout · ribbon width is proportional to session volume.</CardDescription>
             </CardHeader>
             <CardContent>
               <JourneySankey />
@@ -611,12 +619,34 @@ export function Dashboard() {
               <CardContent>
                 <ChartContainer className="h-[280px] w-full" config={trendConfig}>
                   <AreaChart data={filteredTrend} margin={{ left: 6, right: 12, top: 10 }}>
+                    <defs>
+                      <linearGradient id="fillSessions" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="var(--color-sessions)" stopOpacity={0.34} />
+                        <stop offset="95%" stopColor="var(--color-sessions)" stopOpacity={0.03} />
+                      </linearGradient>
+                      <linearGradient id="fillUsers" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="var(--color-users)" stopOpacity={0.42} />
+                        <stop offset="95%" stopColor="var(--color-users)" stopOpacity={0.04} />
+                      </linearGradient>
+                    </defs>
                     <CartesianGrid vertical={false} strokeDasharray="3 3" />
                     <XAxis dataKey="day" axisLine={false} tickLine={false} tickMargin={10} />
                     <YAxis axisLine={false} tickLine={false} width={38} tickFormatter={(v) => v + "K"} />
                     <ChartTooltip content={<ChartTooltipContent indicator="line" />} />
-                    <Area dataKey="sessions" fill="var(--color-sessions)" fillOpacity={0.14} stroke="var(--color-sessions)" strokeWidth={2.5} type="monotone" />
-                    <Area dataKey="users" fill="var(--color-users)" fillOpacity={0.06} stroke="var(--color-users)" strokeWidth={1.8} type="monotone" />
+                    <Area
+                      dataKey="sessions"
+                      fill="url(#fillSessions)"
+                      stroke="var(--color-sessions)"
+                      strokeWidth={2.5}
+                      type="monotone"
+                    />
+                    <Area
+                      dataKey="users"
+                      fill="url(#fillUsers)"
+                      stroke="var(--color-users)"
+                      strokeWidth={2}
+                      type="monotone"
+                    />
                   </AreaChart>
                 </ChartContainer>
               </CardContent>
@@ -940,39 +970,60 @@ function MarimekkoChart() {
 }
 
 function JourneySankey() {
-  const byId = Object.fromEntries(journeyNodes.map((node) => [node.id, node]))
+  function CustomNode({ x, y, width, height, index, payload }: SankeyNodeProps) {
+    const node = journeySankeyData.nodes[index]
+    const isRightSide = x > 760
+    const value = typeof payload.value === "number" ? payload.value : 0
+
+    return (
+      <Layer key={"journey-node-" + index}>
+        <Rectangle
+          x={x}
+          y={y}
+          width={width}
+          height={height}
+          radius={6}
+          fill={node?.color ?? "var(--chart-1)"}
+          fillOpacity={0.96}
+        />
+        <text
+          x={isRightSide ? x - 10 : x + width + 10}
+          y={y + height / 2 - 3}
+          textAnchor={isRightSide ? "end" : "start"}
+          fill="var(--foreground)"
+          fontSize="12"
+          fontWeight="600"
+        >
+          {payload.name}
+        </text>
+        <text
+          x={isRightSide ? x - 10 : x + width + 10}
+          y={y + height / 2 + 13}
+          textAnchor={isRightSide ? "end" : "start"}
+          fill="var(--muted-foreground)"
+          fontSize="10"
+        >
+          {value.toFixed(0)}K sessions
+        </text>
+      </Layer>
+    )
+  }
 
   return (
-    <div className="overflow-x-auto">
-      <svg className="min-w-[1050px] w-full" viewBox="0 0 1160 430" role="img" aria-label="User journey Sankey diagram">
-        {journeyLinks.map((link, index) => {
-          const from = byId[link.from]
-          const to = byId[link.to]
-          const x1 = from.x + 22
-          const y1 = from.y + link.fromOffset
-          const x2 = to.x
-          const y2 = to.y + link.toOffset
-          const width = Math.max(5, link.value * 0.45)
-          return (
-            <path
-              d={"M " + x1 + " " + y1 + " C " + (x1 + 90) + " " + y1 + ", " + (x2 - 90) + " " + y2 + ", " + x2 + " " + y2}
-              fill="none"
-              key={index}
-              opacity="0.3"
-              stroke={link.color}
-              strokeLinecap="round"
-              strokeWidth={width}
-            />
-          )
-        })}
-
-        {journeyNodes.map((node) => (
-          <g key={node.id}>
-            <rect x={node.x} y={node.y} width="22" height={node.h} rx="6" fill="var(--foreground)" opacity="0.9" />
-            <text x={node.x + 32} y={node.y + 18} fill="var(--foreground)" fontSize="12" fontWeight="600">{node.label}</text>
-          </g>
-        ))}
-      </svg>
+    <div className="h-[390px] w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <Sankey
+          data={journeySankeyData}
+          node={CustomNode}
+          nodePadding={34}
+          nodeWidth={14}
+          linkCurvature={0.55}
+          margin={{ top: 18, right: 150, bottom: 18, left: 20 }}
+          link={{ stroke: "var(--chart-1)", strokeOpacity: 0.22 }}
+        >
+          <RechartsTooltip />
+        </Sankey>
+      </ResponsiveContainer>
     </div>
   )
 }
