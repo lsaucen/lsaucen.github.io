@@ -2,11 +2,7 @@
 
 import { useMemo, useState, type ReactNode } from "react"
 import {
-  Bar,
   CartesianGrid,
-  ComposedChart,
-  Line,
-  LineChart,
   ReferenceLine,
   Scatter,
   ScatterChart,
@@ -15,15 +11,16 @@ import {
   ZAxis,
 } from "recharts"
 import {
+  ActivityIcon,
   ArrowDownRightIcon,
   ArrowUpRightIcon,
+  BadgeCheckIcon,
+  ChartNoAxesCombinedIcon,
   CircleDollarSignIcon,
-  FilterIcon,
-  GaugeIcon,
-  RotateCcwIcon,
+  DatabaseIcon,
+  LandmarkIcon,
   ShieldAlertIcon,
-  TrendingDownIcon,
-  UsersIcon,
+  TrendingUpIcon,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -55,203 +52,193 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 
-type WindowKey = "12m" | "6m" | "3m"
-type PlanKey = "all" | "Starter" | "Growth" | "Pro"
-type SourceKey = "all" | "Organic" | "Paid" | "Partner" | "Product-led"
+type RiskMetric = "sharpe" | "return"
+type DcaHorizon = "10y" | "20y"
+type BenchmarkWindow = "1y" | "5y" | "10y"
+type MomentumFormation = "3m" | "6m" | "12m"
 
 type DetailState = {
   eyebrow: string
   title: string
   description: string
   metrics: Array<{ label: string; value: string }>
+  caveat?: string
 } | null
 
-type SegmentRow = {
-  segment: string
-  customers: number
-  retention90: number
-  churn: number
-  nrr: number
-  ltv: number
-  cac: number
-  risk: number
-  value: number
+const sectorRisk = [
+  { ticker: "XLV", sector: "Health Care", ret: 9.1, vol: 14.2, sharpe: 0.642, ciLo: 0.326, ciHi: 1.031 },
+  { ticker: "XLP", sector: "Consumer Staples", ret: 7.2, vol: 12.4, sharpe: 0.581, ciLo: 0.213, ciHi: 0.976 },
+  { ticker: "XLI", sector: "Industrials", ret: 10.8, vol: 18.7, sharpe: 0.578, ciLo: 0.199, ciHi: 0.999 },
+  { ticker: "XLY", sector: "Consumer Discretionary", ret: 10.9, vol: 19.2, sharpe: 0.571, ciLo: 0.221, ciHi: 0.969 },
+  { ticker: "XLU", sector: "Utilities", ret: 8.6, vol: 15.2, sharpe: 0.567, ciLo: 0.187, ciHi: 0.972 },
+  { ticker: "XLK", sector: "Technology", ret: 12.6, vol: 23.1, sharpe: 0.546, ciLo: 0.137, ciHi: 1.009 },
+  { ticker: "XLB", sector: "Materials", ret: 9.9, vol: 20.7, sharpe: 0.479, ciLo: 0.102, ciHi: 0.851 },
+  { ticker: "XLE", sector: "Energy", ret: 11.4, vol: 24.9, sharpe: 0.455, ciLo: 0.053, ciHi: 0.829 },
+  { ticker: "XLF", sector: "Financials", ret: 8.1, vol: 20.9, sharpe: 0.386, ciLo: -0.041, ciHi: 0.843 },
+]
+
+const regimeData = [
+  { asset: "TLT", low: -0.282, high: 0.088 },
+  { asset: "AGG", low: -0.002, high: 0.401 },
+  { asset: "SHY", low: -0.232, high: -0.037 },
+  { asset: "GLD", low: -0.017, high: 0.177 },
+]
+
+const dcaData = {
+  "10y": [
+    { asset: "SPY", n: 284, p5: 1.02, p25: 1.33, median: 1.66, p75: 1.94, p95: 2.23 },
+    { asset: "QQQ", n: 210, p5: 1.14, p25: 1.77, median: 2.28, p75: 2.68, p95: 3.22 },
+    { asset: "GLD", n: 142, p5: 0.99, p25: 1.08, median: 1.25, p75: 1.38, p95: 2.39 },
+    { asset: "60/40", n: 155, p5: 1.43, p25: 1.50, median: 1.56, p75: 1.63, p95: 1.73 },
+  ],
+  "20y": [
+    { asset: "SPY", n: 164, p5: 2.09, p25: 2.30, median: 2.69, p75: 3.62, p95: 4.39 },
+    { asset: "QQQ", n: 90, p5: 3.91, p25: 5.14, median: 6.40, p75: 7.16, p95: 8.16 },
+    { asset: "GLD", n: 22, p5: 2.26, p25: 2.56, median: 2.77, p75: 3.21, p95: 3.58 },
+    { asset: "60/40", n: 35, p5: 2.25, p25: 2.46, median: 2.57, p75: 2.70, p95: 2.78 },
+  ],
 }
 
-const cohortRows = [
-  { cohort: "Jan", size: 2160, values: [100, 88, 82, 79, 77, 76, 74, 73, 72] },
-  { cohort: "Feb", size: 2240, values: [100, 87, 81, 78, 76, 74, 73, 72] },
-  { cohort: "Mar", size: 2380, values: [100, 89, 84, 81, 79, 77, 76] },
-  { cohort: "Apr", size: 2470, values: [100, 90, 85, 82, 80, 79] },
-  { cohort: "May", size: 2590, values: [100, 91, 86, 83, 82] },
-  { cohort: "Jun", size: 2710, values: [100, 91, 87, 85] },
-  { cohort: "Jul", size: 2820, values: [100, 92, 88] },
-  { cohort: "Aug", size: 2960, values: [100, 93] },
+const benchmarkData: Record<BenchmarkWindow, Array<{ ticker: string; win: number; lo?: number; hi?: number }>> = {
+  "1y": [
+    { ticker: "QQQ", win: 0.67 },
+    { ticker: "XLK", win: 0.63 },
+    { ticker: "VTI", win: 0.55 },
+    { ticker: "XLV", win: 0.47 },
+  ],
+  "5y": [
+    { ticker: "QQQ", win: 0.844, lo: 0.699, hi: 0.959 },
+    { ticker: "XLK", win: 0.765, lo: 0.595, hi: 0.904 },
+    { ticker: "XLV", win: 0.596, lo: 0.423, hi: 0.750 },
+    { ticker: "VTI", win: 0.545, lo: 0.368, hi: 0.744 },
+  ],
+  "10y": [
+    { ticker: "QQQ", win: 0.89 },
+    { ticker: "XLK", win: 0.79 },
+    { ticker: "XLV", win: 0.75 },
+    { ticker: "VTI", win: 0.58 },
+  ],
+}
+
+const momentumData = {
+  "3m": { annual: -0.0067, lo: -0.0038, hi: 0.0030, n: 327 },
+  "6m": { annual: -0.0106, lo: -0.0047, hi: 0.0029, n: 324 },
+  "12m": { annual: 0.0052, lo: -0.0037, hi: 0.0045, n: 318 },
+}
+
+const findings = [
+  {
+    id: "rq1",
+    label: "RQ1",
+    title: "Extra sector risk was not rewarded",
+    verdict: "Confirmed",
+    value: "ρ = -0.85",
+    note: "Volatility vs Sharpe · p = 0.004",
+    description: "Across nine S&P 500 sectors, higher volatility was associated with lower risk-adjusted return. Health Care led Sharpe; Financials ranked last.",
+    metrics: [
+      { label: "Spearman rho", value: "-0.850" },
+      { label: "p-value", value: "0.004" },
+      { label: "Best Sharpe", value: "XLV · 0.642" },
+      { label: "Worst Sharpe", value: "XLF · 0.386" },
+    ],
+    caveat: "Only nine sector observations; survival bias remains in the investable universe.",
+  },
+  {
+    id: "rq2",
+    label: "RQ2",
+    title: "Bond protection weakened with inflation",
+    verdict: "Confirmed",
+    value: "-0.28 → +0.09",
+    note: "SPY–TLT correlation · low vs high inflation",
+    description: "The SPY–TLT relationship changed materially across inflation regimes, and the difference survived a one-month CPI publication lag robustness check.",
+    metrics: [
+      { label: "Low inflation", value: "-0.282" },
+      { label: "High inflation", value: "+0.088" },
+      { label: "Fisher z", value: "3.18" },
+      { label: "p-value", value: "0.0015" },
+    ],
+    caveat: "The sign change is dominated by the post-2015 period, especially 2021–2023.",
+  },
+  {
+    id: "rq3",
+    label: "RQ3",
+    title: "Destination mattered more than timing",
+    verdict: "Confirmed",
+    value: "4.1× / 10.3×",
+    note: "Destination effect vs start-date dispersion",
+    description: "Across exhaustive DCA windows, asset choice explained far more outcome dispersion than the specific start date—especially over twenty years.",
+    metrics: [
+      { label: "10-year ratio", value: "4.1×" },
+      { label: "20-year ratio", value: "10.3×" },
+      { label: "QQQ 20y median", value: "6.40×" },
+      { label: "SPY 20y median", value: "2.69×" },
+    ],
+    caveat: "No transaction costs or taxes; 20-year coverage differs by asset.",
+  },
+  {
+    id: "rq4",
+    label: "RQ4",
+    title: "Persistent outperformance was concentrated",
+    verdict: "Refuted",
+    value: "84.4%",
+    note: "QQQ beat SPY in 5-year windows",
+    description: "The hypothesis that no ETF consistently beat SPY was rejected, but the exception was concentrated in US technology: QQQ and XLK.",
+    metrics: [
+      { label: "QQQ 5y win rate", value: "84.4%" },
+      { label: "XLK 5y win rate", value: "76.5%" },
+      { label: "QQQ bootstrap CI", value: "69.9–95.9%" },
+      { label: "Comparisons", value: "17" },
+    ],
+    caveat: "QQQ and XLK express the same structural technology concentration; results should not be generalized to all active bets.",
+  },
+  {
+    id: "rq5",
+    label: "RQ5",
+    title: "Sector momentum did not add value",
+    verdict: "Refuted",
+    value: "-1.06%",
+    note: "Annualized top-minus-bottom spread",
+    description: "A monthly sector rotation rule using six-month momentum produced a negative average spread before costs, with bootstrap intervals crossing zero.",
+    metrics: [
+      { label: "Annualized spread", value: "-1.06%" },
+      { label: "Monthly CI low", value: "-0.47%" },
+      { label: "Monthly CI high", value: "+0.29%" },
+      { label: "Months", value: "324" },
+    ],
+    caveat: "Nine sectors is a narrow cross-section; transaction costs would only worsen the result.",
+  },
 ]
 
-const retentionCurves = [
-  { month: "M0", Starter: 100, Growth: 100, Pro: 100 },
-  { month: "M1", Starter: 84, Growth: 89, Pro: 94 },
-  { month: "M2", Starter: 77, Growth: 84, Pro: 91 },
-  { month: "M3", Starter: 72, Growth: 81, Pro: 89 },
-  { month: "M4", Starter: 69, Growth: 79, Pro: 88 },
-  { month: "M5", Starter: 66, Growth: 77, Pro: 87 },
-  { month: "M6", Starter: 64, Growth: 76, Pro: 86 },
-  { month: "M9", Starter: 60, Growth: 73, Pro: 84 },
-  { month: "M12", Starter: 57, Growth: 71, Pro: 83 },
-]
-
-const hazard = [
-  { tenure: "M1", churn: 7.8, cumulative: 7.8 },
-  { tenure: "M2", churn: 6.1, cumulative: 13.4 },
-  { tenure: "M3", churn: 4.8, cumulative: 17.6 },
-  { tenure: "M4", churn: 3.9, cumulative: 20.8 },
-  { tenure: "M5", churn: 3.4, cumulative: 23.5 },
-  { tenure: "M6", churn: 3.0, cumulative: 25.8 },
-  { tenure: "M7", churn: 2.7, cumulative: 27.8 },
-  { tenure: "M8", churn: 2.5, cumulative: 29.6 },
-  { tenure: "M9", churn: 2.3, cumulative: 31.2 },
-  { tenure: "M10", churn: 2.2, cumulative: 32.7 },
-  { tenure: "M11", churn: 2.0, cumulative: 34.0 },
-  { tenure: "M12", churn: 1.9, cumulative: 35.3 },
-]
-
-const churnReasons = [
-  { reason: "Low product usage", share: 31 },
-  { reason: "Price / budget", share: 24 },
-  { reason: "Missing capability", share: 18 },
-  { reason: "Support friction", share: 12 },
-  { reason: "Switched provider", share: 9 },
-  { reason: "Other", share: 6 },
-]
-
-const lifecycleNodes = [
-  { id: "new", label: "New", x: 38, y: 74, h: 116, color: "var(--chart-4)" },
-  { id: "active", label: "Active", x: 306, y: 84, h: 158, color: "var(--chart-2)" },
-  { id: "risk", label: "At risk", x: 574, y: 116, h: 102, color: "var(--chart-3)" },
-  { id: "churned", label: "Churned", x: 842, y: 66, h: 92, color: "var(--chart-5)" },
-  { id: "reactivated", label: "Reactivated", x: 842, y: 224, h: 76, color: "var(--chart-1)" },
-]
-
-const lifecycleLinks = [
-  { from: "new", to: "active", value: 68, fromOffset: 48, toOffset: 66, color: "var(--chart-4)" },
-  { from: "new", to: "risk", value: 14, fromOffset: 88, toOffset: 24, color: "var(--chart-3)" },
-  { from: "active", to: "risk", value: 21, fromOffset: 112, toOffset: 58, color: "var(--chart-3)" },
-  { from: "risk", to: "churned", value: 16, fromOffset: 46, toOffset: 42, color: "var(--chart-5)" },
-  { from: "risk", to: "reactivated", value: 8, fromOffset: 76, toOffset: 34, color: "var(--chart-1)" },
-  { from: "reactivated", to: "active", value: 6, fromOffset: 54, toOffset: 136, color: "var(--chart-1)", reverse: true },
-]
-
-const waterfall = [
-  { label: "Starting MRR", delta: 1000, total: 1000, kind: "base" },
-  { label: "Expansion", delta: 126, total: 1126, kind: "positive" },
-  { label: "Contraction", delta: -47, total: 1079, kind: "negative" },
-  { label: "Churn", delta: -82, total: 997, kind: "negative" },
-  { label: "Reactivation", delta: 89, total: 1086, kind: "positive" },
-  { label: "Ending MRR", delta: 1086, total: 1086, kind: "base" },
-]
-
-const segments: SegmentRow[] = [
-  { segment: "Pro · Product-led", customers: 2840, retention90: 86.2, churn: 1.8, nrr: 121.4, ltv: 8420, cac: 1180, risk: 24, value: 92 },
-  { segment: "Growth · Organic", customers: 4620, retention90: 78.6, churn: 2.6, nrr: 112.8, ltv: 4860, cac: 840, risk: 36, value: 77 },
-  { segment: "Growth · Partner", customers: 2210, retention90: 75.1, churn: 3.0, nrr: 108.7, ltv: 4210, cac: 970, risk: 44, value: 70 },
-  { segment: "Starter · Organic", customers: 3980, retention90: 69.8, churn: 3.8, nrr: 98.4, ltv: 2180, cac: 610, risk: 58, value: 49 },
-  { segment: "Starter · Paid", customers: 3120, retention90: 61.4, churn: 5.2, nrr: 90.1, ltv: 1640, cac: 760, risk: 76, value: 34 },
-  { segment: "Pro · Partner", customers: 1680, retention90: 82.4, churn: 2.1, nrr: 116.3, ltv: 7210, cac: 1320, risk: 31, value: 86 },
-]
-
-const ltvScatter = segments.map((row) => ({
-  ...row,
-  ratio: +(row.ltv / row.cac).toFixed(1),
-}))
-
-const retentionConfig = {
-  Starter: { label: "Starter", color: "var(--chart-5)" },
-  Growth: { label: "Growth", color: "var(--chart-2)" },
-  Pro: { label: "Pro", color: "var(--chart-1)" },
-} satisfies ChartConfig
-
-const hazardConfig = {
-  churn: { label: "Monthly churn hazard", color: "var(--chart-5)" },
-  cumulative: { label: "Cumulative churn", color: "var(--chart-4)" },
+const riskConfig = {
+  sharpe: { label: "Sharpe", color: "var(--chart-1)" },
+  ret: { label: "Annual return", color: "var(--chart-2)" },
 } satisfies ChartConfig
 
 const emptyConfig = {} satisfies ChartConfig
 
-const windowFactor: Record<WindowKey, number> = { "12m": 1, "6m": 0.56, "3m": 0.30 }
-const planFactor: Record<PlanKey, number> = { all: 1, Starter: 0.44, Growth: 0.38, Pro: 0.18 }
-const sourceFactor: Record<SourceKey, number> = { all: 1, Organic: 0.34, Paid: 0.24, Partner: 0.18, "Product-led": 0.24 }
-
-function compact(value: number) {
-  if (value >= 1000) return (value / 1000).toFixed(value >= 10000 ? 1 : 2) + "K"
-  return Math.round(value).toLocaleString()
-}
-
-function money(value: number) {
-  return "$" + Math.round(value).toLocaleString()
-}
-
 export function Dashboard() {
-  const [windowKey, setWindowKey] = useState<WindowKey>("12m")
-  const [plan, setPlan] = useState<PlanKey>("all")
-  const [source, setSource] = useState<SourceKey>("all")
+  const [riskMetric, setRiskMetric] = useState<RiskMetric>("sharpe")
+  const [dcaHorizon, setDcaHorizon] = useState<DcaHorizon>("20y")
+  const [benchmarkWindow, setBenchmarkWindow] = useState<BenchmarkWindow>("5y")
+  const [momentumFormation, setMomentumFormation] = useState<MomentumFormation>("6m")
   const [detail, setDetail] = useState<DetailState>(null)
 
-  const scale = windowFactor[windowKey] * planFactor[plan] * sourceFactor[source]
+  const riskRows = useMemo(() => sectorRisk.map((row) => ({
+    ...row,
+    y: riskMetric === "sharpe" ? row.sharpe : row.ret,
+  })), [riskMetric])
 
-  const planRetentionAdjustment = plan === "Pro" ? 9.8 : plan === "Growth" ? 4.1 : plan === "Starter" ? -4.8 : 0
-  const sourceRetentionAdjustment = source === "Product-led" ? 5.6 : source === "Organic" ? 2.2 : source === "Paid" ? -5.1 : source === "Partner" ? 1.3 : 0
-  const retention90 = 72.4 + planRetentionAdjustment + sourceRetentionAdjustment
-  const monthlyChurn = Math.max(1.2, 3.1 - planRetentionAdjustment * 0.12 - sourceRetentionAdjustment * 0.10)
-  const nrr = 108.6 + planRetentionAdjustment * 0.9 + sourceRetentionAdjustment * 0.5
-  const activeCustomers = 18450 * scale
-  const atRisk = 842 * scale * (monthlyChurn / 3.1)
-  const expansionMrr = 92_000 * scale * (nrr / 108.6)
+  const benchmarkRows = [...benchmarkData[benchmarkWindow]].sort((a, b) => b.win - a.win)
+  const selectedMomentum = momentumData[momentumFormation]
 
-  const visibleCohorts = useMemo(() => {
-    const rows = windowKey === "3m" ? cohortRows.slice(-3) : windowKey === "6m" ? cohortRows.slice(-6) : cohortRows
-    const offset = planRetentionAdjustment * 0.25 + sourceRetentionAdjustment * 0.25
-    return rows.map((row) => ({
-      ...row,
-      values: row.values.map((value, index) =>
-        index === 0 ? 100 : Math.min(98, Math.max(40, Number((value + offset).toFixed(1))))
-      ),
-    }))
-  }, [windowKey, planRetentionAdjustment, sourceRetentionAdjustment])
-
-  function resetFilters() {
-    setWindowKey("12m")
-    setPlan("all")
-    setSource("all")
-  }
-
-  function openSegment(row: SegmentRow) {
+  function openFinding(finding: typeof findings[number]) {
     setDetail({
-      eyebrow: "Segment drill-through",
-      title: row.segment,
-      description:
-        row.nrr >= 110
-          ? "This segment combines durable retention with expansion. The operational question is how to preserve the acquisition and product behaviors producing that value."
-          : row.churn >= 4
-            ? "This segment carries elevated churn risk and should be investigated for onboarding, pricing or activation friction."
-            : "This segment sits between healthy and fragile behavior and benefits from closer lifecycle monitoring.",
-      metrics: [
-        { label: "Customers", value: row.customers.toLocaleString() },
-        { label: "90-day retention", value: row.retention90.toFixed(1) + "%" },
-        { label: "Monthly churn", value: row.churn.toFixed(1) + "%" },
-        { label: "NRR", value: row.nrr.toFixed(1) + "%" },
-        { label: "LTV", value: money(row.ltv) },
-        { label: "CAC", value: money(row.cac) },
-      ],
+      eyebrow: finding.label + " · " + finding.verdict,
+      title: finding.title,
+      description: finding.description,
+      metrics: finding.metrics,
+      caveat: finding.caveat,
     })
   }
 
@@ -261,259 +248,308 @@ export function Dashboard() {
         <section id="overview" className="scroll-mt-20">
           <div className="flex flex-col justify-between gap-4 xl:flex-row xl:items-end">
             <div>
-              <Badge className="mb-3" variant="outline">Subscription analytics · synthetic data</Badge>
-              <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Customer retention intelligence</h1>
-              <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
-                See which cohorts survive, when customers become fragile, how lifecycle states change and where retention creates or destroys recurring revenue.
+              <div className="mb-3 flex flex-wrap gap-2">
+                <Badge variant="outline">Historical market research</Badge>
+                <Badge variant="outline">1999–2026 sector sample</Badge>
+                <Badge variant="outline">Not investment advice</Badge>
+              </div>
+              <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Financial intelligence research dashboard</h1>
+              <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">
+                Five pre-registered research questions spanning risk, macro regimes, dollar-cost averaging, benchmark consistency and sector momentum.
               </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <Select value={windowKey} onValueChange={(value) => setWindowKey(value as WindowKey)}>
-                <SelectTrigger className="min-w-32"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="12m">Last 12 months</SelectItem>
-                  <SelectItem value="6m">Last 6 months</SelectItem>
-                  <SelectItem value="3m">Last 3 months</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={plan} onValueChange={(value) => setPlan(value as PlanKey)}>
-                <SelectTrigger className="min-w-32"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All plans</SelectItem>
-                  <SelectItem value="Starter">Starter</SelectItem>
-                  <SelectItem value="Growth">Growth</SelectItem>
-                  <SelectItem value="Pro">Pro</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={source} onValueChange={(value) => setSource(value as SourceKey)}>
-                <SelectTrigger className="min-w-36"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All sources</SelectItem>
-                  <SelectItem value="Organic">Organic</SelectItem>
-                  <SelectItem value="Paid">Paid</SelectItem>
-                  <SelectItem value="Partner">Partner</SelectItem>
-                  <SelectItem value="Product-led">Product-led</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Button onClick={resetFilters} size="sm" variant="ghost">
-                <RotateCcwIcon />
-                Reset
-              </Button>
             </div>
           </div>
 
           <div className="mt-5 overflow-hidden rounded-xl border bg-border">
             <div className="grid grid-cols-2 gap-px lg:grid-cols-3 xl:grid-cols-6">
-              <MetricCard icon={<UsersIcon />} label="Active customers" value={compact(activeCustomers)} delta={8.4} sublabel="vs prior period" />
-              <MetricCard icon={<GaugeIcon />} label="90-day retention" value={retention90.toFixed(1) + "%"} delta={2.7} sublabel="cohort survival" />
-              <MetricCard icon={<TrendingDownIcon />} label="Monthly churn" value={monthlyChurn.toFixed(1) + "%"} delta={-0.6} sublabel="logo churn" invertDelta />
-              <MetricCard icon={<CircleDollarSignIcon />} label="Net revenue retention" value={nrr.toFixed(1) + "%"} delta={4.2} sublabel="including expansion" />
-              <MetricCard icon={<ArrowUpRightIcon />} label="Expansion MRR" value={money(expansionMrr)} delta={13.1} sublabel="upsell + seat growth" />
-              <MetricCard icon={<ShieldAlertIcon />} label="At-risk customers" value={compact(atRisk)} delta={-7.9} sublabel="behavioral risk" invertDelta />
+              <MetricCard icon={<DatabaseIcon />} label="Assets analyzed" value="24" sublabel="ETFs + reference stocks" />
+              <MetricCard icon={<LandmarkIcon />} label="Macro series" value="4" sublabel="CPI, Fed, Treasury, jobs" />
+              <MetricCard icon={<ActivityIcon />} label="Max history" value="64y" sublabel="asset-dependent coverage" />
+              <MetricCard icon={<ChartNoAxesCombinedIcon />} label="Vol vs Sharpe" value="-0.85" sublabel="Spearman rho · p=.004" />
+              <MetricCard icon={<TrendingUpIcon />} label="QQQ 5y win rate" value="84.4%" sublabel="vs SPY · 269 windows" />
+              <MetricCard icon={<ShieldAlertIcon />} label="Momentum spread" value="-1.06%" sublabel="annualized · before costs" />
             </div>
           </div>
 
           <div className="mt-4 grid gap-3 md:grid-cols-3">
-            <Signal title="The danger zone is early" body="Churn hazard peaks in months 1–2, before customers establish durable product habits." />
-            <Signal title="Pro customers expand after they retain" body="The Pro plan carries the strongest 90-day survival and the highest net revenue retention." />
-            <Signal title="Paid acquisition needs a retention lens" body="Paid cohorts enter at scale but trail organic and product-led cohorts on 90-day retention." />
+            <Signal title="Asset choice dominated timing" body="The destination effect was 4.1× the start-date dispersion at 10 years and 10.3× at 20 years." />
+            <Signal title="Diversification depended on regime" body="SPY–TLT correlation moved from -0.282 in low inflation to +0.088 in high inflation." />
+            <Signal title="Two hypotheses failed" body="Consistent tech outperformance existed, while mechanical sector momentum did not." />
+          </div>
+
+          <div className="mt-4 grid gap-3 lg:grid-cols-5">
+            {findings.map((finding) => (
+              <button
+                key={finding.id}
+                className="group rounded-xl border bg-background p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/50"
+                onClick={() => openFinding(finding)}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] font-semibold tracking-[0.12em] text-muted-foreground">{finding.label}</span>
+                  <Badge variant={finding.verdict === "Confirmed" ? "secondary" : "outline"}>{finding.verdict}</Badge>
+                </div>
+                <div className="mt-5 text-2xl font-semibold tabular-nums">{finding.value}</div>
+                <div className="mt-2 text-xs font-medium leading-4">{finding.title}</div>
+                <div className="mt-2 text-[10px] leading-4 text-muted-foreground">{finding.note}</div>
+              </button>
+            ))}
           </div>
         </section>
 
-        <section id="cohorts" className="scroll-mt-20">
+        <section id="risk" className="scroll-mt-20">
           <SectionHeading
-            eyebrow="Cohorts"
-            title="Retention is a curve, not a single KPI"
-            description="The cohort matrix shows how each signup month decays; the curve view compares plan durability over longer tenure."
+            eyebrow="RQ1 · Risk & Return"
+            title="More sector volatility did not buy better risk-adjusted return"
+            description="Exact sector statistics from the research notebook. Toggle the vertical metric to separate gross return from risk-adjusted performance."
+          />
+
+          <div className="grid gap-4 xl:grid-cols-[1.35fr_0.65fr]">
+            <Card>
+              <CardHeader className="flex-row items-start justify-between space-y-0">
+                <div>
+                  <CardTitle className="text-base">Sector risk map</CardTitle>
+                  <CardDescription>X = annualized volatility · bubble = sector ETF</CardDescription>
+                </div>
+                <Select value={riskMetric} onValueChange={(v) => setRiskMetric(v as RiskMetric)}>
+                  <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sharpe">Sharpe ratio</SelectItem>
+                    <SelectItem value="return">Annual return</SelectItem>
+                  </SelectContent>
+                </Select>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer className="h-[390px] w-full" config={riskConfig}>
+                  <ScatterChart margin={{ left: 10, right: 24, top: 18, bottom: 8 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      type="number"
+                      dataKey="vol"
+                      name="Volatility"
+                      domain={[10, 27]}
+                      axisLine={false}
+                      tickLine={false}
+                      tickFormatter={(v) => v + "%"}
+                    />
+                    <YAxis
+                      type="number"
+                      dataKey="y"
+                      name={riskMetric === "sharpe" ? "Sharpe" : "Annual return"}
+                      domain={riskMetric === "sharpe" ? [0.32, 0.68] : [5, 14]}
+                      axisLine={false}
+                      tickLine={false}
+                      tickFormatter={(v) => riskMetric === "sharpe" ? v.toFixed(1) : v + "%"}
+                    />
+                    <ZAxis range={[180, 180]} />
+                    <ChartTooltip content={<ChartTooltipContent nameKey="ticker" />} />
+                    <Scatter data={riskRows} fill="var(--chart-1)" />
+                  </ScatterChart>
+                </ChartContainer>
+
+                <div className="mt-2 grid grid-cols-3 gap-2">
+                  <MiniStat label="Best Sharpe" value="XLV · 0.642" />
+                  <MiniStat label="Worst Sharpe" value="XLF · 0.386" />
+                  <MiniStat label="Spearman" value="ρ = -0.850" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Sector ranking</CardTitle>
+                <CardDescription>Sharpe ratio with annual return and volatility</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {sectorRisk.slice().sort((a,b)=>b.sharpe-a.sharpe).map((row, index) => (
+                  <div key={row.ticker} className="grid grid-cols-[28px_1fr_auto] items-center gap-3 rounded-lg border p-3">
+                    <div className="grid size-7 place-items-center rounded-md bg-muted text-[10px] font-semibold">{index + 1}</div>
+                    <div>
+                      <div className="text-xs font-medium">{row.ticker} · {row.sector}</div>
+                      <div className="mt-0.5 text-[10px] text-muted-foreground">{row.ret.toFixed(1)}% return · {row.vol.toFixed(1)}% vol</div>
+                    </div>
+                    <div className="text-sm font-semibold tabular-nums">{row.sharpe.toFixed(3)}</div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        <section id="regimes" className="scroll-mt-20">
+          <SectionHeading
+            eyebrow="RQ2 · Macro Regimes"
+            title="Bond diversification changed when inflation changed"
+            description="Correlation against SPY by inflation regime. Left dots are low-inflation months; right dots are high-inflation months."
           />
 
           <div className="grid gap-4 xl:grid-cols-[1.25fr_0.75fr]">
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Monthly retention cohorts</CardTitle>
-                <CardDescription>Rows = signup cohort · columns = months since signup</CardDescription>
+                <CardTitle className="text-base">Correlation regime shift</CardTitle>
+                <CardDescription>288 monthly observations · median inflation threshold = 2.33%</CardDescription>
               </CardHeader>
               <CardContent>
-                <CohortHeatmap rows={visibleCohorts} />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">Retention survival curves</CardTitle>
-                <CardDescription>Plan-level retention over customer tenure</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ChartContainer className="h-[360px] w-full" config={retentionConfig}>
-                  <LineChart data={retentionCurves} margin={{ left: 4, right: 16, top: 12, bottom: 4 }}>
-                    <CartesianGrid vertical={false} strokeDasharray="3 3" />
-                    <XAxis dataKey="month" axisLine={false} tickLine={false} />
-                    <YAxis domain={[50, 100]} axisLine={false} tickLine={false} tickFormatter={(v) => v + "%"} />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Line dataKey="Starter" dot={false} stroke="var(--color-Starter)" strokeWidth={2.2} type="monotone" />
-                    <Line dataKey="Growth" dot={false} stroke="var(--color-Growth)" strokeWidth={2.4} type="monotone" />
-                    <Line dataKey="Pro" dot={false} stroke="var(--color-Pro)" strokeWidth={2.6} type="monotone" />
-                  </LineChart>
-                </ChartContainer>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-
-        <section id="churn" className="scroll-mt-20">
-          <SectionHeading
-            eyebrow="Churn"
-            title="When and why customers leave"
-            description="Hazard analysis identifies the tenure moments with the highest cancellation risk; reason concentration shows where intervention can matter."
-          />
-
-          <div className="grid gap-4 xl:grid-cols-[1.25fr_0.75fr]">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">Churn hazard by tenure</CardTitle>
-                <CardDescription>Bars = monthly risk · line = cumulative churn</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ChartContainer className="h-[340px] w-full" config={hazardConfig}>
-                  <ComposedChart data={hazard} margin={{ left: 8, right: 12, top: 12 }}>
-                    <CartesianGrid vertical={false} strokeDasharray="3 3" />
-                    <XAxis dataKey="tenure" axisLine={false} tickLine={false} />
-                    <YAxis yAxisId="left" domain={[0, 9]} axisLine={false} tickLine={false} tickFormatter={(v) => v + "%"} />
-                    <YAxis yAxisId="right" orientation="right" domain={[0, 40]} axisLine={false} tickLine={false} tickFormatter={(v) => v + "%"} />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar yAxisId="left" dataKey="churn" fill="var(--color-churn)" radius={[5, 5, 0, 0]} />
-                    <Line yAxisId="right" dataKey="cumulative" dot={false} stroke="var(--color-cumulative)" strokeWidth={2.4} type="monotone" />
-                  </ComposedChart>
-                </ChartContainer>
+                <RegimeDumbbell />
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Churn reason concentration</CardTitle>
-                <CardDescription>Pareto-style ranking of cancellation drivers</CardDescription>
+                <CardTitle className="text-base">Robustness checks</CardTitle>
+                <CardDescription>The SPY–TLT relationship is not equally stable across eras.</CardDescription>
               </CardHeader>
-              <CardContent>
-                <ReasonPareto />
+              <CardContent className="space-y-3">
+                <EvidenceCard label="Headline test" value="z = 3.18 · p = 0.0015" note="High vs low inflation" positive />
+                <EvidenceCard label="CPI lagged 1 month" value="p = 0.0141" note="+0.040 vs -0.247" positive />
+                <EvidenceCard label="2002–2014" value="-0.389 vs -0.256" note="Negative in both regimes" />
+                <EvidenceCard label="2015–2026" value="+0.541 vs -0.353" note="Large regime divergence" positive />
               </CardContent>
             </Card>
           </div>
         </section>
 
-        <section id="lifecycle" className="scroll-mt-20">
+        <section id="dca" className="scroll-mt-20">
           <SectionHeading
-            eyebrow="Lifecycle"
-            title="Customers move between states before they churn"
-            description="A lifecycle flow makes risk visible before cancellation and separates true churn from recoverable customers."
+            eyebrow="RQ3 · Dollar-Cost Averaging"
+            title="Where you invested mattered more than exactly when you started"
+            description="Distribution of final portfolio value divided by total contributions across every historical start window."
           />
 
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">Lifecycle state transitions</CardTitle>
-              <CardDescription>Flow width approximates customer movement between states</CardDescription>
+            <CardHeader className="flex-row items-start justify-between space-y-0">
+              <div>
+                <CardTitle className="text-base">DCA outcome distributions</CardTitle>
+                <CardDescription>Whisker = p5–p95 · box = p25–p75 · dot = median</CardDescription>
+              </div>
+              <Select value={dcaHorizon} onValueChange={(v) => setDcaHorizon(v as DcaHorizon)}>
+                <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10y">10 years</SelectItem>
+                  <SelectItem value="20y">20 years</SelectItem>
+                </SelectContent>
+              </Select>
             </CardHeader>
             <CardContent>
-              <LifecycleFlow />
+              <DcaIntervals horizon={dcaHorizon} />
+              <div className="mt-4 grid gap-2 md:grid-cols-3">
+                <MiniStat label="Destination / timing effect" value={dcaHorizon === "10y" ? "4.1×" : "10.3×"} />
+                <MiniStat label="Friedman p-value" value={dcaHorizon === "10y" ? "2.09e-79" : "4.04e-13"} />
+                <MiniStat label="No 20y nominal losses" value={dcaHorizon === "20y" ? "All destinations" : "Switch to 20y"} />
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">DCA vs lump sum · SPY · 10 years</CardTitle>
+                <CardDescription>Return versus dispersion trade-off</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-3">
+                  <OutcomeTile label="Lump-sum median" value="2.29×" detail="Std dev 0.94" />
+                  <OutcomeTile label="DCA median" value="1.66×" detail="Std dev 0.39" />
+                </div>
+                <div className="mt-3 rounded-lg border bg-muted/25 p-3 text-xs">
+                  Lump sum finished ahead in <strong>90.8%</strong> of 284 ten-year windows, while DCA cut dispersion by more than half.
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">20-year median multiples</CardTitle>
+                <CardDescription>Final value ÷ contributed capital</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <ProgressRow label="QQQ" value={6.40} max={7} color="var(--chart-4)" />
+                <ProgressRow label="GLD" value={2.77} max={7} color="var(--chart-3)" />
+                <ProgressRow label="SPY" value={2.69} max={7} color="var(--chart-1)" />
+                <ProgressRow label="60/40" value={2.57} max={7} color="var(--chart-2)" />
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        <section id="benchmark" className="scroll-mt-20">
+          <SectionHeading
+            eyebrow="RQ4 · Benchmark Consistency"
+            title="Beating SPY consistently was possible—but concentrated in technology"
+            description="Share of rolling windows in which each ETF outperformed SPY. The five-year view includes block-bootstrap confidence intervals."
+          />
+
+          <Card>
+            <CardHeader className="flex-row items-start justify-between space-y-0">
+              <div>
+                <CardTitle className="text-base">Outperformance consistency</CardTitle>
+                <CardDescription>Win rate against SPY across rolling windows</CardDescription>
+              </div>
+              <Select value={benchmarkWindow} onValueChange={(v) => setBenchmarkWindow(v as BenchmarkWindow)}>
+                <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1y">1-year</SelectItem>
+                  <SelectItem value="5y">5-year</SelectItem>
+                  <SelectItem value="10y">10-year</SelectItem>
+                </SelectContent>
+              </Select>
+            </CardHeader>
+            <CardContent>
+              <BenchmarkBars rows={benchmarkRows} showCi={benchmarkWindow === "5y"} />
+              <div className="mt-4 grid gap-2 md:grid-cols-3">
+                <MiniStat label="Bonferroni comparisons" value="17" />
+                <MiniStat label="QQQ 5y bootstrap CI" value="69.9–95.9%" />
+                <MiniStat label="Repeated both decades" value="QQQ + XLK" />
+              </div>
             </CardContent>
           </Card>
         </section>
 
-        <section id="economics" className="scroll-mt-20">
+        <section id="momentum" className="scroll-mt-20">
           <SectionHeading
-            eyebrow="Economics"
-            title="Retention becomes valuable when revenue survives and expands"
-            description="NRR decomposition explains recurring-revenue movement; LTV/CAC shows which segments create enough lifetime value to justify acquisition cost."
+            eyebrow="RQ5 · Momentum"
+            title="Mechanical sector rotation failed the robustness test"
+            description="Top-minus-bottom sector momentum spreads across formation windows. Confidence intervals include zero in every specification."
           />
 
-          <div className="grid gap-4 xl:grid-cols-[1fr_1fr]">
+          <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
             <Card>
-              <CardHeader>
-                <CardTitle className="text-base">NRR bridge</CardTitle>
-                <CardDescription>Starting MRR → expansion, contraction, churn, reactivation → ending MRR</CardDescription>
+              <CardHeader className="flex-row items-start justify-between space-y-0">
+                <div>
+                  <CardTitle className="text-base">Momentum spread by formation period</CardTitle>
+                  <CardDescription>Annualized top-tercile minus bottom-tercile return</CardDescription>
+                </div>
+                <Select value={momentumFormation} onValueChange={(v) => setMomentumFormation(v as MomentumFormation)}>
+                  <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="3m">3 months</SelectItem>
+                    <SelectItem value="6m">6 months</SelectItem>
+                    <SelectItem value="12m">12 months</SelectItem>
+                  </SelectContent>
+                </Select>
               </CardHeader>
               <CardContent>
-                <WaterfallChart />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">LTV vs CAC by segment</CardTitle>
-                <CardDescription>Bubble size = customers · stronger segments sit high and left</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ChartContainer className="h-[350px] w-full" config={emptyConfig}>
-                  <ScatterChart margin={{ left: 8, right: 24, top: 16, bottom: 8 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" dataKey="cac" name="CAC" domain={[400, 1500]} axisLine={false} tickLine={false} tickFormatter={(v) => "$" + v} />
-                    <YAxis type="number" dataKey="ltv" name="LTV" domain={[1000, 9000]} axisLine={false} tickLine={false} tickFormatter={(v) => "$" + Math.round(v / 1000) + "K"} />
-                    <ZAxis type="number" dataKey="customers" range={[130, 520]} />
-                    <ReferenceLine y={3000} stroke="var(--muted-foreground)" strokeDasharray="5 5" />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Scatter data={ltvScatter} fill="var(--chart-2)" name="Segments" />
-                  </ScatterChart>
-                </ChartContainer>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-
-        <section id="segments" className="scroll-mt-20">
-          <SectionHeading
-            eyebrow="Segments"
-            title="High value and high risk are not the same problem"
-            description="The matrix separates retention risk from customer value; the scorecard below supports drill-through into individual segments."
-          />
-
-          <div className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Risk × value matrix</CardTitle>
-                <CardDescription>Prioritize interventions using both churn risk and economic value</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <RiskValueMatrix />
+                <MomentumBars selected={momentumFormation} />
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Segment scorecard</CardTitle>
-                <CardDescription>Click a row for drill-through.</CardDescription>
+                <CardTitle className="text-base">Selected formation window</CardTitle>
+                <CardDescription>{momentumFormation.toUpperCase()} momentum robustness</CardDescription>
               </CardHeader>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="pl-6">Segment</TableHead>
-                      <TableHead>Customers</TableHead>
-                      <TableHead>90d retention</TableHead>
-                      <TableHead>Churn</TableHead>
-                      <TableHead>NRR</TableHead>
-                      <TableHead className="pr-6 text-right">LTV/CAC</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {segments.map((row) => (
-                      <TableRow className="cursor-pointer" key={row.segment} onClick={() => openSegment(row)}>
-                        <TableCell className="pl-6 font-medium">{row.segment}</TableCell>
-                        <TableCell>{row.customers.toLocaleString()}</TableCell>
-                        <TableCell>{row.retention90.toFixed(1)}%</TableCell>
-                        <TableCell>
-                          <Badge variant={row.churn >= 4 ? "destructive" : row.churn <= 2.2 ? "secondary" : "outline"}>
-                            {row.churn.toFixed(1)}%
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{row.nrr.toFixed(1)}%</TableCell>
-                        <TableCell className="pr-6 text-right">{(row.ltv / row.cac).toFixed(1)}x</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+              <CardContent className="space-y-3">
+                <EvidenceCard
+                  label="Annualized spread"
+                  value={(selectedMomentum.annual * 100).toFixed(2) + "%"}
+                  note={selectedMomentum.n + " monthly observations"}
+                />
+                <EvidenceCard
+                  label="95% block-bootstrap CI"
+                  value={(selectedMomentum.lo * 100).toFixed(2) + "% to +" + (selectedMomentum.hi * 100).toFixed(2) + "%"}
+                  note="Monthly mean · interval crosses zero"
+                />
+                <EvidenceCard label="Rates rising" value="+0.82% annual" note="6m formation · not significant" />
+                <EvidenceCard label="Rates falling" value="-3.14% annual" note="6m formation · not significant" />
               </CardContent>
             </Card>
           </div>
@@ -522,14 +558,19 @@ export function Dashboard() {
         <section id="methodology" className="scroll-mt-20 rounded-xl border bg-muted/25 p-5">
           <div className="flex items-start gap-3">
             <div className="grid size-9 shrink-0 place-items-center rounded-lg border bg-background">
-              <FilterIcon className="size-4" />
+              <DatabaseIcon className="size-4" />
             </div>
             <div>
-              <h2 className="text-sm font-medium">Portfolio methodology</h2>
+              <h2 className="text-sm font-medium">Reproducible research architecture</h2>
               <p className="mt-1 max-w-4xl text-xs leading-5 text-muted-foreground">
-                All values are synthetic. The case study demonstrates cohort survival, churn hazard, lifecycle transitions,
-                net revenue retention, segment economics, filter context and drill-through without exposing production customer data.
+                Yahoo Finance and FRED feed an idempotent PostgreSQL ETL, SQL analytical views, one notebook per research question,
+                block-bootstrap inference, a Streamlit app and a version-controlled Power BI project. No look-ahead is used in signal construction.
               </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {["Python 3.12","PostgreSQL 16","SQL window functions","SciPy","Bootstrap","Streamlit","Power BI","pytest"].map((x)=>(
+                  <Badge key={x} variant="outline">{x}</Badge>
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -550,12 +591,12 @@ export function Dashboard() {
               </div>
             ))}
           </div>
-          <div className="px-4 pb-4">
-            <h3 className="text-sm font-medium">Retention action</h3>
-            <p className="mt-2 text-xs leading-5 text-muted-foreground">
-              The next step is to isolate the lifecycle event or product behavior that separates durable customers from fragile ones inside this segment.
-            </p>
-          </div>
+          {detail?.caveat && (
+            <div className="px-4 pb-4">
+              <h3 className="text-sm font-medium">Limitation</h3>
+              <p className="mt-2 text-xs leading-5 text-muted-foreground">{detail.caveat}</p>
+            </div>
+          )}
         </SheetContent>
       </Sheet>
     </>
@@ -567,27 +608,12 @@ function SectionHeading({ eyebrow, title, description }: { eyebrow: string; titl
     <div className="mb-4 flex flex-col gap-1">
       <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">{eyebrow}</div>
       <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
-      <p className="max-w-3xl text-sm text-muted-foreground">{description}</p>
+      <p className="max-w-4xl text-sm text-muted-foreground">{description}</p>
     </div>
   )
 }
 
-function MetricCard({
-  icon,
-  label,
-  value,
-  delta,
-  sublabel,
-  invertDelta = false,
-}: {
-  icon: ReactNode
-  label: string
-  value: string
-  delta: number
-  sublabel: string
-  invertDelta?: boolean
-}) {
-  const favorable = invertDelta ? delta <= 0 : delta >= 0
+function MetricCard({ icon, label, value, sublabel }: { icon: ReactNode; label: string; value: string; sublabel: string }) {
   return (
     <div className="min-h-32 bg-background p-4">
       <div className="flex items-center justify-between gap-2">
@@ -595,13 +621,7 @@ function MetricCard({
         <div className="grid size-7 place-items-center rounded-md border bg-muted/25 text-muted-foreground [&>svg]:size-3.5">{icon}</div>
       </div>
       <div className="mt-4 text-2xl font-semibold tracking-tight tabular-nums">{value}</div>
-      <div className="mt-2 flex items-center gap-1 text-[11px]">
-        <span className={favorable ? "text-emerald-600" : "text-rose-600"}>
-          {delta >= 0 ? <ArrowUpRightIcon className="inline size-3" /> : <ArrowDownRightIcon className="inline size-3" />}
-          {Math.abs(delta).toFixed(1)}%
-        </span>
-        <span className="text-muted-foreground">{sublabel}</span>
-      </div>
+      <div className="mt-2 text-[11px] text-muted-foreground">{sublabel}</div>
     </div>
   )
 }
@@ -615,194 +635,187 @@ function Signal({ title, body }: { title: string; body: string }) {
   )
 }
 
-function CohortHeatmap({ rows }: { rows: typeof cohortRows }) {
-  const maxMonths = 9
+function MiniStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="overflow-x-auto">
-      <div className="min-w-[720px]">
-        <div className="grid grid-cols-[72px_68px_repeat(9,minmax(52px,1fr))] gap-1 text-[10px]">
-          <div />
-          <div className="pb-1 text-center text-muted-foreground">Size</div>
-          {Array.from({ length: maxMonths }, (_, i) => (
-            <div className="pb-1 text-center text-muted-foreground" key={i}>M{i}</div>
-          ))}
-          {rows.map((row) => (
-            <div className="contents" key={row.cohort}>
-              <div className="flex items-center font-medium">{row.cohort}</div>
-              <div className="flex items-center justify-center rounded-md border bg-muted/25 text-muted-foreground">{row.size.toLocaleString()}</div>
-              {Array.from({ length: maxMonths }, (_, i) => {
-                const value = row.values[i]
-                if (value === undefined) return <div key={i} className="h-10 rounded-md border border-dashed bg-muted/10" />
-                const intensity = Math.max(10, Math.round((value - 45) * 1.7))
-                return (
-                  <div
-                    className="flex h-10 items-center justify-center rounded-md border text-[10px] font-medium"
-                    key={i}
-                    style={{
-                      backgroundColor: "color-mix(in oklab, var(--primary) " + Math.min(92, intensity) + "%, transparent)",
-                      color: value >= 78 ? "var(--primary-foreground)" : "var(--foreground)",
-                    }}
-                  >
-                    {value.toFixed(value % 1 ? 1 : 0)}%
-                  </div>
-                )
-              })}
-            </div>
-          ))}
-        </div>
+    <div className="rounded-lg border bg-muted/20 p-3">
+      <div className="text-[10px] text-muted-foreground">{label}</div>
+      <div className="mt-1 text-sm font-semibold">{value}</div>
+    </div>
+  )
+}
+
+function EvidenceCard({ label, value, note, positive=false }: { label: string; value: string; note: string; positive?: boolean }) {
+  return (
+    <div className="rounded-lg border p-3">
+      <div className="flex items-center justify-between gap-2">
+        <div className="text-[10px] text-muted-foreground">{label}</div>
+        {positive && <BadgeCheckIcon className="size-3.5 text-emerald-500" />}
+      </div>
+      <div className="mt-1 text-sm font-semibold tabular-nums">{value}</div>
+      <div className="mt-1 text-[10px] leading-4 text-muted-foreground">{note}</div>
+    </div>
+  )
+}
+
+function OutcomeTile({ label, value, detail }: { label: string; value: string; detail: string }) {
+  return (
+    <div className="rounded-lg border bg-muted/20 p-4">
+      <div className="text-[10px] text-muted-foreground">{label}</div>
+      <div className="mt-2 text-2xl font-semibold">{value}</div>
+      <div className="mt-1 text-[10px] text-muted-foreground">{detail}</div>
+    </div>
+  )
+}
+
+function ProgressRow({ label, value, max, color }: { label: string; value: number; max: number; color: string }) {
+  return (
+    <div>
+      <div className="mb-1.5 flex items-center justify-between text-xs">
+        <span className="font-medium">{label}</span>
+        <span className="font-semibold">{value.toFixed(2)}×</span>
+      </div>
+      <div className="h-2.5 overflow-hidden rounded-full bg-muted">
+        <div className="h-full rounded-full" style={{ width: (value / max * 100) + "%", backgroundColor: color }} />
       </div>
     </div>
   )
 }
 
-function ReasonPareto() {
-  let cumulative = 0
+function RegimeDumbbell() {
+  const min = -0.5
+  const max = 0.5
+  const x = (v: number) => 110 + ((v - min) / (max - min)) * 610
+  return (
+    <div className="overflow-x-auto">
+      <svg className="min-w-[760px] w-full" viewBox="0 0 780 320" role="img" aria-label="SPY correlation by inflation regime">
+        {[-0.5,-0.25,0,0.25,0.5].map((tick)=>(
+          <g key={tick}>
+            <line x1={x(tick)} x2={x(tick)} y1="30" y2="270" stroke={tick===0 ? "var(--foreground)" : "var(--border)"} strokeDasharray={tick===0 ? "0" : "4 4"} opacity={tick===0 ? 0.45 : 1}/>
+            <text x={x(tick)} y="294" textAnchor="middle" fill="var(--muted-foreground)" fontSize="10">{tick>0?"+":""}{tick.toFixed(2)}</text>
+          </g>
+        ))}
+        {regimeData.map((row,index)=>{
+          const y=62+index*58
+          return (
+            <g key={row.asset}>
+              <text x="16" y={y+4} fill="var(--foreground)" fontSize="12" fontWeight="700">{row.asset}</text>
+              <line x1={x(row.low)} x2={x(row.high)} y1={y} y2={y} stroke="var(--muted-foreground)" strokeWidth="3" opacity="0.45"/>
+              <circle cx={x(row.low)} cy={y} r="8" fill="var(--chart-2)"/>
+              <circle cx={x(row.high)} cy={y} r="8" fill="var(--chart-3)"/>
+              <text x={x(row.low)} y={y-14} textAnchor="middle" fill="var(--chart-2)" fontSize="10">{row.low.toFixed(3)}</text>
+              <text x={x(row.high)} y={y-14} textAnchor="middle" fill="var(--chart-3)" fontSize="10">{row.high>0?"+":""}{row.high.toFixed(3)}</text>
+            </g>
+          )
+        })}
+        <g transform="translate(470,306)">
+          <circle cx="0" cy="0" r="5" fill="var(--chart-2)"/><text x="10" y="4" fill="var(--muted-foreground)" fontSize="10">Low inflation</text>
+          <circle cx="108" cy="0" r="5" fill="var(--chart-3)"/><text x="118" y="4" fill="var(--muted-foreground)" fontSize="10">High inflation</text>
+        </g>
+      </svg>
+    </div>
+  )
+}
+
+function DcaIntervals({ horizon }: { horizon: DcaHorizon }) {
+  const rows=dcaData[horizon]
+  const max=horizon==="10y" ? 3.5 : 8.5
+  const min=0.5
+  const x=(v:number)=>130+((v-min)/(max-min))*650
+  return (
+    <div className="overflow-x-auto">
+      <svg className="min-w-[820px] w-full" viewBox="0 0 840 300" role="img" aria-label="DCA outcome interval chart">
+        {[min,1,2,3,4,5,6,7,8].filter(v=>v<=max).map((tick)=>(
+          <g key={tick}>
+            <line x1={x(tick)} x2={x(tick)} y1="24" y2="248" stroke="var(--border)" strokeDasharray="4 4"/>
+            <text x={x(tick)} y="274" textAnchor="middle" fill="var(--muted-foreground)" fontSize="10">{tick.toFixed(tick%1?1:0)}×</text>
+          </g>
+        ))}
+        {rows.map((row,index)=>{
+          const y=55+index*52
+          return (
+            <g key={row.asset}>
+              <text x="12" y={y+4} fill="var(--foreground)" fontSize="12" fontWeight="700">{row.asset}</text>
+              <text x="65" y={y+4} fill="var(--muted-foreground)" fontSize="9">n={row.n}</text>
+              <line x1={x(row.p5)} x2={x(row.p95)} y1={y} y2={y} stroke="var(--muted-foreground)" strokeWidth="3"/>
+              <line x1={x(row.p5)} x2={x(row.p5)} y1={y-7} y2={y+7} stroke="var(--muted-foreground)" strokeWidth="2"/>
+              <line x1={x(row.p95)} x2={x(row.p95)} y1={y-7} y2={y+7} stroke="var(--muted-foreground)" strokeWidth="2"/>
+              <rect x={x(row.p25)} y={y-11} width={Math.max(4,x(row.p75)-x(row.p25))} height="22" rx="6" fill="var(--chart-1)" opacity="0.42"/>
+              <circle cx={x(row.median)} cy={y} r="7" fill="var(--chart-3)" stroke="var(--background)" strokeWidth="2"/>
+              <text x={x(row.median)} y={y-17} textAnchor="middle" fill="var(--foreground)" fontSize="10" fontWeight="700">{row.median.toFixed(2)}×</text>
+            </g>
+          )
+        })}
+      </svg>
+    </div>
+  )
+}
+
+function BenchmarkBars({ rows, showCi }: { rows: Array<{ticker:string;win:number;lo?:number;hi?:number}>; showCi:boolean }) {
   return (
     <div className="space-y-4">
-      {churnReasons.map((row, index) => {
-        cumulative += row.share
-        return (
-          <div key={row.reason}>
-            <div className="mb-1.5 flex items-center justify-between text-xs">
-              <span className="font-medium">{row.reason}</span>
-              <span className="tabular-nums text-muted-foreground">{row.share}% · {cumulative}% cumulative</span>
-            </div>
-            <div className="h-2.5 overflow-hidden rounded-full bg-muted">
+      {rows.map((row)=>(
+        <div key={row.ticker}>
+          <div className="mb-1.5 flex items-center justify-between text-xs">
+            <span className="font-semibold">{row.ticker}</span>
+            <span className="tabular-nums">{(row.win*100).toFixed(1)}%</span>
+          </div>
+          <div className="relative h-7 overflow-hidden rounded-md border bg-muted/20">
+            <div className="absolute inset-y-0 left-1/2 border-l border-dashed border-muted-foreground/50"/>
+            <div className="h-full rounded-md bg-primary/65" style={{width:(row.win*100)+"%"}}/>
+            {showCi && row.lo!==undefined && row.hi!==undefined && (
               <div
-                className="h-full rounded-full"
+                className="absolute top-1/2 h-1 -translate-y-1/2 rounded-full bg-foreground/80"
+                style={{left:(row.lo*100)+"%",width:((row.hi-row.lo)*100)+"%"}}
+                title={"Bootstrap CI: "+(row.lo*100).toFixed(1)+"–"+(row.hi*100).toFixed(1)+"%"}
+              />
+            )}
+          </div>
+        </div>
+      ))}
+      <div className="flex justify-between text-[10px] text-muted-foreground">
+        <span>0%</span><span>50% parity</span><span>100%</span>
+      </div>
+    </div>
+  )
+}
+
+function MomentumBars({ selected }: { selected: MomentumFormation }) {
+  const rows = [
+    { key:"3m" as const, label:"3 months", ...momentumData["3m"] },
+    { key:"6m" as const, label:"6 months", ...momentumData["6m"] },
+    { key:"12m" as const, label:"12 months", ...momentumData["12m"] },
+  ]
+  const max=0.015
+  return (
+    <div className="space-y-5">
+      {rows.map((row)=>{
+        const pct=row.annual*100
+        const width=Math.min(46,Math.abs(row.annual)/max*46)
+        const positive=row.annual>=0
+        return (
+          <div key={row.key} className={selected===row.key ? "rounded-lg border border-primary/40 bg-primary/5 p-3" : "p-3"}>
+            <div className="mb-2 flex items-center justify-between text-xs">
+              <span className="font-medium">{row.label}</span>
+              <span className={positive ? "font-semibold text-emerald-500" : "font-semibold text-rose-500"}>{positive?"+":""}{pct.toFixed(2)}%</span>
+            </div>
+            <div className="relative h-8 rounded-md border bg-muted/20">
+              <div className="absolute inset-y-0 left-1/2 border-l border-muted-foreground/50"/>
+              <div
+                className="absolute top-1/2 h-4 -translate-y-1/2 rounded-sm"
                 style={{
-                  width: row.share * 2.7 + "%",
-                  backgroundColor: index < 2 ? "var(--chart-5)" : index < 4 ? "var(--chart-3)" : "var(--chart-4)",
+                  width:width+"%",
+                  left:positive ? "50%" : (50-width)+"%",
+                  backgroundColor:positive ? "var(--chart-1)" : "var(--chart-5)"
                 }}
               />
+            </div>
+            <div className="mt-1 flex justify-between text-[9px] text-muted-foreground">
+              <span>{(row.lo*100).toFixed(2)}% monthly CI low</span>
+              <span>{(row.hi*100).toFixed(2)}% high</span>
             </div>
           </div>
         )
       })}
-      <div className="rounded-lg border bg-muted/25 p-3 text-[11px] leading-5 text-muted-foreground">
-        The top two reasons account for 55% of churn, which makes activation and pricing the highest-leverage investigation areas.
-      </div>
-    </div>
-  )
-}
-
-function LifecycleFlow() {
-  const byId = Object.fromEntries(lifecycleNodes.map((node) => [node.id, node]))
-  return (
-    <div className="overflow-x-auto">
-      <svg className="min-w-[1000px] w-full" viewBox="0 0 1040 360" role="img" aria-label="Customer lifecycle transition flow">
-        {lifecycleLinks.map((link, index) => {
-          const from = byId[link.from]
-          const to = byId[link.to]
-          const x1 = link.reverse ? from.x : from.x + 20
-          const y1 = from.y + link.fromOffset
-          const x2 = link.reverse ? to.x + 20 : to.x
-          const y2 = to.y + link.toOffset
-          const c1 = link.reverse ? x1 - 120 : x1 + 110
-          const c2 = link.reverse ? x2 + 120 : x2 - 110
-          return (
-            <path
-              d={"M " + x1 + " " + y1 + " C " + c1 + " " + y1 + ", " + c2 + " " + y2 + ", " + x2 + " " + y2}
-              fill="none"
-              key={index}
-              opacity="0.28"
-              stroke={link.color}
-              strokeLinecap="round"
-              strokeWidth={Math.max(6, link.value * 0.52)}
-            />
-          )
-        })}
-        {lifecycleNodes.map((node) => (
-          <g key={node.id}>
-            <rect x={node.x} y={node.y} width="20" height={node.h} rx="6" fill={node.color} />
-            <text x={node.x + 32} y={node.y + 20} fill="var(--foreground)" fontSize="12" fontWeight="700">{node.label}</text>
-          </g>
-        ))}
-      </svg>
-      <div className="mt-2 grid gap-2 md:grid-cols-3">
-        <Signal title="68% reach Active" body="Most new customers establish an active state before the first renewal window." />
-        <Signal title="At-risk is recoverable" body="A meaningful portion of at-risk customers reactivate before cancellation." />
-        <Signal title="Reactivation matters to NRR" body="Recovered customers contribute enough MRR to materially offset churn." />
-      </div>
-    </div>
-  )
-}
-
-function WaterfallChart() {
-  const max = 1150
-  return (
-    <div className="space-y-3">
-      <div className="flex h-[280px] items-end gap-2 rounded-lg border bg-muted/10 p-4">
-        {waterfall.map((row, index) => {
-          const previousTotal = index === 0 ? 0 : waterfall[index - 1].total
-          const positive = row.delta >= 0
-          const isBase = row.kind === "base"
-          const top = isBase ? row.total : Math.max(previousTotal, row.total)
-          const bottom = isBase ? 0 : Math.min(previousTotal, row.total)
-          const height = ((top - bottom) / max) * 210
-          const spacer = (bottom / max) * 210
-          const color =
-            row.kind === "positive" ? "var(--chart-2)" :
-            row.kind === "negative" ? "var(--chart-5)" :
-            "var(--chart-4)"
-          return (
-            <div className="flex h-full min-w-0 flex-1 flex-col justify-end" key={row.label}>
-              <div className="flex h-[220px] flex-col justify-end">
-                <div style={{ height: spacer }} />
-                <div
-                  className="rounded-t-md"
-                  style={{ height: Math.max(8, height), backgroundColor: color }}
-                  title={row.label + ": " + row.delta}
-                />
-              </div>
-              <div className="mt-2 text-center text-[9px] leading-3 text-muted-foreground">{row.label}</div>
-              <div className="mt-1 text-center text-[10px] font-semibold">
-                {isBase ? row.total : (positive ? "+" : "") + row.delta}
-              </div>
-            </div>
-          )
-        })}
-      </div>
-      <div className="flex items-center justify-between rounded-lg border bg-muted/25 p-3 text-xs">
-        <span className="text-muted-foreground">Net revenue retention</span>
-        <strong className="text-base">108.6%</strong>
-      </div>
-    </div>
-  )
-}
-
-function RiskValueMatrix() {
-  return (
-    <div className="relative aspect-square max-h-[430px] w-full rounded-xl border bg-muted/10">
-      <div className="absolute inset-x-0 top-1/2 border-t border-dashed" />
-      <div className="absolute inset-y-0 left-1/2 border-l border-dashed" />
-
-      <div className="absolute left-3 top-3 text-[10px] font-medium text-muted-foreground">High value · low risk</div>
-      <div className="absolute right-3 top-3 text-[10px] font-medium text-muted-foreground">High value · high risk</div>
-      <div className="absolute bottom-3 left-3 text-[10px] font-medium text-muted-foreground">Low value · low risk</div>
-      <div className="absolute bottom-3 right-3 text-[10px] font-medium text-muted-foreground">Low value · high risk</div>
-
-      {segments.map((row, index) => {
-        const left = Math.min(92, Math.max(8, row.risk))
-        const top = Math.min(90, Math.max(10, 100 - row.value))
-        return (
-          <button
-            key={row.segment}
-            className="absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-2 border-background text-[9px] font-bold text-white shadow-sm transition-transform hover:scale-110"
-            style={{
-              left: left + "%",
-              top: top + "%",
-              backgroundColor: index % 3 === 0 ? "var(--chart-1)" : index % 3 === 1 ? "var(--chart-2)" : "var(--chart-5)",
-            }}
-            title={row.segment}
-          >
-            {index + 1}
-          </button>
-        )
-      })}
-
-      <div className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[9px] text-muted-foreground">Risk →</div>
-      <div className="absolute left-1 top-1/2 -translate-y-1/2 -rotate-90 text-[9px] text-muted-foreground">Value →</div>
     </div>
   )
 }
