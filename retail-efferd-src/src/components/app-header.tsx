@@ -7,13 +7,17 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { AppBreadcrumbs } from "@/components/app-breadcrumbs"
 import { navLinks } from "@/components/app-shared"
 import { useActiveSection } from "@/hooks/use-active-section"
-import { ArrowUpRightIcon } from "lucide-react"
+import { useTheme } from "@/components/theme-provider"
+import { ArrowUpRightIcon, MoonIcon, SunIcon } from "lucide-react"
 
 export function AppHeader() {
   const activeSection = useActiveSection()
+  const { theme, setTheme } = useTheme()
   const activeItem =
     navLinks.find((item) => item.url === "#" + activeSection) ??
     navLinks.find((item) => item.url === "#overview")
+
+  const isDark = theme === "dark"
 
   return (
     <header className="sticky top-0 z-50 flex h-14 shrink-0 items-center justify-between gap-3 border-b bg-background/95 px-4 backdrop-blur md:px-6">
@@ -29,6 +33,17 @@ export function AppHeader() {
         <Badge className="hidden sm:inline-flex" variant="outline">
           Synthetic portfolio data
         </Badge>
+
+        <Button
+          aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+          onClick={() => setTheme(isDark ? "light" : "dark")}
+          size="icon"
+          title={isDark ? "Light mode" : "Dark mode"}
+          variant="outline"
+        >
+          {isDark ? <SunIcon /> : <MoonIcon />}
+        </Button>
+
         <Button asChild size="sm" variant="outline">
           <a href="https://lsaucen.github.io/">
             Portfolio
