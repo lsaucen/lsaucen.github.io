@@ -44,6 +44,12 @@ export function AppHeader() {
           {isDark ? <SunIcon /> : <MoonIcon />}
         </Button>
 
+        <Button asChild className="hidden sm:inline-flex" size="sm" variant="outline">
+          <a href="https://github.com/lsaucen/inteligencia-financiera" target="_blank" rel="noreferrer">
+            Repository
+            <ArrowUpRightIcon />
+          </a>
+        </Button>
         <Button asChild size="sm" variant="outline">
           <a href="https://lsaucen.github.io/">
             Portfolio
