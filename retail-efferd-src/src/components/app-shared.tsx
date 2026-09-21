@@ -1,11 +1,13 @@
 import type { ReactNode } from "react"
 import {
+  ActivityIcon,
   ChartNoAxesCombinedIcon,
+  CompassIcon,
+  GalleryVerticalEndIcon,
   LayoutDashboardIcon,
-  MapPinnedIcon,
-  PackageSearchIcon,
-  ShoppingBagIcon,
-  SquareChartGanttIcon,
+  MonitorSmartphoneIcon,
+  MousePointerClickIcon,
+  RouteIcon,
   ArrowUpRightIcon,
   DatabaseIcon,
 } from "lucide-react"
@@ -24,49 +26,21 @@ export type SidebarNavGroup = {
 
 export const navGroups: SidebarNavGroup[] = [
   {
-    label: "Retail performance",
+    label: "Web analytics",
     items: [
-      {
-        title: "Overview",
-        url: "#overview",
-        icon: <LayoutDashboardIcon />,
-        isActive: true,
-      },
-      {
-        title: "Sales",
-        url: "#sales",
-        icon: <ChartNoAxesCombinedIcon />,
-      },
-      {
-        title: "Products",
-        url: "#products",
-        icon: <PackageSearchIcon />,
-      },
-      {
-        title: "Regions",
-        url: "#regions",
-        icon: <MapPinnedIcon />,
-      },
-      {
-        title: "Orders",
-        url: "#orders",
-        icon: <ShoppingBagIcon />,
-      },
+      { title: "Overview", url: "#overview", icon: <LayoutDashboardIcon />, isActive: true },
+      { title: "Acquisition", url: "#acquisition", icon: <CompassIcon /> },
+      { title: "Funnel", url: "#funnel", icon: <MousePointerClickIcon /> },
+      { title: "Journeys", url: "#journeys", icon: <RouteIcon /> },
+      { title: "Content", url: "#content", icon: <GalleryVerticalEndIcon /> },
+      { title: "Devices", url: "#devices", icon: <MonitorSmartphoneIcon /> },
     ],
   },
 ]
 
 export const footerNavLinks: SidebarNavItem[] = [
-  {
-    title: "Methodology",
-    url: "#methodology",
-    icon: <DatabaseIcon />,
-  },
-  {
-    title: "Main portfolio",
-    url: "https://lsaucen.github.io/",
-    icon: <ArrowUpRightIcon />,
-  },
+  { title: "Methodology", url: "#methodology", icon: <DatabaseIcon /> },
+  { title: "Main portfolio", url: "https://lsaucen.github.io/", icon: <ArrowUpRightIcon /> },
 ]
 
 export const navLinks: SidebarNavItem[] = [
@@ -75,7 +49,19 @@ export const navLinks: SidebarNavItem[] = [
 ]
 
 export const dashboardIdentity = {
-  name: "Retail Analytics",
-  subtitle: "Performance command center",
-  icon: <SquareChartGanttIcon />,
+  name: "Web Analytics",
+  subtitle: "Acquisition & journey analysis",
+  icon: <ActivityIcon />,
 }
+
+export const sectionLabels: Record<string, string> = {
+  overview: "Overview",
+  acquisition: "Acquisition",
+  funnel: "Funnel",
+  journeys: "Journeys",
+  content: "Content",
+  devices: "Devices",
+  methodology: "Methodology",
+}
+
+export const analyticsIcon = <ChartNoAxesCombinedIcon />
