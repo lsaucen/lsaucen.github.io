@@ -2,53 +2,45 @@
 
 import { useEffect, useState } from "react"
 
-export const RETENTION_SECTION_IDS = [
+export const FINANCIAL_SECTION_IDS = [
   "overview",
-  "cohorts",
-  "churn",
-  "lifecycle",
-  "economics",
-  "segments",
+  "risk",
+  "regimes",
+  "dca",
+  "benchmark",
+  "momentum",
   "methodology",
 ] as const
 
-export type RetentionSectionId = (typeof RETENTION_SECTION_IDS)[number]
+export type FinancialSectionId = (typeof FINANCIAL_SECTION_IDS)[number]
 
-function sectionFromHash(): RetentionSectionId {
-  const hash = window.location.hash.replace("#", "") as RetentionSectionId
-  return RETENTION_SECTION_IDS.includes(hash) ? hash : "overview"
+function sectionFromHash(): FinancialSectionId {
+  const hash = window.location.hash.replace("#", "") as FinancialSectionId
+  return FINANCIAL_SECTION_IDS.includes(hash) ? hash : "overview"
 }
 
 export function useActiveSection() {
-  const [activeSection, setActiveSection] = useState<RetentionSectionId>(() =>
+  const [activeSection, setActiveSection] = useState<FinancialSectionId>(() =>
     typeof window === "undefined" ? "overview" : sectionFromHash()
   )
 
   useEffect(() => {
     let frame = 0
-
     const updateActiveSection = () => {
       cancelAnimationFrame(frame)
       frame = requestAnimationFrame(() => {
         const marker = window.scrollY + 110
-        let next: RetentionSectionId = "overview"
-
-        for (const id of RETENTION_SECTION_IDS) {
+        let next: FinancialSectionId = "overview"
+        for (const id of FINANCIAL_SECTION_IDS) {
           const section = document.getElementById(id)
           if (section && section.offsetTop <= marker) next = id
         }
-
         const nearBottom =
-          window.innerHeight + window.scrollY >=
-          document.documentElement.scrollHeight - 24
-
+          window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 24
         if (nearBottom) {
-          const lastVisible = [...RETENTION_SECTION_IDS]
-            .reverse()
-            .find((id) => document.getElementById(id))
+          const lastVisible = [...FINANCIAL_SECTION_IDS].reverse().find((id) => document.getElementById(id))
           if (lastVisible) next = lastVisible
         }
-
         setActiveSection((current) => (current === next ? current : next))
       })
     }
