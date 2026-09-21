@@ -77,7 +77,7 @@ export function AppSidebar() {
         <div className="mb-2 rounded-lg border bg-muted/35 p-3">
           <p className="text-[11px] font-medium">Portfolio case study</p>
           <p className="mt-1 text-[10px] leading-4 text-muted-foreground">
-            Synthetic subscription dataset created for cohort, churn, lifecycle and revenue-retention analysis.
+            Historical market research across 24 assets and 4 macro series, with reproducible statistical tests and backtests.
           </p>
         </div>
         <SidebarMenu>
