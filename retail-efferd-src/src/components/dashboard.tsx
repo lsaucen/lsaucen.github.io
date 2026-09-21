@@ -4,14 +4,12 @@ import { useMemo, useState, type ReactNode } from "react"
 import {
   Area,
   AreaChart,
-  Bar,
-  BarChart,
   CartesianGrid,
   Cell,
-  Legend,
-  Line,
-  Pie,
-  PieChart,
+  Funnel,
+  FunnelChart,
+  LabelList,
+  ReferenceLine,
   Scatter,
   ScatterChart,
   XAxis,
@@ -73,6 +71,7 @@ type PeriodKey = "30d" | "14d" | "7d"
 type ChannelKey = "all" | "Organic" | "Paid Search" | "Direct" | "Referral" | "Email"
 type DeviceKey = "all" | "Mobile" | "Desktop" | "Tablet"
 type AudienceKey = "all" | "New" | "Returning"
+type HeatmapMetric = "sessions" | "conversion" | "engagement"
 
 type DetailState = {
   eyebrow: string
@@ -112,21 +111,21 @@ type CampaignRow = {
 }
 
 const trendBase = [
-  { day: "Aug 23", sessions: 5.1, users: 3.8, conversions: 166 },
-  { day: "Aug 25", sessions: 5.4, users: 4.0, conversions: 171 },
-  { day: "Aug 27", sessions: 5.9, users: 4.2, conversions: 182 },
-  { day: "Aug 29", sessions: 5.6, users: 4.1, conversions: 176 },
-  { day: "Aug 31", sessions: 6.0, users: 4.4, conversions: 187 },
-  { day: "Sep 2", sessions: 6.2, users: 4.5, conversions: 193 },
-  { day: "Sep 4", sessions: 5.8, users: 4.2, conversions: 181 },
-  { day: "Sep 6", sessions: 6.4, users: 4.6, conversions: 202 },
-  { day: "Sep 8", sessions: 6.8, users: 4.8, conversions: 214 },
-  { day: "Sep 10", sessions: 7.5, users: 5.2, conversions: 242 },
-  { day: "Sep 12", sessions: 8.0, users: 5.5, conversions: 267 },
-  { day: "Sep 14", sessions: 7.7, users: 5.3, conversions: 258 },
-  { day: "Sep 16", sessions: 6.9, users: 4.8, conversions: 229 },
-  { day: "Sep 18", sessions: 7.2, users: 5.0, conversions: 244 },
-  { day: "Sep 20", sessions: 7.4, users: 5.1, conversions: 252 },
+  { day: "Aug 23", sessions: 5.1, users: 3.8 },
+  { day: "Aug 25", sessions: 5.4, users: 4.0 },
+  { day: "Aug 27", sessions: 5.9, users: 4.2 },
+  { day: "Aug 29", sessions: 5.6, users: 4.1 },
+  { day: "Aug 31", sessions: 6.0, users: 4.4 },
+  { day: "Sep 2", sessions: 6.2, users: 4.5 },
+  { day: "Sep 4", sessions: 5.8, users: 4.2 },
+  { day: "Sep 6", sessions: 6.4, users: 4.6 },
+  { day: "Sep 8", sessions: 6.8, users: 4.8 },
+  { day: "Sep 10", sessions: 7.5, users: 5.2 },
+  { day: "Sep 12", sessions: 8.0, users: 5.5 },
+  { day: "Sep 14", sessions: 7.7, users: 5.3 },
+  { day: "Sep 16", sessions: 6.9, users: 4.8 },
+  { day: "Sep 18", sessions: 7.2, users: 5.0 },
+  { day: "Sep 20", sessions: 7.4, users: 5.1 },
 ]
 
 const channels: ChannelRow[] = [
@@ -137,26 +136,60 @@ const channels: ChannelRow[] = [
   { channel: "Email", sessions: 14.8, share: 8, engagement: 66.4, conversion: 4.4, revenue: 27.6, cpa: 9.8 },
 ]
 
-const channelTrend = [
-  { week: "W1", organic: 15.4, paidSearch: 10.2, direct: 7.2, referral: 4.8, email: 3.1 },
-  { week: "W2", organic: 16.2, paidSearch: 10.6, direct: 7.8, referral: 5.0, email: 3.2 },
-  { week: "W3", organic: 17.8, paidSearch: 11.1, direct: 8.4, referral: 5.5, email: 3.6 },
-  { week: "W4", organic: 20.8, paidSearch: 12.4, direct: 9.8, referral: 6.9, email: 4.9 },
+const channelColors: Record<Exclude<ChannelKey, "all">, string> = {
+  Organic: "var(--chart-1)",
+  "Paid Search": "var(--chart-2)",
+  Direct: "var(--chart-3)",
+  Referral: "var(--chart-4)",
+  Email: "var(--chart-5)",
+}
+
+const weeklyChannel = [
+  { week: "W1", total: 40.7, Organic: 15.4, "Paid Search": 10.2, Direct: 7.2, Referral: 4.8, Email: 3.1 },
+  { week: "W2", total: 42.8, Organic: 16.2, "Paid Search": 10.6, Direct: 7.8, Referral: 5.0, Email: 3.2 },
+  { week: "W3", total: 46.4, Organic: 17.8, "Paid Search": 11.1, Direct: 8.4, Referral: 5.5, Email: 3.6 },
+  { week: "W4", total: 54.8, Organic: 20.8, "Paid Search": 12.4, Direct: 9.8, Referral: 6.9, Email: 4.9 },
 ]
+
+const rankHistory: Record<Exclude<ChannelKey, "all">, number[]> = {
+  Organic: [1, 1, 1, 1],
+  "Paid Search": [2, 2, 2, 2],
+  Direct: [3, 3, 3, 3],
+  Referral: [4, 4, 4, 4],
+  Email: [5, 5, 5, 4],
+}
 
 const funnelBase = [
-  { stage: "Landing sessions", value: 184700, rate: 100 },
-  { stage: "Product views", value: 112400, rate: 60.9 },
-  { stage: "Pricing / offer", value: 49300, rate: 26.7 },
-  { stage: "Checkout start", value: 12400, rate: 6.7 },
-  { stage: "Conversions", value: 6317, rate: 3.42 },
+  { stage: "Landing sessions", value: 184700, rate: 100, fill: "var(--chart-1)" },
+  { stage: "Product views", value: 112400, rate: 60.9, fill: "var(--chart-2)" },
+  { stage: "Pricing / offer", value: 49300, rate: 26.7, fill: "var(--chart-3)" },
+  { stage: "Checkout start", value: 12400, rate: 6.7, fill: "var(--chart-4)" },
+  { stage: "Conversions", value: 6317, rate: 3.42, fill: "var(--chart-5)" },
 ]
 
-const journeyRows = [
-  { path: ["Landing", "Product", "Pricing", "Checkout"], share: 24.6, conversion: 7.8 },
-  { path: ["Blog", "Product", "Pricing", "Checkout"], share: 18.3, conversion: 5.9 },
-  { path: ["Landing", "Search", "Product", "Exit"], share: 15.7, conversion: 0.0 },
-  { path: ["Campaign", "Landing", "Product", "Checkout"], share: 11.8, conversion: 8.6 },
+const journeyNodes = [
+  { id: "landing", label: "Landing", x: 36, y: 74, h: 110 },
+  { id: "blog", label: "Blog", x: 36, y: 220, h: 70 },
+  { id: "campaign", label: "Campaign", x: 36, y: 324, h: 64 },
+  { id: "product", label: "Product", x: 290, y: 94, h: 132 },
+  { id: "search", label: "Search", x: 290, y: 270, h: 66 },
+  { id: "pricing", label: "Pricing", x: 544, y: 116, h: 118 },
+  { id: "exit", label: "Exit", x: 798, y: 264, h: 90 },
+  { id: "checkout", label: "Checkout", x: 798, y: 92, h: 108 },
+  { id: "conversion", label: "Conversion", x: 1038, y: 104, h: 88 },
+]
+
+const journeyLinks = [
+  { from: "landing", to: "product", value: 52, color: "var(--chart-1)", fromOffset: 28, toOffset: 34 },
+  { from: "blog", to: "product", value: 31, color: "var(--chart-2)", fromOffset: 30, toOffset: 86 },
+  { from: "campaign", to: "product", value: 22, color: "var(--chart-3)", fromOffset: 26, toOffset: 112 },
+  { from: "landing", to: "search", value: 24, color: "var(--chart-4)", fromOffset: 80, toOffset: 28 },
+  { from: "product", to: "pricing", value: 78, color: "var(--chart-1)", fromOffset: 54, toOffset: 54 },
+  { from: "search", to: "exit", value: 22, color: "var(--chart-4)", fromOffset: 32, toOffset: 42 },
+  { from: "pricing", to: "checkout", value: 39, color: "var(--chart-2)", fromOffset: 46, toOffset: 44 },
+  { from: "pricing", to: "exit", value: 27, color: "var(--chart-5)", fromOffset: 86, toOffset: 74 },
+  { from: "checkout", to: "conversion", value: 25, color: "var(--chart-3)", fromOffset: 52, toOffset: 42 },
+  { from: "checkout", to: "exit", value: 14, color: "var(--chart-5)", fromOffset: 84, toOffset: 20 },
 ]
 
 const pages: PageRow[] = [
@@ -170,9 +203,9 @@ const pages: PageRow[] = [
 ]
 
 const devices = [
-  { device: "Mobile", sessions: 101.6, share: 55, engagement: 58.6, conversion: 2.8, fill: "var(--chart-1)" },
-  { device: "Desktop", sessions: 72.0, share: 39, engagement: 67.2, conversion: 4.2, fill: "var(--chart-2)" },
-  { device: "Tablet", sessions: 11.1, share: 6, engagement: 60.1, conversion: 3.1, fill: "var(--chart-3)" },
+  { device: "Mobile", share: 55, engagement: 58.6, conversion: 2.8, color: "var(--chart-1)" },
+  { device: "Desktop", share: 39, engagement: 67.2, conversion: 4.2, color: "var(--chart-2)" },
+  { device: "Tablet", share: 6, engagement: 60.1, conversion: 3.1, color: "var(--chart-3)" },
 ]
 
 const campaigns: CampaignRow[] = [
@@ -185,40 +218,29 @@ const campaigns: CampaignRow[] = [
 
 const heatmapDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 const heatmapSlots = ["00–04", "04–08", "08–12", "12–16", "16–20", "20–24"]
-const heatmap = [
-  [18, 24, 62, 88, 94, 51],
-  [17, 27, 68, 91, 97, 56],
-  [15, 26, 72, 96, 100, 61],
-  [16, 25, 69, 93, 98, 59],
-  [19, 28, 64, 86, 90, 67],
-  [22, 31, 47, 58, 71, 74],
-  [24, 33, 42, 51, 66, 70],
-]
+const heatmaps: Record<HeatmapMetric, number[][]> = {
+  sessions: [
+    [18, 24, 62, 88, 94, 51], [17, 27, 68, 91, 97, 56], [15, 26, 72, 96, 100, 61],
+    [16, 25, 69, 93, 98, 59], [19, 28, 64, 86, 90, 67], [22, 31, 47, 58, 71, 74], [24, 33, 42, 51, 66, 70],
+  ],
+  conversion: [
+    [22, 28, 41, 63, 72, 38], [20, 29, 46, 68, 76, 42], [18, 26, 49, 71, 79, 45],
+    [19, 27, 47, 69, 77, 43], [23, 31, 44, 64, 70, 50], [26, 34, 38, 46, 55, 58], [28, 35, 36, 42, 51, 54],
+  ],
+  engagement: [
+    [36, 42, 59, 72, 78, 66], [34, 45, 63, 75, 81, 69], [33, 44, 66, 78, 85, 72],
+    [35, 43, 64, 76, 83, 70], [38, 47, 61, 73, 79, 75], [42, 51, 57, 63, 71, 78], [44, 53, 55, 60, 69, 76],
+  ],
+}
 
 const trendConfig = {
   sessions: { label: "Sessions", color: "var(--chart-1)" },
   users: { label: "Users", color: "var(--chart-2)" },
 } satisfies ChartConfig
 
-const channelConfig = {
-  organic: { label: "Organic", color: "var(--chart-1)" },
-  paidSearch: { label: "Paid Search", color: "var(--chart-2)" },
-  direct: { label: "Direct", color: "var(--chart-3)" },
-  referral: { label: "Referral", color: "var(--chart-4)" },
-  email: { label: "Email", color: "var(--chart-5)" },
-} satisfies ChartConfig
-
 const emptyConfig = {} satisfies ChartConfig
-
 const periodFactor: Record<PeriodKey, number> = { "30d": 1, "14d": 0.49, "7d": 0.25 }
-const channelFactor: Record<ChannelKey, number> = {
-  all: 1,
-  Organic: 0.38,
-  "Paid Search": 0.24,
-  Direct: 0.18,
-  Referral: 0.12,
-  Email: 0.08,
-}
+const channelFactor: Record<ChannelKey, number> = { all: 1, Organic: 0.38, "Paid Search": 0.24, Direct: 0.18, Referral: 0.12, Email: 0.08 }
 const deviceFactor: Record<DeviceKey, number> = { all: 1, Mobile: 0.55, Desktop: 0.39, Tablet: 0.06 }
 const audienceFactor: Record<AudienceKey, number> = { all: 1, New: 0.615, Returning: 0.385 }
 
@@ -236,6 +258,7 @@ export function Dashboard() {
   const [channel, setChannel] = useState<ChannelKey>("all")
   const [device, setDevice] = useState<DeviceKey>("all")
   const [audience, setAudience] = useState<AudienceKey>("all")
+  const [heatmapMetric, setHeatmapMetric] = useState<HeatmapMetric>("sessions")
   const [detail, setDetail] = useState<DetailState>(null)
 
   const scale = periodFactor[period] * channelFactor[channel] * deviceFactor[device] * audienceFactor[audience]
@@ -246,24 +269,20 @@ export function Dashboard() {
       ...row,
       sessions: +(row.sessions * channelFactor[channel] * deviceFactor[device] * audienceFactor[audience]).toFixed(2),
       users: +(row.users * channelFactor[channel] * deviceFactor[device] * audienceFactor[audience]).toFixed(2),
-      conversions: Math.round(row.conversions * channelFactor[channel] * deviceFactor[device] * audienceFactor[audience]),
     }))
   }, [period, channel, device, audience])
 
   const visibleChannels = channel === "all" ? channels : channels.filter((row) => row.channel === channel)
-  const visibleDevices = device === "all" ? devices : devices.filter((row) => row.device === device)
   const visiblePages = pages.map((row) => ({
     ...row,
-    sessions: +(row.sessions * periodFactor[period] * channelFactor[channel] * deviceFactor[device] * audienceFactor[audience]).toFixed(1),
+    sessions: +(row.sessions * scale).toFixed(1),
   }))
 
   const sessions = 184700 * scale
   const users = 126300 * scale
   const returningRate = audience === "Returning" ? 100 : audience === "New" ? 0 : 38.5
   const engagementAdjustment = device === "Desktop" ? 4.6 : device === "Mobile" ? -3.2 : device === "Tablet" ? -1.7 : 0
-  const channelConversion =
-    channel === "all" ? 3.42 :
-    channels.find((row) => row.channel === channel)?.conversion ?? 3.42
+  const channelConversion = channel === "all" ? 3.42 : channels.find((row) => row.channel === channel)?.conversion ?? 3.42
   const deviceConversion = device === "Desktop" ? 4.2 : device === "Mobile" ? 2.8 : device === "Tablet" ? 3.1 : 3.42
   const conversion = channel === "all" ? deviceConversion : (channelConversion + deviceConversion) / 2
   const conversions = sessions * (conversion / 100)
@@ -286,10 +305,9 @@ export function Dashboard() {
     setDetail({
       eyebrow: "Acquisition drill-through",
       title: row.channel,
-      description:
-        row.conversion >= 3.8
-          ? "This channel combines meaningful traffic with above-average conversion quality."
-          : "This channel contributes useful volume, but its conversion efficiency trails the strongest acquisition sources.",
+      description: row.conversion >= 3.8
+        ? "This channel combines meaningful traffic with above-average conversion quality."
+        : "This channel contributes useful volume, but its conversion efficiency trails the strongest acquisition sources.",
       metrics: [
         { label: "Sessions", value: row.sessions.toFixed(1) + "K" },
         { label: "Traffic share", value: row.share + "%" },
@@ -305,10 +323,9 @@ export function Dashboard() {
     setDetail({
       eyebrow: "Content drill-through",
       title: row.page,
-      description:
-        row.conversion >= 4
-          ? "This page shows strong commercial intent. The next question is which sources and journeys are feeding that behavior."
-          : "This page contributes engagement, but conversion is weaker than the strongest commercial pages.",
+      description: row.conversion >= 4
+        ? "This page shows strong commercial intent. The next question is which sources and journeys are feeding that behavior."
+        : "This page contributes engagement, but conversion is weaker than the strongest commercial pages.",
       metrics: [
         { label: "Sessions", value: row.sessions.toFixed(1) + "K" },
         { label: "Engagement", value: row.engagement.toFixed(1) + "%" },
@@ -323,10 +340,9 @@ export function Dashboard() {
     setDetail({
       eyebrow: "Campaign drill-through",
       title: row.campaign,
-      description:
-        row.revenue / row.cost >= 3
-          ? "This campaign is producing efficient commercial return relative to media cost."
-          : "This campaign is generating traffic but requires closer review of cost, conversion and landing-page quality.",
+      description: row.revenue / row.cost >= 3
+        ? "This campaign is producing efficient commercial return relative to media cost."
+        : "This campaign is generating traffic but requires closer review of cost, conversion and landing-page quality.",
       metrics: [
         { label: "Source", value: row.source },
         { label: "Sessions", value: row.sessions.toFixed(1) + "K" },
@@ -345,9 +361,7 @@ export function Dashboard() {
           <div className="flex flex-col justify-between gap-4 xl:flex-row xl:items-end">
             <div>
               <Badge className="mb-3" variant="outline">Digital analytics · synthetic data</Badge>
-              <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
-                Acquisition & journey analysis
-              </h1>
+              <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Acquisition & journey analysis</h1>
               <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
                 Understand where users come from, how they move through the site, where intent drops and which experiences produce conversion.
               </p>
@@ -413,68 +427,37 @@ export function Dashboard() {
           </div>
 
           <div className="mt-4 grid gap-3 md:grid-cols-3">
-            <Signal
-              title="Mobile owns reach, desktop owns conversion"
-              body="Mobile contributes 55% of sessions but converts 1.4 percentage points below desktop."
-            />
-            <Signal
-              title="Pricing is the highest-intent content"
-              body="/pricing combines strong volume with the best conversion rate among high-traffic pages."
-            />
-            <Signal
-              title="Largest funnel loss happens before pricing"
-              body="39% of landing sessions never reach a product page, making early journey quality the largest opportunity."
-            />
+            <Signal title="Mobile owns reach, desktop owns conversion" body="Mobile contributes 55% of sessions but converts 1.4 percentage points below desktop." />
+            <Signal title="Pricing is the highest-intent content" body="/pricing combines strong volume with the best conversion rate among high-traffic pages." />
+            <Signal title="Largest funnel loss happens before pricing" body="39% of landing sessions never reach a product page, making early journey quality the largest opportunity." />
           </div>
         </section>
 
         <section id="acquisition" className="scroll-mt-20">
           <SectionHeading
             eyebrow="Acquisition"
-            title="Traffic quality by source"
-            description="Traffic volume alone is not enough. This view compares growth, audience quality and downstream conversion."
+            title="How channel position and mix are changing"
+            description="Two complementary views: ranking movement over time and the changing composition of total traffic."
           />
 
-          <div className="grid gap-4 xl:grid-cols-[1.55fr_1fr]">
+          <div className="grid gap-4 xl:grid-cols-[1.1fr_1fr]">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">Sessions and active users</CardTitle>
-                <CardDescription>Traffic trend in thousands</CardDescription>
+                <CardTitle className="text-base">Channel rank evolution</CardTitle>
+                <CardDescription>Bump chart · rank by weekly session volume</CardDescription>
               </CardHeader>
               <CardContent>
-                <ChartContainer className="h-[330px] w-full" config={trendConfig}>
-                  <AreaChart data={filteredTrend} margin={{ left: 8, right: 14, top: 10 }}>
-                    <CartesianGrid vertical={false} strokeDasharray="3 3" />
-                    <XAxis dataKey="day" axisLine={false} tickLine={false} tickMargin={10} />
-                    <YAxis axisLine={false} tickLine={false} width={42} tickFormatter={(v) => v + "K"} />
-                    <ChartTooltip content={<ChartTooltipContent indicator="line" />} />
-                    <Area dataKey="sessions" fill="var(--color-sessions)" fillOpacity={0.14} stroke="var(--color-sessions)" strokeWidth={2.5} type="monotone" />
-                    <Line dataKey="users" dot={false} stroke="var(--color-users)" strokeWidth={2} type="monotone" />
-                  </AreaChart>
-                </ChartContainer>
+                <BumpChart />
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">Acquisition mix</CardTitle>
-                <CardDescription>Weekly channel contribution</CardDescription>
+                <CardTitle className="text-base">Acquisition composition</CardTitle>
+                <CardDescription>Marimekko · width = weekly traffic, height = channel share</CardDescription>
               </CardHeader>
               <CardContent>
-                <ChartContainer className="h-[330px] w-full" config={channelConfig}>
-                  <BarChart data={channelTrend}>
-                    <CartesianGrid vertical={false} strokeDasharray="3 3" />
-                    <XAxis dataKey="week" axisLine={false} tickLine={false} />
-                    <YAxis hide />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Legend />
-                    <Bar dataKey="organic" stackId="a" fill="var(--color-organic)" />
-                    <Bar dataKey="paidSearch" stackId="a" fill="var(--color-paidSearch)" />
-                    <Bar dataKey="direct" stackId="a" fill="var(--color-direct)" />
-                    <Bar dataKey="referral" stackId="a" fill="var(--color-referral)" />
-                    <Bar dataKey="email" stackId="a" fill="var(--color-email)" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ChartContainer>
+                <MarimekkoChart />
               </CardContent>
             </Card>
           </div>
@@ -482,7 +465,7 @@ export function Dashboard() {
           <Card className="mt-4">
             <CardHeader>
               <CardTitle className="text-base">Channel quality scorecard</CardTitle>
-              <CardDescription>Click a channel for drill-through.</CardDescription>
+              <CardDescription>Only one table in the dashboard; click a channel for drill-through.</CardDescription>
             </CardHeader>
             <CardContent className="p-0">
               <Table>
@@ -522,48 +505,32 @@ export function Dashboard() {
         <section id="funnel" className="scroll-mt-20">
           <SectionHeading
             eyebrow="Funnel"
-            title="Where intent drops"
-            description="Each stage shows the share of landing sessions that survive to the next commercial step."
+            title="Where intent collapses"
+            description="A proportional funnel makes stage loss visible immediately instead of disguising it as a standard bar chart."
           />
 
-          <div className="grid gap-4 xl:grid-cols-[1.25fr_0.75fr]">
+          <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
             <Card>
-              <CardHeader>
+              <CardHeader className="pb-2">
                 <CardTitle className="text-base">Conversion funnel</CardTitle>
-                <CardDescription>Filtered journey from landing session to conversion.</CardDescription>
+                <CardDescription>Width is proportional to surviving users.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {funnel.map((stage, index) => {
-                  const previous = index === 0 ? stage.value : funnel[index - 1].value
-                  const stageConversion = previous ? (stage.value / previous) * 100 : 0
-                  return (
-                    <div className="grid grid-cols-[150px_1fr_90px] items-center gap-4" key={stage.stage}>
-                      <div>
-                        <div className="text-sm font-medium">{stage.stage}</div>
-                        <div className="text-xs text-muted-foreground">{compact(stage.value)}</div>
-                      </div>
-                      <div className="h-10 overflow-hidden rounded-md border bg-muted/30">
-                        <div
-                          className="flex h-full items-center rounded-md bg-primary/85 px-3 text-xs font-medium text-primary-foreground transition-all"
-                          style={{ width: Math.max(5, stage.rate) + "%" }}
-                        >
-                          {stage.rate.toFixed(stage.rate < 10 ? 2 : 1)}%
-                        </div>
-                      </div>
-                      <div className="text-right text-xs">
-                        <div className="font-medium">{index === 0 ? "Entry" : stageConversion.toFixed(1) + "%"}</div>
-                        <div className="text-muted-foreground">stage rate</div>
-                      </div>
-                    </div>
-                  )
-                })}
+              <CardContent>
+                <ChartContainer className="h-[360px] w-full" config={emptyConfig}>
+                  <FunnelChart>
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Funnel data={funnel} dataKey="value" nameKey="stage" isAnimationActive>
+                      <LabelList dataKey="stage" fill="var(--foreground)" position="right" stroke="none" />
+                    </Funnel>
+                  </FunnelChart>
+                </ChartContainer>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Drop-off diagnosis</CardTitle>
-                <CardDescription>Largest losses in the journey.</CardDescription>
+                <CardDescription>Ranked by business impact.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Dropoff rank="01" title="Landing → Product" value="39.1%" note="Largest absolute loss" />
@@ -578,71 +545,57 @@ export function Dashboard() {
         <section id="journeys" className="scroll-mt-20">
           <SectionHeading
             eyebrow="Journeys"
-            title="How users move through the experience"
-            description="High-frequency paths reveal which sequences generate intent and which patterns end in exits."
+            title="How sessions actually flow"
+            description="The Sankey-style flow exposes the routes feeding conversion and the routes leaking users to exit."
           />
 
-          <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Journey flow</CardTitle>
+              <CardDescription>Ribbon width approximates path volume.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <JourneySankey />
+            </CardContent>
+          </Card>
+
+          <div className="mt-4 grid gap-4 xl:grid-cols-[1fr_0.9fr]">
             <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Top navigation paths</CardTitle>
-                <CardDescription>Share of observed sessions and conversion by path.</CardDescription>
+              <CardHeader className="flex-row items-center justify-between space-y-0">
+                <div>
+                  <CardTitle className="text-base">Behavior heatmap</CardTitle>
+                  <CardDescription>Day of week × time of day</CardDescription>
+                </div>
+                <Select value={heatmapMetric} onValueChange={(value) => setHeatmapMetric(value as HeatmapMetric)}>
+                  <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sessions">Sessions</SelectItem>
+                    <SelectItem value="conversion">Conversion</SelectItem>
+                    <SelectItem value="engagement">Engagement</SelectItem>
+                  </SelectContent>
+                </Select>
               </CardHeader>
-              <CardContent className="space-y-3">
-                {journeyRows.map((row, index) => (
-                  <div className="rounded-lg border p-4" key={row.path.join("-")}>
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="text-xs font-medium text-muted-foreground">Path {index + 1}</div>
-                      <div className="flex gap-4 text-xs">
-                        <span><strong>{row.share}%</strong> sessions</span>
-                        <span><strong>{row.conversion}%</strong> conv.</span>
-                      </div>
-                    </div>
-                    <div className="mt-3 flex flex-wrap items-center gap-2">
-                      {row.path.map((step, stepIndex) => (
-                        <div className="flex items-center gap-2" key={step + stepIndex}>
-                          <span className={"rounded-md border px-3 py-2 text-xs " + (step === "Exit" ? "border-destructive/30 bg-destructive/10 text-destructive" : "bg-muted/35")}>
-                            {step}
-                          </span>
-                          {stepIndex < row.path.length - 1 && <ArrowUpRightIcon className="size-3.5 rotate-45 text-muted-foreground" />}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+              <CardContent>
+                <Heatmap metric={heatmapMetric} />
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Traffic intensity heatmap</CardTitle>
-                <CardDescription>Day of week × time of day.</CardDescription>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Sessions & active users</CardTitle>
+                <CardDescription>Context trend for the selected filters</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-[44px_repeat(6,minmax(0,1fr))] gap-1 text-[10px]">
-                  <div />
-                  {heatmapSlots.map((slot) => <div className="pb-1 text-center text-muted-foreground" key={slot}>{slot}</div>)}
-                  {heatmapDays.map((day, rowIndex) => (
-                    <>
-                      <div className="flex items-center text-muted-foreground" key={day + "-label"}>{day}</div>
-                      {heatmap[rowIndex].map((value, colIndex) => (
-                        <div
-                          className="group relative h-9 rounded-sm border"
-                          key={day + colIndex}
-                          style={{
-                            backgroundColor: "color-mix(in oklab, var(--primary) " + Math.max(10, value) + "%, transparent)",
-                          }}
-                          title={day + " " + heatmapSlots[colIndex] + ": " + value + " index"}
-                        />
-                      ))}
-                    </>
-                  ))}
-                </div>
-                <div className="mt-4 flex items-center justify-between text-[10px] text-muted-foreground">
-                  <span>Lower activity</span>
-                  <div className="h-2 w-32 rounded-full bg-gradient-to-r from-primary/10 to-primary" />
-                  <span>Higher activity</span>
-                </div>
+                <ChartContainer className="h-[280px] w-full" config={trendConfig}>
+                  <AreaChart data={filteredTrend} margin={{ left: 6, right: 12, top: 10 }}>
+                    <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                    <XAxis dataKey="day" axisLine={false} tickLine={false} tickMargin={10} />
+                    <YAxis axisLine={false} tickLine={false} width={38} tickFormatter={(v) => v + "K"} />
+                    <ChartTooltip content={<ChartTooltipContent indicator="line" />} />
+                    <Area dataKey="sessions" fill="var(--color-sessions)" fillOpacity={0.14} stroke="var(--color-sessions)" strokeWidth={2.5} type="monotone" />
+                    <Area dataKey="users" fill="var(--color-users)" fillOpacity={0.06} stroke="var(--color-users)" strokeWidth={1.8} type="monotone" />
+                  </AreaChart>
+                </ChartContainer>
               </CardContent>
             </Card>
           </div>
@@ -651,126 +604,93 @@ export function Dashboard() {
         <section id="content" className="scroll-mt-20">
           <SectionHeading
             eyebrow="Content"
-            title="Engagement vs conversion"
-            description="A page can be popular without being commercially useful. This view separates attention from outcome."
+            title="Which pages create value"
+            description="A quadrant bubble map separates high-attention pages from genuinely high-converting pages."
           />
 
-          <div className="grid gap-4 xl:grid-cols-[1fr_1.35fr]">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">Page quality map</CardTitle>
-                <CardDescription>X = engagement, Y = conversion, bubble = sessions.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ChartContainer className="h-[320px] w-full" config={emptyConfig}>
-                  <ScatterChart margin={{ left: 8, right: 18, top: 8, bottom: 6 }}>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Content quality quadrants</CardTitle>
+              <CardDescription>X = engagement, Y = conversion, bubble size = sessions</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="relative">
+                <ChartContainer className="h-[390px] w-full" config={emptyConfig}>
+                  <ScatterChart margin={{ left: 12, right: 24, top: 18, bottom: 8 }}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      type="number"
-                      dataKey="engagement"
-                      name="Engagement"
-                      domain={[55, 78]}
-                      axisLine={false}
-                      tickLine={false}
-                      tickFormatter={(v) => v + "%"}
-                    />
-                    <YAxis
-                      type="number"
-                      dataKey="conversion"
-                      name="Conversion"
-                      domain={[1, 6.5]}
-                      axisLine={false}
-                      tickLine={false}
-                      tickFormatter={(v) => v + "%"}
-                    />
-                    <ZAxis type="number" dataKey="sessions" range={[90, 360]} />
+                    <XAxis type="number" dataKey="engagement" name="Engagement" domain={[55, 78]} axisLine={false} tickLine={false} tickFormatter={(v) => v + "%"} />
+                    <YAxis type="number" dataKey="conversion" name="Conversion" domain={[1, 6.5]} axisLine={false} tickLine={false} tickFormatter={(v) => v + "%"} />
+                    <ZAxis type="number" dataKey="sessions" range={[100, 420]} />
+                    <ReferenceLine x={65} stroke="var(--muted-foreground)" strokeDasharray="5 5" />
+                    <ReferenceLine y={3.5} stroke="var(--muted-foreground)" strokeDasharray="5 5" />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Scatter data={visiblePages} fill="var(--chart-1)" name="Pages" />
                   </ScatterChart>
                 </ChartContainer>
-              </CardContent>
-            </Card>
+                <div className="pointer-events-none absolute inset-x-10 top-3 flex justify-between text-[10px] font-medium text-muted-foreground">
+                  <span>High conversion / low engagement</span>
+                  <span>High-value content</span>
+                </div>
+                <div className="pointer-events-none absolute inset-x-10 bottom-3 flex justify-between text-[10px] font-medium text-muted-foreground">
+                  <span>Needs work</span>
+                  <span>Engaging but under-converting</span>
+                </div>
+              </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Top content</CardTitle>
-                <CardDescription>Click a row for page-level drill-through.</CardDescription>
-              </CardHeader>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="pl-6">Page</TableHead>
-                      <TableHead>Sessions</TableHead>
-                      <TableHead>Engagement</TableHead>
-                      <TableHead>Conversion</TableHead>
-                      <TableHead>Exit</TableHead>
-                      <TableHead className="pr-6 text-right">Avg. time</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {visiblePages.map((row) => (
-                      <TableRow className="cursor-pointer" key={row.page} onClick={() => openPage(row)}>
-                        <TableCell className="pl-6">
-                          <div className="font-medium">{row.title}</div>
-                          <div className="font-mono text-[10px] text-muted-foreground">{row.page}</div>
-                        </TableCell>
-                        <TableCell>{row.sessions.toFixed(1)}K</TableCell>
-                        <TableCell>{row.engagement.toFixed(1)}%</TableCell>
-                        <TableCell>{row.conversion.toFixed(1)}%</TableCell>
-                        <TableCell>{row.exitRate.toFixed(1)}%</TableCell>
-                        <TableCell className="pr-6 text-right">{Math.floor(row.avgTime / 60)}m {row.avgTime % 60}s</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </div>
+              <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-4">
+                {visiblePages.slice(0, 4).map((row) => (
+                  <button className="rounded-lg border p-3 text-left transition-colors hover:bg-muted/50" key={row.page} onClick={() => openPage(row)}>
+                    <div className="text-xs font-medium">{row.title}</div>
+                    <div className="mt-1 font-mono text-[10px] text-muted-foreground">{row.page}</div>
+                    <div className="mt-3 flex justify-between text-[10px] text-muted-foreground">
+                      <span>{row.engagement.toFixed(1)}% engaged</span>
+                      <span>{row.conversion.toFixed(1)}% conv.</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </section>
 
         <section id="devices" className="scroll-mt-20">
           <SectionHeading
             eyebrow="Devices & campaigns"
-            title="Experience quality by context"
-            description="Device behavior exposes UX friction; campaign economics show whether acquired traffic is worth the cost."
+            title="Context changes the quality of traffic"
+            description="A waffle shows the device footprint at a glance; the campaign bubble plot adds media efficiency and conversion scale."
           />
 
-          <div className="grid gap-4 xl:grid-cols-[0.8fr_1.4fr]">
+          <div className="grid gap-4 xl:grid-cols-[0.78fr_1.22fr]">
             <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">Device mix</CardTitle>
-                <CardDescription>Session share by device.</CardDescription>
+              <CardHeader>
+                <CardTitle className="text-base">Device footprint</CardTitle>
+                <CardDescription>Waffle chart · each square ≈ 1% of sessions</CardDescription>
               </CardHeader>
               <CardContent>
-                <ChartContainer className="h-[290px] w-full" config={emptyConfig}>
-                  <PieChart>
-                    <ChartTooltip content={<ChartTooltipContent nameKey="device" />} />
-                    <Pie data={visibleDevices} dataKey="sessions" nameKey="device" innerRadius={58} outerRadius={96} paddingAngle={3}>
-                      {visibleDevices.map((row) => <Cell fill={row.fill} key={row.device} />)}
-                    </Pie>
-                    <Legend />
-                  </PieChart>
-                </ChartContainer>
-                <div className="mt-2 space-y-2">
-                  {visibleDevices.map((row) => (
+                <WaffleChart />
+                <div className="mt-5 space-y-2">
+                  {devices.map((row) => (
                     <button
                       className="flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-xs transition-colors hover:bg-muted/50"
                       key={row.device}
                       onClick={() => setDetail({
                         eyebrow: "Device drill-through",
                         title: row.device,
-                        description: row.device === "Mobile" ? "Mobile supplies the most traffic but underperforms desktop on conversion, suggesting friction after intent is established." : "This device segment shows a distinct balance between reach, engagement and conversion.",
+                        description: row.device === "Mobile"
+                          ? "Mobile supplies the most traffic but underperforms desktop on conversion, suggesting friction after intent is established."
+                          : "This device segment shows a distinct balance between reach, engagement and conversion.",
                         metrics: [
-                          { label: "Sessions", value: row.sessions.toFixed(1) + "K" },
-                          { label: "Share", value: row.share + "%" },
+                          { label: "Traffic share", value: row.share + "%" },
                           { label: "Engagement", value: row.engagement.toFixed(1) + "%" },
                           { label: "Conversion", value: row.conversion.toFixed(1) + "%" },
                         ],
                       })}
                     >
-                      <span className="font-medium">{row.device}</span>
-                      <span className="text-muted-foreground">{row.engagement.toFixed(1)}% engaged · {row.conversion.toFixed(1)}% conv.</span>
+                      <span className="flex items-center gap-2 font-medium">
+                        <span className="size-2.5 rounded-sm" style={{ backgroundColor: row.color }} />
+                        {row.device}
+                      </span>
+                      <span className="text-muted-foreground">{row.share}% share · {row.conversion.toFixed(1)}% conv.</span>
                     </button>
                   ))}
                 </div>
@@ -778,41 +698,36 @@ export function Dashboard() {
             </Card>
 
             <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Campaign economics</CardTitle>
-                <CardDescription>Paid and owned campaign quality, including ROAS.</CardDescription>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Campaign efficiency map</CardTitle>
+                <CardDescription>X = spend, Y = ROAS, bubble size = conversions</CardDescription>
               </CardHeader>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="pl-6">Campaign</TableHead>
-                      <TableHead>Source</TableHead>
-                      <TableHead>Sessions</TableHead>
-                      <TableHead>Conversions</TableHead>
-                      <TableHead>CVR</TableHead>
-                      <TableHead>Cost</TableHead>
-                      <TableHead className="pr-6 text-right">ROAS</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {campaigns.map((row) => (
-                      <TableRow className="cursor-pointer" key={row.campaign} onClick={() => openCampaign(row)}>
-                        <TableCell className="pl-6 font-medium">{row.campaign}</TableCell>
-                        <TableCell>{row.source}</TableCell>
-                        <TableCell>{row.sessions.toFixed(1)}K</TableCell>
-                        <TableCell>{row.conversions.toLocaleString()}</TableCell>
-                        <TableCell>{row.conversion.toFixed(1)}%</TableCell>
-                        <TableCell>{moneyK(row.cost)}</TableCell>
-                        <TableCell className="pr-6 text-right">
-                          <Badge variant={row.revenue / row.cost >= 3 ? "secondary" : "outline"}>
-                            {(row.revenue / row.cost).toFixed(1)}x
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+              <CardContent>
+                <ChartContainer className="h-[350px] w-full" config={emptyConfig}>
+                  <ScatterChart margin={{ left: 10, right: 24, top: 16, bottom: 8 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" dataKey="cost" name="Spend" domain={[0, 24]} axisLine={false} tickLine={false} tickFormatter={(v) => "$" + v + "K"} />
+                    <YAxis type="number" dataKey="roas" name="ROAS" domain={[1, 9]} axisLine={false} tickLine={false} tickFormatter={(v) => v + "x"} />
+                    <ZAxis type="number" dataKey="conversions" range={[110, 520]} />
+                    <ReferenceLine y={3} stroke="var(--chart-4)" strokeDasharray="5 5" label={{ value: "3x efficiency floor", fill: "var(--muted-foreground)", fontSize: 10 }} />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Scatter
+                      data={campaigns.map((row) => ({ ...row, roas: +(row.revenue / row.cost).toFixed(2) }))}
+                      fill="var(--chart-2)"
+                      name="Campaigns"
+                    />
+                  </ScatterChart>
+                </ChartContainer>
+
+                <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+                  {campaigns.slice(0, 3).map((row) => (
+                    <button className="rounded-lg border p-3 text-left transition-colors hover:bg-muted/50" key={row.campaign} onClick={() => openCampaign(row)}>
+                      <div className="text-xs font-medium">{row.campaign}</div>
+                      <div className="mt-1 text-[10px] text-muted-foreground">{row.source}</div>
+                      <div className="mt-3 text-sm font-semibold">{(row.revenue / row.cost).toFixed(1)}x ROAS</div>
+                    </button>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -826,8 +741,8 @@ export function Dashboard() {
             <div>
               <h2 className="text-sm font-medium">Portfolio methodology</h2>
               <p className="mt-1 max-w-4xl text-xs leading-5 text-muted-foreground">
-                All values are synthetic. The project demonstrates acquisition analysis, funnel diagnosis, journey exploration,
-                behavioral segmentation, content quality, filter context and drill-through without exposing production analytics data.
+                All values are synthetic. The project demonstrates acquisition analysis, funnel diagnosis, journey flow,
+                behavioral heatmaps, content quadrants, device composition, campaign economics and drill-through without exposing production analytics data.
               </p>
             </div>
           </div>
@@ -852,7 +767,7 @@ export function Dashboard() {
           <div className="px-4 pb-4">
             <h3 className="text-sm font-medium">Next analytical question</h3>
             <p className="mt-2 text-xs leading-5 text-muted-foreground">
-              A useful drill-through should preserve the selected context and expose the next layer of behavior, not simply repeat the same KPI.
+              Drill-through preserves the selected context and exposes the next layer of behavior instead of repeating the same KPI.
             </p>
           </div>
         </SheetContent>
@@ -861,15 +776,7 @@ export function Dashboard() {
   )
 }
 
-function SectionHeading({
-  eyebrow,
-  title,
-  description,
-}: {
-  eyebrow: string
-  title: string
-  description: string
-}) {
+function SectionHeading({ eyebrow, title, description }: { eyebrow: string; title: string; description: string }) {
   return (
     <div className="mb-4 flex flex-col gap-1">
       <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">{eyebrow}</div>
@@ -879,19 +786,7 @@ function SectionHeading({
   )
 }
 
-function MetricCard({
-  icon,
-  label,
-  value,
-  delta,
-  sublabel,
-}: {
-  icon: ReactNode
-  label: string
-  value: string
-  delta: number
-  sublabel: string
-}) {
+function MetricCard({ icon, label, value, delta, sublabel }: { icon: ReactNode; label: string; value: string; delta: number; sublabel: string }) {
   const positive = delta >= 0
   return (
     <div className="min-h-32 bg-background p-4">
@@ -920,17 +815,7 @@ function Signal({ title, body }: { title: string; body: string }) {
   )
 }
 
-function Dropoff({
-  rank,
-  title,
-  value,
-  note,
-}: {
-  rank: string
-  title: string
-  value: string
-  note: string
-}) {
+function Dropoff({ rank, title, value, note }: { rank: string; title: string; value: string; note: string }) {
   return (
     <div className="flex items-center gap-3 rounded-lg border p-3">
       <div className="grid size-8 place-items-center rounded-md bg-muted text-xs font-semibold">{rank}</div>
@@ -939,6 +824,185 @@ function Dropoff({
         <div className="text-[11px] text-muted-foreground">{note}</div>
       </div>
       <div className="text-sm font-semibold text-rose-500">{value}</div>
+    </div>
+  )
+}
+
+function BumpChart() {
+  const weeks = ["W1", "W2", "W3", "W4"]
+  const x = [70, 255, 440, 625]
+  const yForRank = (rank: number) => 36 + (rank - 1) * 48
+
+  return (
+    <div className="h-[300px] w-full">
+      <svg className="h-full w-full" viewBox="0 0 700 280" role="img" aria-label="Channel rank bump chart">
+        {weeks.map((week, index) => (
+          <g key={week}>
+            <line x1={x[index]} x2={x[index]} y1="28" y2="238" stroke="var(--border)" />
+            <text x={x[index]} y="264" textAnchor="middle" fill="var(--muted-foreground)" fontSize="11">{week}</text>
+          </g>
+        ))}
+
+        {Object.entries(rankHistory).map(([channelName, ranks]) => {
+          const channel = channelName as Exclude<ChannelKey, "all">
+          const points = ranks.map((rank, index) => x[index] + "," + yForRank(rank)).join(" ")
+          return (
+            <g key={channel}>
+              <polyline
+                points={points}
+                fill="none"
+                stroke={channelColors[channel]}
+                strokeWidth="5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              {ranks.map((rank, index) => (
+                <circle key={index} cx={x[index]} cy={yForRank(rank)} r="6" fill={channelColors[channel]} stroke="var(--background)" strokeWidth="2" />
+              ))}
+              <text x="10" y={yForRank(ranks[0]) + 4} fill={channelColors[channel]} fontSize="11" fontWeight="600">{channel}</text>
+              <text x="652" y={yForRank(ranks[ranks.length - 1]) + 4} fill={channelColors[channel]} fontSize="11" fontWeight="700">#{ranks[ranks.length - 1]}</text>
+            </g>
+          )
+        })}
+      </svg>
+    </div>
+  )
+}
+
+function MarimekkoChart() {
+  const maxTotal = Math.max(...weeklyChannel.map((row) => row.total))
+  const channelOrder: Array<Exclude<ChannelKey, "all">> = ["Organic", "Paid Search", "Direct", "Referral", "Email"]
+
+  return (
+    <div>
+      <div className="flex h-[250px] items-end gap-2 rounded-lg border bg-muted/10 p-3">
+        {weeklyChannel.map((row) => (
+          <div
+            className="flex h-full flex-col justify-end"
+            key={row.week}
+            style={{ width: (row.total / maxTotal) * 25 + "%" }}
+          >
+            <div className="flex h-[210px] flex-col-reverse overflow-hidden rounded-md border bg-background">
+              {channelOrder.map((channel) => {
+                const value = row[channel] as number
+                return (
+                  <div
+                    key={channel}
+                    style={{
+                      height: (value / row.total) * 100 + "%",
+                      backgroundColor: channelColors[channel],
+                    }}
+                    title={channel + ": " + value.toFixed(1) + "K"}
+                  />
+                )
+              })}
+            </div>
+            <div className="mt-2 text-center text-[10px] text-muted-foreground">
+              {row.week}<br /><span className="font-medium text-foreground">{row.total.toFixed(1)}K</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
+        {channelOrder.map((channel) => (
+          <div className="flex items-center gap-2 text-[10px] text-muted-foreground" key={channel}>
+            <span className="size-2.5 rounded-sm" style={{ backgroundColor: channelColors[channel] }} />
+            {channel}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function JourneySankey() {
+  const byId = Object.fromEntries(journeyNodes.map((node) => [node.id, node]))
+
+  return (
+    <div className="overflow-x-auto">
+      <svg className="min-w-[1050px] w-full" viewBox="0 0 1160 430" role="img" aria-label="User journey Sankey diagram">
+        {journeyLinks.map((link, index) => {
+          const from = byId[link.from]
+          const to = byId[link.to]
+          const x1 = from.x + 22
+          const y1 = from.y + link.fromOffset
+          const x2 = to.x
+          const y2 = to.y + link.toOffset
+          const width = Math.max(5, link.value * 0.45)
+          return (
+            <path
+              d={"M " + x1 + " " + y1 + " C " + (x1 + 90) + " " + y1 + ", " + (x2 - 90) + " " + y2 + ", " + x2 + " " + y2}
+              fill="none"
+              key={index}
+              opacity="0.3"
+              stroke={link.color}
+              strokeLinecap="round"
+              strokeWidth={width}
+            />
+          )
+        })}
+
+        {journeyNodes.map((node) => (
+          <g key={node.id}>
+            <rect x={node.x} y={node.y} width="22" height={node.h} rx="6" fill="var(--foreground)" opacity="0.9" />
+            <text x={node.x + 32} y={node.y + 18} fill="var(--foreground)" fontSize="12" fontWeight="600">{node.label}</text>
+          </g>
+        ))}
+      </svg>
+    </div>
+  )
+}
+
+function Heatmap({ metric }: { metric: HeatmapMetric }) {
+  const values = heatmaps[metric]
+  const label = metric === "sessions" ? "activity index" : metric === "conversion" ? "conversion index" : "engagement index"
+
+  return (
+    <>
+      <div className="grid grid-cols-[44px_repeat(6,minmax(0,1fr))] gap-1 text-[10px]">
+        <div />
+        {heatmapSlots.map((slot) => <div className="pb-1 text-center text-muted-foreground" key={slot}>{slot}</div>)}
+        {heatmapDays.map((day, rowIndex) => (
+          <div className="contents" key={day}>
+            <div className="flex items-center text-muted-foreground">{day}</div>
+            {values[rowIndex].map((value, colIndex) => (
+              <div
+                className="h-9 rounded-sm border"
+                key={day + colIndex}
+                style={{ backgroundColor: "color-mix(in oklab, var(--primary) " + Math.max(10, value) + "%, transparent)" }}
+                title={day + " " + heatmapSlots[colIndex] + ": " + value + " " + label}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 flex items-center justify-between text-[10px] text-muted-foreground">
+        <span>Lower {metric}</span>
+        <div className="h-2 w-32 rounded-full bg-gradient-to-r from-primary/10 to-primary" />
+        <span>Higher {metric}</span>
+      </div>
+    </>
+  )
+}
+
+function WaffleChart() {
+  const cells = Array.from({ length: 100 }, (_, index) => {
+    if (index < 55) return devices[0]
+    if (index < 94) return devices[1]
+    return devices[2]
+  })
+
+  return (
+    <div className="mx-auto grid max-w-[320px] grid-cols-10 gap-1.5">
+      {cells.map((device, index) => (
+        <div
+          className="aspect-square rounded-[3px]"
+          key={index}
+          style={{ backgroundColor: device.color }}
+          title={device.device}
+        />
+      ))}
     </div>
   )
 }
