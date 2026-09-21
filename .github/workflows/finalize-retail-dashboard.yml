@@ -40,47 +40,7 @@ jobs:
 
           sed -i 's/retail-efferd-src/retail-dashboard-src/g' retail-dashboard-src/package.json retail-dashboard-src/package-lock.json
           rm -f retail-dashboard-src/src/components/nav-user.tsx
-
-          rm -f .github/workflows/install-efferd-dashboard-1.yml
-          rm -f .github/workflows/publish-retail-preview.yml
-          rm -f .github/workflows/finalize-retail-dashboard.yml
-
-          cat > .github/workflows/validate-retail-dashboard.yml <<'YAML'
-          name: Validate Retail Dashboard
-
-          on:
-            push:
-              branches:
-                - retail-dashboard
-              paths:
-                - retail-dashboard-src/**
-                - .github/workflows/validate-retail-dashboard.yml
-            workflow_dispatch:
-
-          permissions:
-            contents: read
-
-          jobs:
-            build:
-              runs-on: ubuntu-latest
-              steps:
-                - uses: actions/checkout@v4
-                  with:
-                    ref: retail-dashboard
-                - uses: actions/setup-node@v4
-                  with:
-                    node-version: 24
-                    cache: npm
-                    cache-dependency-path: retail-dashboard-src/package-lock.json
-                - name: Install dependencies
-                  working-directory: retail-dashboard-src
-                  run: npm ci
-                - name: Typecheck and build
-                  working-directory: retail-dashboard-src
-                  run: npm run build
-          YAML
-
-          if grep -Rni --exclude-dir=node_modules --exclude-dir=.git -i 'efferd' retail-dashboard-src .github/workflows/validate-retail-dashboard.yml; then
+          if grep -Rni --exclude-dir=node_modules --exclude-dir=.git -i 'efferd' retail-dashboard-src; then
             echo "Unwanted reference remains in final source"
             exit 1
           fi
@@ -105,17 +65,6 @@ jobs:
           rm -rf /tmp/retail-final
           mkdir -p /tmp/retail-final
           cp -R retail-dashboard-src/dist/. /tmp/retail-final/
-
-      - name: Commit clean source branch
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          if ! git diff --cached --quiet; then
-            git commit -m "Finalize retail dashboard source"
-            git push origin HEAD:retail-dashboard
-          fi
-
       - name: Publish final dashboard to main
         run: |
           git fetch origin main
