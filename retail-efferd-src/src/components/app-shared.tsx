@@ -2,13 +2,12 @@ import type { ReactNode } from "react"
 import {
   ActivityIcon,
   ArrowUpRightIcon,
-  CalendarDaysIcon,
+  ChartNoAxesCombinedIcon,
   CircleDollarSignIcon,
   DatabaseIcon,
   LayoutDashboardIcon,
-  RouteIcon,
-  TrendingDownIcon,
-  UsersIcon,
+  LandmarkIcon,
+  TrendingUpIcon,
 } from "lucide-react"
 
 export type SidebarNavItem = {
@@ -25,14 +24,14 @@ export type SidebarNavGroup = {
 
 export const navGroups: SidebarNavGroup[] = [
   {
-    label: "Customer retention",
+    label: "Market research",
     items: [
       { title: "Overview", url: "#overview", icon: <LayoutDashboardIcon />, isActive: true },
-      { title: "Cohorts", url: "#cohorts", icon: <CalendarDaysIcon /> },
-      { title: "Churn", url: "#churn", icon: <TrendingDownIcon /> },
-      { title: "Lifecycle", url: "#lifecycle", icon: <RouteIcon /> },
-      { title: "Economics", url: "#economics", icon: <CircleDollarSignIcon /> },
-      { title: "Segments", url: "#segments", icon: <UsersIcon /> },
+      { title: "Risk & Return", url: "#risk", icon: <ChartNoAxesCombinedIcon /> },
+      { title: "Regimes", url: "#regimes", icon: <LandmarkIcon /> },
+      { title: "DCA", url: "#dca", icon: <CircleDollarSignIcon /> },
+      { title: "Benchmark", url: "#benchmark", icon: <TrendingUpIcon /> },
+      { title: "Momentum", url: "#momentum", icon: <ActivityIcon /> },
     ],
   },
 ]
@@ -48,17 +47,17 @@ export const navLinks: SidebarNavItem[] = [
 ]
 
 export const dashboardIdentity = {
-  name: "Retention Intelligence",
-  subtitle: "Cohort & churn analysis",
-  icon: <ActivityIcon />,
+  name: "Market Intelligence",
+  subtitle: "Risk, regime & allocation research",
+  icon: <ChartNoAxesCombinedIcon />,
 }
 
 export const sectionLabels: Record<string, string> = {
   overview: "Overview",
-  cohorts: "Cohorts",
-  churn: "Churn",
-  lifecycle: "Lifecycle",
-  economics: "Economics",
-  segments: "Segments",
+  risk: "Risk & Return",
+  regimes: "Regimes",
+  dca: "DCA",
+  benchmark: "Benchmark",
+  momentum: "Momentum",
   methodology: "Methodology",
 }
