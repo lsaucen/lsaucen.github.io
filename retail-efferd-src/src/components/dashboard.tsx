@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, type ReactNode } from "react"
 import {
   Area,
   AreaChart,
@@ -21,14 +21,15 @@ import {
 import {
   ArrowDownRightIcon,
   ArrowUpRightIcon,
-  BoxesIcon,
-  CircleDollarSignIcon,
-  PackageCheckIcon,
-  ReceiptTextIcon,
+  BadgeCheckIcon,
+  Clock3Icon,
+  CompassIcon,
+  FilterIcon,
+  GaugeIcon,
+  MousePointer2Icon,
   RotateCcwIcon,
-  ShoppingCartIcon,
-  TargetIcon,
-  TrendingUpIcon,
+  RouteIcon,
+  UsersIcon,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -69,347 +70,297 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-type PeriodKey = "ytd" | "last6" | "q3"
-type RegionKey = "all" | "North" | "East" | "Central" | "South"
-type ChannelKey = "all" | "Store" | "Online" | "Marketplace"
-type CategoryKey = "all" | "Home" | "Electronics" | "Beauty" | "Sports" | "Kids"
-
-type RegionRow = {
-  region: Exclude<RegionKey, "all">
-  share: number
-  revenue: number
-  target: number
-  margin: number
-  growth: number
-  stores: number
-}
-
-type ProductRow = {
-  sku: string
-  product: string
-  category: Exclude<CategoryKey, "all">
-  revenue: number
-  margin: number
-  units: number
-  target: number
-  returnRate: number
-}
-
-type OrderRow = {
-  id: string
-  customer: string
-  region: Exclude<RegionKey, "all">
-  channel: Exclude<ChannelKey, "all">
-  amount: number
-  items: number
-  status: "Completed" | "Processing" | "Returned"
-}
+type PeriodKey = "30d" | "14d" | "7d"
+type ChannelKey = "all" | "Organic" | "Paid Search" | "Direct" | "Referral" | "Email"
+type DeviceKey = "all" | "Mobile" | "Desktop" | "Tablet"
+type AudienceKey = "all" | "New" | "Returning"
 
 type DetailState = {
-  title: string
   eyebrow: string
+  title: string
   description: string
   metrics: Array<{ label: string; value: string }>
 } | null
 
+type ChannelRow = {
+  channel: Exclude<ChannelKey, "all">
+  sessions: number
+  share: number
+  engagement: number
+  conversion: number
+  revenue: number
+  cpa: number | null
+}
+
+type PageRow = {
+  page: string
+  title: string
+  sessions: number
+  engagement: number
+  conversion: number
+  exitRate: number
+  avgTime: number
+}
+
+type CampaignRow = {
+  campaign: string
+  source: string
+  sessions: number
+  conversions: number
+  conversion: number
+  cost: number
+  revenue: number
+}
+
 const trendBase = [
-  { month: "Jan", actual: 430, target: 450, prior: 392, store: 245, online: 136, marketplace: 49 },
-  { month: "Feb", actual: 480, target: 500, prior: 428, store: 269, online: 157, marketplace: 54 },
-  { month: "Mar", actual: 500, target: 520, prior: 447, store: 279, online: 164, marketplace: 57 },
-  { month: "Apr", actual: 520, target: 530, prior: 462, store: 286, online: 172, marketplace: 62 },
-  { month: "May", actual: 535, target: 550, prior: 476, store: 291, online: 178, marketplace: 66 },
-  { month: "Jun", actual: 550, target: 570, prior: 489, store: 296, online: 184, marketplace: 70 },
-  { month: "Jul", actual: 575, target: 590, prior: 510, store: 305, online: 194, marketplace: 76 },
-  { month: "Aug", actual: 590, target: 610, prior: 523, store: 309, online: 201, marketplace: 80 },
-  { month: "Sep", actual: 640, target: 680, prior: 583, store: 331, online: 218, marketplace: 91 },
+  { day: "Aug 23", sessions: 5.1, users: 3.8, conversions: 166 },
+  { day: "Aug 25", sessions: 5.4, users: 4.0, conversions: 171 },
+  { day: "Aug 27", sessions: 5.9, users: 4.2, conversions: 182 },
+  { day: "Aug 29", sessions: 5.6, users: 4.1, conversions: 176 },
+  { day: "Aug 31", sessions: 6.0, users: 4.4, conversions: 187 },
+  { day: "Sep 2", sessions: 6.2, users: 4.5, conversions: 193 },
+  { day: "Sep 4", sessions: 5.8, users: 4.2, conversions: 181 },
+  { day: "Sep 6", sessions: 6.4, users: 4.6, conversions: 202 },
+  { day: "Sep 8", sessions: 6.8, users: 4.8, conversions: 214 },
+  { day: "Sep 10", sessions: 7.5, users: 5.2, conversions: 242 },
+  { day: "Sep 12", sessions: 8.0, users: 5.5, conversions: 267 },
+  { day: "Sep 14", sessions: 7.7, users: 5.3, conversions: 258 },
+  { day: "Sep 16", sessions: 6.9, users: 4.8, conversions: 229 },
+  { day: "Sep 18", sessions: 7.2, users: 5.0, conversions: 244 },
+  { day: "Sep 20", sessions: 7.4, users: 5.1, conversions: 252 },
 ]
 
-const regionBase: RegionRow[] = [
-  { region: "North", share: 0.30, revenue: 1446, target: 1418, margin: 39.8, growth: 14.4, stores: 12 },
-  { region: "East", share: 0.245, revenue: 1181, target: 1256, margin: 36.1, growth: 9.1, stores: 10 },
-  { region: "Central", share: 0.225, revenue: 1085, target: 1192, margin: 35.7, growth: 7.5, stores: 9 },
-  { region: "South", share: 0.23, revenue: 1108, target: 1134, margin: 38.2, growth: 12.0, stores: 8 },
+const channels: ChannelRow[] = [
+  { channel: "Organic", sessions: 70.2, share: 38, engagement: 64.3, conversion: 3.9, revenue: 171.4, cpa: null },
+  { channel: "Paid Search", sessions: 44.3, share: 24, engagement: 57.8, conversion: 3.7, revenue: 116.8, cpa: 24.6 },
+  { channel: "Direct", sessions: 33.2, share: 18, engagement: 63.2, conversion: 3.3, revenue: 74.1, cpa: null },
+  { channel: "Referral", sessions: 22.2, share: 12, engagement: 61.0, conversion: 2.5, revenue: 38.7, cpa: 18.4 },
+  { channel: "Email", sessions: 14.8, share: 8, engagement: 66.4, conversion: 4.4, revenue: 27.6, cpa: 9.8 },
 ]
 
-const categoryBase = [
-  { category: "Home" as const, share: 0.245, revenue: 1181, margin: 41.2, growth: 15.8, fill: "var(--chart-1)" },
-  { category: "Electronics" as const, share: 0.216, revenue: 1041, margin: 38.7, growth: 12.6, fill: "var(--chart-2)" },
-  { category: "Beauty" as const, share: 0.191, revenue: 921, margin: 36.5, growth: 10.4, fill: "var(--chart-3)" },
-  { category: "Sports" as const, share: 0.181, revenue: 872, margin: 34.9, growth: 7.8, fill: "var(--chart-4)" },
-  { category: "Kids" as const, share: 0.167, revenue: 805, margin: 33.8, growth: 5.9, fill: "var(--chart-5)" },
+const channelTrend = [
+  { week: "W1", Organic: 15.4, "Paid Search": 10.2, Direct: 7.2, Referral: 4.8, Email: 3.1 },
+  { week: "W2", Organic: 16.2, "Paid Search": 10.6, Direct: 7.8, Referral: 5.0, Email: 3.2 },
+  { week: "W3", Organic: 17.8, "Paid Search": 11.1, Direct: 8.4, Referral: 5.5, Email: 3.6 },
+  { week: "W4", Organic: 20.8, "Paid Search": 12.4, Direct: 9.8, Referral: 6.9, Email: 4.9 },
 ]
 
-const productBase: ProductRow[] = [
-  { sku: "HOM-104", product: "Oak Dining Set", category: "Home", revenue: 410, margin: 43.2, units: 3800, target: 107, returnRate: 2.2 },
-  { sku: "HOM-221", product: "Air Fryer Pro", category: "Home", revenue: 355, margin: 39.8, units: 5200, target: 101, returnRate: 2.9 },
-  { sku: "ELE-431", product: "Nova Headphones", category: "Electronics", revenue: 338, margin: 36.9, units: 4700, target: 98, returnRate: 4.8 },
-  { sku: "ELE-118", product: "Smart Display", category: "Electronics", revenue: 292, margin: 40.5, units: 2800, target: 101, returnRate: 3.7 },
-  { sku: "BEA-390", product: "Hydra Serum", category: "Beauty", revenue: 275, margin: 45.1, units: 6100, target: 104, returnRate: 1.4 },
-  { sku: "BEA-155", product: "Daily Essentials", category: "Beauty", revenue: 244, margin: 34.2, units: 6900, target: 92, returnRate: 2.0 },
-  { sku: "SPO-251", product: "Trail Runner X", category: "Sports", revenue: 230, margin: 31.8, units: 3400, target: 89, returnRate: 6.2 },
-  { sku: "SPO-087", product: "Core Yoga Kit", category: "Sports", revenue: 205, margin: 38.3, units: 4500, target: 96, returnRate: 2.6 },
-  { sku: "KID-288", product: "PlayLab Blocks", category: "Kids", revenue: 194, margin: 35.7, units: 5100, target: 93, returnRate: 3.1 },
-  { sku: "KID-073", product: "Mini Explorer", category: "Kids", revenue: 178, margin: 30.6, units: 3900, target: 87, returnRate: 5.5 },
+const funnelBase = [
+  { stage: "Landing sessions", value: 184700, rate: 100 },
+  { stage: "Product views", value: 112400, rate: 60.9 },
+  { stage: "Pricing / offer", value: 49300, rate: 26.7 },
+  { stage: "Checkout start", value: 12400, rate: 6.7 },
+  { stage: "Conversions", value: 6317, rate: 3.42 },
 ]
 
-const orders: OrderRow[] = [
-  { id: "R-10948", customer: "Marina Stores", region: "North", channel: "Store", amount: 4280, items: 34, status: "Completed" },
-  { id: "R-10947", customer: "Camila Reyes", region: "East", channel: "Online", amount: 684, items: 4, status: "Processing" },
-  { id: "R-10946", customer: "Urban Haus", region: "Central", channel: "Marketplace", amount: 2310, items: 18, status: "Completed" },
-  { id: "R-10945", customer: "José Valdez", region: "South", channel: "Online", amount: 418, items: 3, status: "Returned" },
-  { id: "R-10944", customer: "Norte Living", region: "North", channel: "Store", amount: 5630, items: 41, status: "Completed" },
-  { id: "R-10943", customer: "Andrea Molina", region: "East", channel: "Online", amount: 952, items: 7, status: "Completed" },
-  { id: "R-10942", customer: "Casa Uno", region: "Central", channel: "Store", amount: 3180, items: 25, status: "Processing" },
-  { id: "R-10941", customer: "MarketHub", region: "South", channel: "Marketplace", amount: 1760, items: 13, status: "Completed" },
+const journeyRows = [
+  { path: ["Landing", "Product", "Pricing", "Checkout"], share: 24.6, conversion: 7.8 },
+  { path: ["Blog", "Product", "Pricing", "Checkout"], share: 18.3, conversion: 5.9 },
+  { path: ["Landing", "Search", "Product", "Exit"], share: 15.7, conversion: 0.0 },
+  { path: ["Campaign", "Landing", "Product", "Checkout"], share: 11.8, conversion: 8.6 },
 ]
 
-const returnReasons = [
-  { name: "Damaged", value: 31, fill: "var(--chart-5)" },
-  { name: "Wrong size / fit", value: 24, fill: "var(--chart-4)" },
-  { name: "Changed mind", value: 21, fill: "var(--chart-3)" },
-  { name: "Late delivery", value: 14, fill: "var(--chart-2)" },
-  { name: "Other", value: 10, fill: "var(--chart-1)" },
+const pages: PageRow[] = [
+  { page: "/pricing", title: "Pricing", sessions: 28.4, engagement: 69.1, conversion: 5.8, exitRate: 24.1, avgTime: 176 },
+  { page: "/product/analytics", title: "Analytics product", sessions: 24.7, engagement: 66.4, conversion: 4.9, exitRate: 28.8, avgTime: 208 },
+  { page: "/resources/reporting", title: "Reporting resource", sessions: 19.8, engagement: 63.0, conversion: 2.7, exitRate: 31.5, avgTime: 232 },
+  { page: "/case-studies/retail", title: "Retail case study", sessions: 16.2, engagement: 71.8, conversion: 3.9, exitRate: 22.4, avgTime: 264 },
+  { page: "/blog/dashboard-design", title: "Dashboard design", sessions: 12.9, engagement: 74.2, conversion: 1.8, exitRate: 36.7, avgTime: 291 },
+  { page: "/integrations", title: "Integrations", sessions: 10.7, engagement: 58.6, conversion: 3.2, exitRate: 33.1, avgTime: 148 },
+  { page: "/features", title: "Features", sessions: 9.8, engagement: 62.5, conversion: 3.6, exitRate: 29.6, avgTime: 187 },
+]
+
+const devices = [
+  { device: "Mobile", sessions: 101.6, share: 55, engagement: 58.6, conversion: 2.8, fill: "var(--chart-1)" },
+  { device: "Desktop", sessions: 72.0, share: 39, engagement: 67.2, conversion: 4.2, fill: "var(--chart-2)" },
+  { device: "Tablet", sessions: 11.1, share: 6, engagement: 60.1, conversion: 3.1, fill: "var(--chart-3)" },
+]
+
+const campaigns: CampaignRow[] = [
+  { campaign: "Brand Search", source: "Google Ads", sessions: 14.2, conversions: 812, conversion: 5.7, cost: 18.6, revenue: 71.4 },
+  { campaign: "Analytics Q3", source: "LinkedIn", sessions: 8.9, conversions: 348, conversion: 3.9, cost: 21.4, revenue: 32.7 },
+  { campaign: "Reporting Guide", source: "Email", sessions: 7.4, conversions: 326, conversion: 4.4, cost: 3.2, revenue: 24.6 },
+  { campaign: "Retargeting", source: "Display", sessions: 6.8, conversions: 204, conversion: 3.0, cost: 11.8, revenue: 17.9 },
+  { campaign: "Partner Launch", source: "Referral", sessions: 5.3, conversions: 164, conversion: 3.1, cost: 5.6, revenue: 14.8 },
+]
+
+const heatmapDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+const heatmapSlots = ["00–04", "04–08", "08–12", "12–16", "16–20", "20–24"]
+const heatmap = [
+  [18, 24, 62, 88, 94, 51],
+  [17, 27, 68, 91, 97, 56],
+  [15, 26, 72, 96, 100, 61],
+  [16, 25, 69, 93, 98, 59],
+  [19, 28, 64, 86, 90, 67],
+  [22, 31, 47, 58, 71, 74],
+  [24, 33, 42, 51, 66, 70],
 ]
 
 const trendConfig = {
-  actual: { label: "Revenue", color: "var(--chart-1)" },
-  target: { label: "Target", color: "var(--chart-4)" },
-  prior: { label: "Prior year", color: "var(--chart-2)" },
+  sessions: { label: "Sessions", color: "var(--chart-1)" },
+  users: { label: "Users", color: "var(--chart-2)" },
 } satisfies ChartConfig
 
 const channelConfig = {
-  store: { label: "Store", color: "var(--chart-1)" },
-  online: { label: "Online", color: "var(--chart-2)" },
-  marketplace: { label: "Marketplace", color: "var(--chart-3)" },
-} satisfies ChartConfig
-
-const regionConfig = {
-  revenue: { label: "Revenue", color: "var(--chart-1)" },
-  target: { label: "Target", color: "var(--chart-2)" },
+  Organic: { label: "Organic", color: "var(--chart-1)" },
+  "Paid Search": { label: "Paid Search", color: "var(--chart-2)" },
+  Direct: { label: "Direct", color: "var(--chart-3)" },
+  Referral: { label: "Referral", color: "var(--chart-4)" },
+  Email: { label: "Email", color: "var(--chart-5)" },
 } satisfies ChartConfig
 
 const emptyConfig = {} satisfies ChartConfig
 
-const regionShare: Record<RegionKey, number> = {
+const periodFactor: Record<PeriodKey, number> = { "30d": 1, "14d": 0.49, "7d": 0.25 }
+const channelFactor: Record<ChannelKey, number> = {
   all: 1,
-  North: 0.30,
-  East: 0.245,
-  Central: 0.225,
-  South: 0.23,
+  Organic: 0.38,
+  "Paid Search": 0.24,
+  Direct: 0.18,
+  Referral: 0.12,
+  Email: 0.08,
 }
+const deviceFactor: Record<DeviceKey, number> = { all: 1, Mobile: 0.55, Desktop: 0.39, Tablet: 0.06 }
+const audienceFactor: Record<AudienceKey, number> = { all: 1, New: 0.615, Returning: 0.385 }
 
-const channelShare: Record<ChannelKey, number> = {
-  all: 1,
-  Store: 0.56,
-  Online: 0.32,
-  Marketplace: 0.12,
-}
-
-const categoryShare: Record<CategoryKey, number> = {
-  all: 1,
-  Home: 0.245,
-  Electronics: 0.216,
-  Beauty: 0.191,
-  Sports: 0.181,
-  Kids: 0.167,
-}
-
-function moneyK(value: number) {
-  if (value >= 1000) return "$" + (value / 1000).toFixed(2) + "M"
-  return "$" + Math.round(value) + "K"
-}
-
-function numberCompact(value: number) {
-  if (value >= 1000) return (value / 1000).toFixed(1) + "K"
+function compact(value: number) {
+  if (value >= 1000) return (value / 1000).toFixed(value >= 100000 ? 1 : 2) + "K"
   return Math.round(value).toLocaleString()
 }
 
-function statusVariant(status: OrderRow["status"]) {
-  if (status === "Completed") return "secondary" as const
-  if (status === "Returned") return "destructive" as const
-  return "outline" as const
+function moneyK(value: number) {
+  return "$" + value.toFixed(1) + "K"
 }
 
 export function Dashboard() {
-  const [period, setPeriod] = useState<PeriodKey>("ytd")
-  const [region, setRegion] = useState<RegionKey>("all")
+  const [period, setPeriod] = useState<PeriodKey>("30d")
   const [channel, setChannel] = useState<ChannelKey>("all")
-  const [category, setCategory] = useState<CategoryKey>("all")
+  const [device, setDevice] = useState<DeviceKey>("all")
+  const [audience, setAudience] = useState<AudienceKey>("all")
   const [detail, setDetail] = useState<DetailState>(null)
 
-  const periodRows = useMemo(() => {
-    if (period === "q3") return trendBase.slice(-3)
-    if (period === "last6") return trendBase.slice(-6)
-    return trendBase
-  }, [period])
+  const scale = periodFactor[period] * channelFactor[channel] * deviceFactor[device] * audienceFactor[audience]
 
-  const timeFactor = periodRows.reduce((sum, row) => sum + row.actual, 0) / 4820
-  const scopeFactor = regionShare[region] * channelShare[channel] * categoryShare[category]
-
-  const filteredTrend = useMemo(
-    () =>
-      periodRows.map((row) => ({
-        ...row,
-        actual: Math.round(row.actual * scopeFactor),
-        target: Math.round(row.target * scopeFactor),
-        prior: Math.round(row.prior * scopeFactor),
-        store: Math.round(row.store * regionShare[region] * categoryShare[category]),
-        online: Math.round(row.online * regionShare[region] * categoryShare[category]),
-        marketplace: Math.round(row.marketplace * regionShare[region] * categoryShare[category]),
-      })),
-    [periodRows, scopeFactor, region, category]
-  )
-
-  const revenueK = filteredTrend.reduce((sum, row) => sum + row.actual, 0)
-  const targetK = filteredTrend.reduce((sum, row) => sum + row.target, 0)
-  const priorK = filteredTrend.reduce((sum, row) => sum + row.prior, 0)
-  const growth = priorK ? ((revenueK - priorK) / priorK) * 100 : 0
-  const targetAttainment = targetK ? (revenueK / targetK) * 100 : 0
-
-  const marginAdjustment =
-    category === "Home" ? 3.6 :
-    category === "Electronics" ? 1.1 :
-    category === "Beauty" ? -0.8 :
-    category === "Sports" ? -2.7 :
-    category === "Kids" ? -3.8 : 0
-
-  const margin = 37.6 + marginAdjustment
-  const grossProfitK = revenueK * (margin / 100)
-  const ordersCount = Math.max(1, Math.round(57300 * timeFactor * scopeFactor))
-  const aov = (revenueK * 1000) / ordersCount
-  const returnRate = category === "Sports" ? 5.1 : category === "Electronics" ? 4.4 : 3.8
-
-  const visibleRegions = useMemo(() => {
-    const base = region === "all" ? regionBase : regionBase.filter((r) => r.region === region)
-    return base.map((r) => ({
-      ...r,
-      revenue: Math.round(r.revenue * timeFactor * channelShare[channel] * categoryShare[category]),
-      target: Math.round(r.target * timeFactor * channelShare[channel] * categoryShare[category]),
+  const filteredTrend = useMemo(() => {
+    const rows = period === "7d" ? trendBase.slice(-4) : period === "14d" ? trendBase.slice(-7) : trendBase
+    return rows.map((row) => ({
+      ...row,
+      sessions: +(row.sessions * channelFactor[channel] * deviceFactor[device] * audienceFactor[audience]).toFixed(2),
+      users: +(row.users * channelFactor[channel] * deviceFactor[device] * audienceFactor[audience]).toFixed(2),
+      conversions: Math.round(row.conversions * channelFactor[channel] * deviceFactor[device] * audienceFactor[audience]),
     }))
-  }, [region, timeFactor, channel, category])
+  }, [period, channel, device, audience])
 
-  const visibleCategories = useMemo(() => {
-    const base = category === "all" ? categoryBase : categoryBase.filter((c) => c.category === category)
-    return base.map((c) => ({
-      ...c,
-      revenue: Math.round(c.revenue * timeFactor * regionShare[region] * channelShare[channel]),
-    }))
-  }, [category, timeFactor, region, channel])
+  const visibleChannels = channel === "all" ? channels : channels.filter((row) => row.channel === channel)
+  const visibleDevices = device === "all" ? devices : devices.filter((row) => row.device === device)
+  const visiblePages = pages.map((row) => ({
+    ...row,
+    sessions: +(row.sessions * periodFactor[period] * channelFactor[channel] * deviceFactor[device] * audienceFactor[audience]).toFixed(1),
+  }))
 
-  const visibleProducts = useMemo(() => {
-    const base = category === "all" ? productBase : productBase.filter((p) => p.category === category)
-    return base
-      .map((p) => ({
-        ...p,
-        revenue: Math.round(p.revenue * timeFactor * regionShare[region] * channelShare[channel]),
-        units: Math.round(p.units * timeFactor * regionShare[region] * channelShare[channel]),
-      }))
-      .sort((a, b) => b.revenue - a.revenue)
-  }, [category, timeFactor, region, channel])
+  const sessions = 184700 * scale
+  const users = 126300 * scale
+  const returningRate = audience === "Returning" ? 100 : audience === "New" ? 0 : 38.5
+  const engagementAdjustment = device === "Desktop" ? 4.6 : device === "Mobile" ? -3.2 : device === "Tablet" ? -1.7 : 0
+  const channelConversion =
+    channel === "all" ? 3.42 :
+    channels.find((row) => row.channel === channel)?.conversion ?? 3.42
+  const deviceConversion = device === "Desktop" ? 4.2 : device === "Mobile" ? 2.8 : device === "Tablet" ? 3.1 : 3.42
+  const conversion = channel === "all" ? deviceConversion : (channelConversion + deviceConversion) / 2
+  const conversions = sessions * (conversion / 100)
+  const revenue = 428.6 * scale * (conversion / 3.42)
+  const engagement = 61.8 + engagementAdjustment
 
-  const visibleOrders = useMemo(
-    () =>
-      orders.filter(
-        (order) =>
-          (region === "all" || order.region === region) &&
-          (channel === "all" || order.channel === channel)
-      ),
-    [region, channel]
-  )
+  const funnel = funnelBase.map((row) => ({
+    ...row,
+    value: Math.round(row.value * scale),
+  }))
 
   function resetFilters() {
-    setPeriod("ytd")
-    setRegion("all")
+    setPeriod("30d")
     setChannel("all")
-    setCategory("all")
+    setDevice("all")
+    setAudience("all")
   }
 
-  function openRegionDetail(row: RegionRow) {
+  function openChannel(row: ChannelRow) {
     setDetail({
-      eyebrow: "Region drill-through",
-      title: row.region,
+      eyebrow: "Acquisition drill-through",
+      title: row.channel,
       description:
-        row.revenue >= row.target
-          ? "This region is above target. The next management question is whether the gain is coming from sustainable volume, pricing, or product mix."
-          : "This region is below target. The detail view separates commercial scale from margin quality so the shortfall is easier to diagnose.",
+        row.conversion >= 3.8
+          ? "This channel combines meaningful traffic with above-average conversion quality."
+          : "This channel contributes useful volume, but its conversion efficiency trails the strongest acquisition sources.",
       metrics: [
+        { label: "Sessions", value: row.sessions.toFixed(1) + "K" },
+        { label: "Traffic share", value: row.share + "%" },
+        { label: "Engagement", value: row.engagement.toFixed(1) + "%" },
+        { label: "Conversion", value: row.conversion.toFixed(1) + "%" },
         { label: "Revenue", value: moneyK(row.revenue) },
-        { label: "Target", value: moneyK(row.target) },
-        { label: "Gross margin", value: row.margin.toFixed(1) + "%" },
-        { label: "Stores", value: String(row.stores) },
+        { label: "CPA", value: row.cpa ? "$" + row.cpa.toFixed(2) : "Organic" },
       ],
     })
   }
 
-  function openProductDetail(row: ProductRow) {
+  function openPage(row: PageRow) {
     setDetail({
-      eyebrow: "Product drill-through",
-      title: row.product,
+      eyebrow: "Content drill-through",
+      title: row.page,
       description:
-        row.target >= 100
-          ? "The product is above plan. Focus on protecting availability and margin while demand remains strong."
-          : "The product is below plan. Review assortment, promotion intensity and channel placement before increasing discounting.",
+        row.conversion >= 4
+          ? "This page shows strong commercial intent. The next question is which sources and journeys are feeding that behavior."
+          : "This page contributes engagement, but conversion is weaker than the strongest commercial pages.",
       metrics: [
-        { label: "SKU", value: row.sku },
-        { label: "Revenue", value: moneyK(row.revenue) },
-        { label: "Margin", value: row.margin.toFixed(1) + "%" },
-        { label: "Target", value: row.target + "%" },
-        { label: "Units", value: numberCompact(row.units) },
-        { label: "Return rate", value: row.returnRate.toFixed(1) + "%" },
+        { label: "Sessions", value: row.sessions.toFixed(1) + "K" },
+        { label: "Engagement", value: row.engagement.toFixed(1) + "%" },
+        { label: "Conversion", value: row.conversion.toFixed(1) + "%" },
+        { label: "Exit rate", value: row.exitRate.toFixed(1) + "%" },
+        { label: "Avg. time", value: Math.floor(row.avgTime / 60) + "m " + (row.avgTime % 60) + "s" },
       ],
     })
   }
 
-  function openOrderDetail(row: OrderRow) {
+  function openCampaign(row: CampaignRow) {
     setDetail({
-      eyebrow: "Order drill-through",
-      title: row.id,
+      eyebrow: "Campaign drill-through",
+      title: row.campaign,
       description:
-        "Order-level detail keeps the selected transaction context while surfacing channel, region, basket size and current status.",
+        row.revenue / row.cost >= 3
+          ? "This campaign is producing efficient commercial return relative to media cost."
+          : "This campaign is generating traffic but requires closer review of cost, conversion and landing-page quality.",
       metrics: [
-        { label: "Customer", value: row.customer },
-        { label: "Amount", value: "$" + row.amount.toLocaleString() },
-        { label: "Items", value: String(row.items) },
-        { label: "Region", value: row.region },
-        { label: "Channel", value: row.channel },
-        { label: "Status", value: row.status },
+        { label: "Source", value: row.source },
+        { label: "Sessions", value: row.sessions.toFixed(1) + "K" },
+        { label: "Conversions", value: row.conversions.toLocaleString() },
+        { label: "Conversion", value: row.conversion.toFixed(1) + "%" },
+        { label: "Cost", value: moneyK(row.cost) },
+        { label: "ROAS", value: (row.revenue / row.cost).toFixed(1) + "x" },
       ],
     })
   }
 
   return (
     <>
-      <div className="mx-auto flex w-full max-w-[1380px] flex-col gap-6">
+      <div className="mx-auto flex w-full max-w-[1380px] flex-col gap-7">
         <section id="overview" className="scroll-mt-20">
           <div className="flex flex-col justify-between gap-4 xl:flex-row xl:items-end">
             <div>
-              <Badge className="mb-3" variant="outline">Retail performance · 2026</Badge>
+              <Badge className="mb-3" variant="outline">Digital analytics · synthetic data</Badge>
               <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
-                Executive retail performance
+                Acquisition & journey analysis
               </h1>
               <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
-                Sales, margin, target attainment, product performance and order quality in one interactive view.
+                Understand where users come from, how they move through the site, where intent drops and which experiences produce conversion.
               </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
               <Select value={period} onValueChange={(value) => setPeriod(value as PeriodKey)}>
-                <SelectTrigger className="min-w-36"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ytd">YTD 2026</SelectItem>
-                  <SelectItem value="last6">Last 6 months</SelectItem>
-                  <SelectItem value="q3">Q3 2026</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={region} onValueChange={(value) => setRegion(value as RegionKey)}>
                 <SelectTrigger className="min-w-32"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All regions</SelectItem>
-                  <SelectItem value="North">North</SelectItem>
-                  <SelectItem value="East">East</SelectItem>
-                  <SelectItem value="Central">Central</SelectItem>
-                  <SelectItem value="South">South</SelectItem>
+                  <SelectItem value="30d">Last 30 days</SelectItem>
+                  <SelectItem value="14d">Last 14 days</SelectItem>
+                  <SelectItem value="7d">Last 7 days</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -417,21 +368,30 @@ export function Dashboard() {
                 <SelectTrigger className="min-w-36"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All channels</SelectItem>
-                  <SelectItem value="Store">Store</SelectItem>
-                  <SelectItem value="Online">Online</SelectItem>
-                  <SelectItem value="Marketplace">Marketplace</SelectItem>
+                  <SelectItem value="Organic">Organic</SelectItem>
+                  <SelectItem value="Paid Search">Paid Search</SelectItem>
+                  <SelectItem value="Direct">Direct</SelectItem>
+                  <SelectItem value="Referral">Referral</SelectItem>
+                  <SelectItem value="Email">Email</SelectItem>
                 </SelectContent>
               </Select>
 
-              <Select value={category} onValueChange={(value) => setCategory(value as CategoryKey)}>
-                <SelectTrigger className="min-w-36"><SelectValue /></SelectTrigger>
+              <Select value={device} onValueChange={(value) => setDevice(value as DeviceKey)}>
+                <SelectTrigger className="min-w-32"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All categories</SelectItem>
-                  <SelectItem value="Home">Home</SelectItem>
-                  <SelectItem value="Electronics">Electronics</SelectItem>
-                  <SelectItem value="Beauty">Beauty</SelectItem>
-                  <SelectItem value="Sports">Sports</SelectItem>
-                  <SelectItem value="Kids">Kids</SelectItem>
+                  <SelectItem value="all">All devices</SelectItem>
+                  <SelectItem value="Mobile">Mobile</SelectItem>
+                  <SelectItem value="Desktop">Desktop</SelectItem>
+                  <SelectItem value="Tablet">Tablet</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={audience} onValueChange={(value) => setAudience(value as AudienceKey)}>
+                <SelectTrigger className="min-w-32"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All users</SelectItem>
+                  <SelectItem value="New">New users</SelectItem>
+                  <SelectItem value="Returning">Returning</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -444,118 +404,53 @@ export function Dashboard() {
 
           <div className="mt-5 overflow-hidden rounded-xl border bg-border">
             <div className="grid grid-cols-2 gap-px lg:grid-cols-3 xl:grid-cols-6">
-              <MetricCard
-                icon={<CircleDollarSignIcon />}
-                label="Revenue"
-                value={moneyK(revenueK)}
-                delta={growth}
-                sublabel="vs prior year"
-              />
-              <MetricCard
-                icon={<TrendingUpIcon />}
-                label="Gross profit"
-                value={moneyK(grossProfitK)}
-                delta={2.6}
-                sublabel={margin.toFixed(1) + "% margin"}
-              />
-              <MetricCard
-                icon={<TargetIcon />}
-                label="Target attainment"
-                value={targetAttainment.toFixed(1) + "%"}
-                delta={targetAttainment - 100}
-                sublabel={moneyK(Math.abs(targetK - revenueK)) + " gap"}
-              />
-              <MetricCard
-                icon={<ReceiptTextIcon />}
-                label="Orders"
-                value={numberCompact(ordersCount)}
-                delta={8.4}
-                sublabel="completed baskets"
-              />
-              <MetricCard
-                icon={<ShoppingCartIcon />}
-                label="Average order"
-                value={"$" + aov.toFixed(2)}
-                delta={6.2}
-                sublabel="basket value"
-              />
-              <MetricCard
-                icon={<PackageCheckIcon />}
-                label="Return rate"
-                value={returnRate.toFixed(1) + "%"}
-                delta={-0.7}
-                sublabel="vs prior period"
-              />
+              <MetricCard icon={<MousePointer2Icon />} label="Sessions" value={compact(sessions)} delta={14.2} sublabel="vs prior period" />
+              <MetricCard icon={<UsersIcon />} label="Active users" value={compact(users)} delta={9.7} sublabel="unique users" />
+              <MetricCard icon={<GaugeIcon />} label="Engagement rate" value={engagement.toFixed(1) + "%"} delta={4.1} sublabel="engaged sessions" />
+              <MetricCard icon={<BadgeCheckIcon />} label="Conversion rate" value={conversion.toFixed(2) + "%"} delta={0.38} sublabel="primary conversion" />
+              <MetricCard icon={<CompassIcon />} label="Conversions" value={compact(conversions)} delta={12.8} sublabel="completed goals" />
+              <MetricCard icon={<RouteIcon />} label="Returning users" value={returningRate.toFixed(1) + "%"} delta={3.4} sublabel="audience mix" />
             </div>
           </div>
 
           <div className="mt-4 grid gap-3 md:grid-cols-3">
             <Signal
-              icon={<TargetIcon />}
-              title="Central remains the largest target gap"
-              body="91% attainment before filters; growth is positive, but still not enough to close plan."
+              title="Mobile owns reach, desktop owns conversion"
+              body="Mobile contributes 55% of sessions but converts 1.4 percentage points below desktop."
             />
             <Signal
-              icon={<BoxesIcon />}
-              title="Home combines scale and margin"
-              body="The category leads revenue while keeping the strongest margin profile among large categories."
+              title="Pricing is the highest-intent content"
+              body="/pricing combines strong volume with the best conversion rate among high-traffic pages."
             />
             <Signal
-              icon={<ArrowUpRightIcon />}
-              title="Online is gaining share"
-              body="Digital contribution expands through Q3 without requiring a proportional increase in returns."
+              title="Largest funnel loss happens before pricing"
+              body="39% of landing sessions never reach a product page, making early journey quality the largest opportunity."
             />
           </div>
         </section>
 
-        <section id="sales" className="scroll-mt-20">
+        <section id="acquisition" className="scroll-mt-20">
           <SectionHeading
-            eyebrow="Sales"
-            title="Revenue movement and channel mix"
-            description="Performance against target and prior year, with the channel composition underneath the same filter context."
+            eyebrow="Acquisition"
+            title="Traffic quality by source"
+            description="Traffic volume alone is not enough. This view compares growth, audience quality and downstream conversion."
           />
 
-          <div className="grid gap-4 xl:grid-cols-[1.65fr_1fr]">
+          <div className="grid gap-4 xl:grid-cols-[1.55fr_1fr]">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">Revenue trend</CardTitle>
-                <CardDescription>Actual vs target vs prior year · $K</CardDescription>
+                <CardTitle className="text-base">Sessions and active users</CardTitle>
+                <CardDescription>Traffic trend in thousands</CardDescription>
               </CardHeader>
               <CardContent>
                 <ChartContainer className="h-[330px] w-full" config={trendConfig}>
-                  <AreaChart data={filteredTrend} margin={{ left: 6, right: 14, top: 12 }}>
+                  <AreaChart data={filteredTrend} margin={{ left: 8, right: 14, top: 10 }}>
                     <CartesianGrid vertical={false} strokeDasharray="3 3" />
-                    <XAxis dataKey="month" axisLine={false} tickLine={false} tickMargin={10} />
-                    <YAxis
-                      axisLine={false}
-                      tickLine={false}
-                      width={48}
-                      tickFormatter={(value) => "$" + Number(value) + "K"}
-                    />
+                    <XAxis dataKey="day" axisLine={false} tickLine={false} tickMargin={10} />
+                    <YAxis axisLine={false} tickLine={false} width={42} tickFormatter={(v) => v + "K"} />
                     <ChartTooltip content={<ChartTooltipContent indicator="line" />} />
-                    <Area
-                      dataKey="actual"
-                      fill="var(--color-actual)"
-                      fillOpacity={0.12}
-                      stroke="var(--color-actual)"
-                      strokeWidth={2.5}
-                      type="monotone"
-                    />
-                    <Line
-                      dataKey="target"
-                      dot={false}
-                      stroke="var(--color-target)"
-                      strokeDasharray="6 5"
-                      strokeWidth={2}
-                      type="monotone"
-                    />
-                    <Line
-                      dataKey="prior"
-                      dot={false}
-                      stroke="var(--color-prior)"
-                      strokeWidth={1.5}
-                      type="monotone"
-                    />
+                    <Area dataKey="sessions" fill="var(--color-sessions)" fillOpacity={0.14} stroke="var(--color-sessions)" strokeWidth={2.5} type="monotone" />
+                    <Line dataKey="users" dot={false} stroke="var(--color-users)" strokeWidth={2} type="monotone" />
                   </AreaChart>
                 </ChartContainer>
               </CardContent>
@@ -563,197 +458,23 @@ export function Dashboard() {
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">Channel contribution</CardTitle>
-                <CardDescription>Revenue mix by month · stacked</CardDescription>
+                <CardTitle className="text-base">Acquisition mix</CardTitle>
+                <CardDescription>Weekly channel contribution</CardDescription>
               </CardHeader>
               <CardContent>
                 <ChartContainer className="h-[330px] w-full" config={channelConfig}>
-                  <BarChart data={filteredTrend} margin={{ left: 4, right: 4, top: 12 }}>
+                  <BarChart data={channelTrend}>
                     <CartesianGrid vertical={false} strokeDasharray="3 3" />
-                    <XAxis dataKey="month" axisLine={false} tickLine={false} tickMargin={10} />
+                    <XAxis dataKey="week" axisLine={false} tickLine={false} />
                     <YAxis hide />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Legend />
-                    <Bar dataKey="store" fill="var(--color-store)" radius={[3, 3, 0, 0]} stackId="sales" />
-                    <Bar dataKey="online" fill="var(--color-online)" stackId="sales" />
-                    <Bar dataKey="marketplace" fill="var(--color-marketplace)" radius={[3, 3, 0, 0]} stackId="sales" />
+                    <Bar dataKey="Organic" stackId="a" fill="var(--color-Organic)" />
+                    <Bar dataKey="Paid Search" stackId="a" fill="var(--color-Paid Search)" />
+                    <Bar dataKey="Direct" stackId="a" fill="var(--color-Direct)" />
+                    <Bar dataKey="Referral" stackId="a" fill="var(--color-Referral)" />
+                    <Bar dataKey="Email" stackId="a" fill="var(--color-Email)" radius={[4, 4, 0, 0]} />
                   </BarChart>
-                </ChartContainer>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-
-        <section id="regions" className="scroll-mt-20">
-          <SectionHeading
-            eyebrow="Regions"
-            title="Where plan is being won or lost"
-            description="Regional scale, assigned target, margin and store footprint."
-          />
-
-          <div className="grid gap-4 xl:grid-cols-[1.4fr_1fr]">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">Revenue vs regional target</CardTitle>
-                <CardDescription>Click a row in the table for drill-through.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ChartContainer className="h-[300px] w-full" config={regionConfig}>
-                  <BarChart
-                    data={visibleRegions}
-                    layout="vertical"
-                    margin={{ left: 4, right: 16, top: 8 }}
-                  >
-                    <CartesianGrid horizontal={false} strokeDasharray="3 3" />
-                    <XAxis type="number" axisLine={false} tickLine={false} tickFormatter={(v) => "$" + v + "K"} />
-                    <YAxis
-                      dataKey="region"
-                      type="category"
-                      width={62}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Legend />
-                    <Bar dataKey="target" fill="var(--color-target)" opacity={0.28} radius={4} />
-                    <Bar dataKey="revenue" fill="var(--color-revenue)" radius={4} />
-                  </BarChart>
-                </ChartContainer>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Regional scorecard</CardTitle>
-                <CardDescription>Scale and quality side by side.</CardDescription>
-              </CardHeader>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="pl-6">Region</TableHead>
-                      <TableHead>Margin</TableHead>
-                      <TableHead>Growth</TableHead>
-                      <TableHead className="pr-6 text-right">Plan</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {visibleRegions.map((row) => {
-                      const plan = row.target ? (row.revenue / row.target) * 100 : 0
-                      return (
-                        <TableRow
-                          className="cursor-pointer"
-                          key={row.region}
-                          onClick={() => openRegionDetail(row)}
-                        >
-                          <TableCell className="pl-6 font-medium">{row.region}</TableCell>
-                          <TableCell>{row.margin.toFixed(1)}%</TableCell>
-                          <TableCell className="text-emerald-600">+{row.growth.toFixed(1)}%</TableCell>
-                          <TableCell className="pr-6 text-right">
-                            <Badge variant={plan >= 100 ? "secondary" : plan >= 95 ? "outline" : "destructive"}>
-                              {plan.toFixed(0)}%
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
-                      )
-                    })}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-
-        <section id="products" className="scroll-mt-20">
-          <SectionHeading
-            eyebrow="Products"
-            title="Portfolio mix and profitability"
-            description="Category contribution plus product-level scale, margin and unit velocity."
-          />
-
-          <div className="grid gap-4 xl:grid-cols-[0.9fr_1.35fr]">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">Category revenue mix</CardTitle>
-                <CardDescription>Contribution to filtered revenue.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ChartContainer className="h-[310px] w-full" config={emptyConfig}>
-                  <PieChart>
-                    <ChartTooltip content={<ChartTooltipContent nameKey="category" />} />
-                    <Pie
-                      data={visibleCategories}
-                      dataKey="revenue"
-                      nameKey="category"
-                      innerRadius={68}
-                      outerRadius={106}
-                      paddingAngle={2}
-                    >
-                      {visibleCategories.map((row) => (
-                        <Cell fill={row.fill} key={row.category} />
-                      ))}
-                    </Pie>
-                    <Legend />
-                  </PieChart>
-                </ChartContainer>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">Scale vs profitability</CardTitle>
-                <CardDescription>Revenue on X, gross margin on Y, bubble size = units sold.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ChartContainer className="h-[310px] w-full" config={emptyConfig}>
-                  <ScatterChart margin={{ left: 8, right: 24, top: 12, bottom: 4 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      type="number"
-                      dataKey="revenue"
-                      name="Revenue"
-                      axisLine={false}
-                      tickLine={false}
-                      tickFormatter={(v) => "$" + v + "K"}
-                    />
-                    <YAxis
-                      type="number"
-                      dataKey="margin"
-                      name="Margin"
-                      domain={[28, 47]}
-                      axisLine={false}
-                      tickLine={false}
-                      tickFormatter={(v) => v + "%"}
-                    />
-                    <ZAxis type="number" dataKey="units" range={[70, 320]} />
-                    <ChartTooltip
-                      content={
-                        <ChartTooltipContent
-                          formatter={(value, name) => (
-                            <div className="flex min-w-36 items-center justify-between gap-4">
-                              <span className="text-muted-foreground">{String(name)}</span>
-                              <span className="font-mono font-medium">
-                                {name === "margin" ? Number(value).toFixed(1) + "%" : String(value)}
-                              </span>
-                            </div>
-                          )}
-                        />
-                      }
-                    />
-                    {(["Home", "Electronics", "Beauty", "Sports", "Kids"] as const).map((cat, index) => {
-                      const rows = visibleProducts.filter((p) => p.category === cat)
-                      if (!rows.length) return null
-                      const fills = [
-                        "var(--chart-1)",
-                        "var(--chart-2)",
-                        "var(--chart-3)",
-                        "var(--chart-4)",
-                        "var(--chart-5)",
-                      ]
-                      return <Scatter data={rows} fill={fills[index]} key={cat} name={cat} />
-                    })}
-                    <Legend />
-                  </ScatterChart>
                 </ChartContainer>
               </CardContent>
             </Card>
@@ -761,43 +482,36 @@ export function Dashboard() {
 
           <Card className="mt-4">
             <CardHeader>
-              <CardTitle className="text-base">Top products</CardTitle>
-              <CardDescription>Click any product to open the drill-through panel.</CardDescription>
+              <CardTitle className="text-base">Channel quality scorecard</CardTitle>
+              <CardDescription>Click a channel for drill-through.</CardDescription>
             </CardHeader>
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="pl-6">Product</TableHead>
-                    <TableHead>Category</TableHead>
+                    <TableHead className="pl-6">Channel</TableHead>
+                    <TableHead>Sessions</TableHead>
+                    <TableHead>Share</TableHead>
+                    <TableHead>Engagement</TableHead>
+                    <TableHead>Conversion</TableHead>
                     <TableHead>Revenue</TableHead>
-                    <TableHead>Margin</TableHead>
-                    <TableHead>Units</TableHead>
-                    <TableHead>Returns</TableHead>
-                    <TableHead className="pr-6 text-right">Plan</TableHead>
+                    <TableHead className="pr-6 text-right">CPA</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {visibleProducts.slice(0, 8).map((row) => (
-                    <TableRow
-                      className="cursor-pointer"
-                      key={row.sku}
-                      onClick={() => openProductDetail(row)}
-                    >
-                      <TableCell className="pl-6">
-                        <div className="font-medium">{row.product}</div>
-                        <div className="text-xs text-muted-foreground">{row.sku}</div>
-                      </TableCell>
-                      <TableCell>{row.category}</TableCell>
-                      <TableCell>{moneyK(row.revenue)}</TableCell>
-                      <TableCell>{row.margin.toFixed(1)}%</TableCell>
-                      <TableCell>{numberCompact(row.units)}</TableCell>
-                      <TableCell>{row.returnRate.toFixed(1)}%</TableCell>
-                      <TableCell className="pr-6 text-right">
-                        <Badge variant={row.target >= 100 ? "secondary" : row.target >= 95 ? "outline" : "destructive"}>
-                          {row.target}%
+                  {visibleChannels.map((row) => (
+                    <TableRow className="cursor-pointer" key={row.channel} onClick={() => openChannel(row)}>
+                      <TableCell className="pl-6 font-medium">{row.channel}</TableCell>
+                      <TableCell>{row.sessions.toFixed(1)}K</TableCell>
+                      <TableCell>{row.share}%</TableCell>
+                      <TableCell>{row.engagement.toFixed(1)}%</TableCell>
+                      <TableCell>
+                        <Badge variant={row.conversion >= 4 ? "secondary" : row.conversion >= 3 ? "outline" : "destructive"}>
+                          {row.conversion.toFixed(1)}%
                         </Badge>
                       </TableCell>
+                      <TableCell>{moneyK(row.revenue)}</TableCell>
+                      <TableCell className="pr-6 text-right">{row.cpa ? "$" + row.cpa.toFixed(2) : "—"}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -806,86 +520,300 @@ export function Dashboard() {
           </Card>
         </section>
 
-        <section id="orders" className="scroll-mt-20">
+        <section id="funnel" className="scroll-mt-20">
           <SectionHeading
-            eyebrow="Orders"
-            title="Transaction quality and returns"
-            description="Recent order activity paired with the reasons behind returned merchandise."
+            eyebrow="Funnel"
+            title="Where intent drops"
+            description="Each stage shows the share of landing sessions that survive to the next commercial step."
           />
 
-          <div className="grid gap-4 xl:grid-cols-[1.45fr_0.75fr]">
+          <div className="grid gap-4 xl:grid-cols-[1.25fr_0.75fr]">
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Recent orders</CardTitle>
-                <CardDescription>Click an order to preserve its context in drill-through.</CardDescription>
+                <CardTitle className="text-base">Conversion funnel</CardTitle>
+                <CardDescription>Filtered journey from landing session to conversion.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {funnel.map((stage, index) => {
+                  const previous = index === 0 ? stage.value : funnel[index - 1].value
+                  const stageConversion = previous ? (stage.value / previous) * 100 : 0
+                  return (
+                    <div className="grid grid-cols-[150px_1fr_90px] items-center gap-4" key={stage.stage}>
+                      <div>
+                        <div className="text-sm font-medium">{stage.stage}</div>
+                        <div className="text-xs text-muted-foreground">{compact(stage.value)}</div>
+                      </div>
+                      <div className="h-10 overflow-hidden rounded-md border bg-muted/30">
+                        <div
+                          className="flex h-full items-center rounded-md bg-primary/85 px-3 text-xs font-medium text-primary-foreground transition-all"
+                          style={{ width: Math.max(5, stage.rate) + "%" }}
+                        >
+                          {stage.rate.toFixed(stage.rate < 10 ? 2 : 1)}%
+                        </div>
+                      </div>
+                      <div className="text-right text-xs">
+                        <div className="font-medium">{index === 0 ? "Entry" : stageConversion.toFixed(1) + "%"}</div>
+                        <div className="text-muted-foreground">stage rate</div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Drop-off diagnosis</CardTitle>
+                <CardDescription>Largest losses in the journey.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Dropoff rank="01" title="Landing → Product" value="39.1%" note="Largest absolute loss" />
+                <Dropoff rank="02" title="Product → Pricing" value="56.1%" note="Intent not reaching offer" />
+                <Dropoff rank="03" title="Pricing → Checkout" value="74.8%" note="Commercial friction" />
+                <Dropoff rank="04" title="Checkout → Conversion" value="49.1%" note="Final-step abandonment" />
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        <section id="journeys" className="scroll-mt-20">
+          <SectionHeading
+            eyebrow="Journeys"
+            title="How users move through the experience"
+            description="High-frequency paths reveal which sequences generate intent and which patterns end in exits."
+          />
+
+          <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Top navigation paths</CardTitle>
+                <CardDescription>Share of observed sessions and conversion by path.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {journeyRows.map((row, index) => (
+                  <div className="rounded-lg border p-4" key={row.path.join("-")}>
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="text-xs font-medium text-muted-foreground">Path {index + 1}</div>
+                      <div className="flex gap-4 text-xs">
+                        <span><strong>{row.share}%</strong> sessions</span>
+                        <span><strong>{row.conversion}%</strong> conv.</span>
+                      </div>
+                    </div>
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      {row.path.map((step, stepIndex) => (
+                        <div className="flex items-center gap-2" key={step + stepIndex}>
+                          <span className={"rounded-md border px-3 py-2 text-xs " + (step === "Exit" ? "border-destructive/30 bg-destructive/10 text-destructive" : "bg-muted/35")}>
+                            {step}
+                          </span>
+                          {stepIndex < row.path.length - 1 && <ArrowUpRightIcon className="size-3.5 rotate-45 text-muted-foreground" />}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Traffic intensity heatmap</CardTitle>
+                <CardDescription>Day of week × time of day.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-[44px_repeat(6,minmax(0,1fr))] gap-1 text-[10px]">
+                  <div />
+                  {heatmapSlots.map((slot) => <div className="pb-1 text-center text-muted-foreground" key={slot}>{slot}</div>)}
+                  {heatmapDays.map((day, rowIndex) => (
+                    <>
+                      <div className="flex items-center text-muted-foreground" key={day + "-label"}>{day}</div>
+                      {heatmap[rowIndex].map((value, colIndex) => (
+                        <div
+                          className="group relative h-9 rounded-sm border"
+                          key={day + colIndex}
+                          style={{
+                            backgroundColor: "color-mix(in oklab, var(--primary) " + Math.max(10, value) + "%, transparent)",
+                          }}
+                          title={day + " " + heatmapSlots[colIndex] + ": " + value + " index"}
+                        />
+                      ))}
+                    </>
+                  ))}
+                </div>
+                <div className="mt-4 flex items-center justify-between text-[10px] text-muted-foreground">
+                  <span>Lower activity</span>
+                  <div className="h-2 w-32 rounded-full bg-gradient-to-r from-primary/10 to-primary" />
+                  <span>Higher activity</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        <section id="content" className="scroll-mt-20">
+          <SectionHeading
+            eyebrow="Content"
+            title="Engagement vs conversion"
+            description="A page can be popular without being commercially useful. This view separates attention from outcome."
+          />
+
+          <div className="grid gap-4 xl:grid-cols-[1fr_1.35fr]">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Page quality map</CardTitle>
+                <CardDescription>X = engagement, Y = conversion, bubble = sessions.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer className="h-[320px] w-full" config={emptyConfig}>
+                  <ScatterChart margin={{ left: 8, right: 18, top: 8, bottom: 6 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      type="number"
+                      dataKey="engagement"
+                      name="Engagement"
+                      domain={[55, 78]}
+                      axisLine={false}
+                      tickLine={false}
+                      tickFormatter={(v) => v + "%"}
+                    />
+                    <YAxis
+                      type="number"
+                      dataKey="conversion"
+                      name="Conversion"
+                      domain={[1, 6.5]}
+                      axisLine={false}
+                      tickLine={false}
+                      tickFormatter={(v) => v + "%"}
+                    />
+                    <ZAxis type="number" dataKey="sessions" range={[90, 360]} />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Scatter data={visiblePages} fill="var(--chart-1)" name="Pages" />
+                  </ScatterChart>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Top content</CardTitle>
+                <CardDescription>Click a row for page-level drill-through.</CardDescription>
               </CardHeader>
               <CardContent className="p-0">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="pl-6">Order</TableHead>
-                      <TableHead>Customer</TableHead>
-                      <TableHead>Region</TableHead>
-                      <TableHead>Channel</TableHead>
-                      <TableHead>Items</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead className="pr-6 text-right">Status</TableHead>
+                      <TableHead className="pl-6">Page</TableHead>
+                      <TableHead>Sessions</TableHead>
+                      <TableHead>Engagement</TableHead>
+                      <TableHead>Conversion</TableHead>
+                      <TableHead>Exit</TableHead>
+                      <TableHead className="pr-6 text-right">Avg. time</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {visibleOrders.map((row) => (
-                      <TableRow
-                        className="cursor-pointer"
-                        key={row.id}
-                        onClick={() => openOrderDetail(row)}
-                      >
-                        <TableCell className="pl-6 font-mono text-xs">{row.id}</TableCell>
-                        <TableCell className="font-medium">{row.customer}</TableCell>
-                        <TableCell>{row.region}</TableCell>
-                        <TableCell>{row.channel}</TableCell>
-                        <TableCell>{row.items}</TableCell>
-                        <TableCell>{"$" + row.amount.toLocaleString()}</TableCell>
-                        <TableCell className="pr-6 text-right">
-                          <Badge variant={statusVariant(row.status)}>{row.status}</Badge>
+                    {visiblePages.map((row) => (
+                      <TableRow className="cursor-pointer" key={row.page} onClick={() => openPage(row)}>
+                        <TableCell className="pl-6">
+                          <div className="font-medium">{row.title}</div>
+                          <div className="font-mono text-[10px] text-muted-foreground">{row.page}</div>
                         </TableCell>
+                        <TableCell>{row.sessions.toFixed(1)}K</TableCell>
+                        <TableCell>{row.engagement.toFixed(1)}%</TableCell>
+                        <TableCell>{row.conversion.toFixed(1)}%</TableCell>
+                        <TableCell>{row.exitRate.toFixed(1)}%</TableCell>
+                        <TableCell className="pr-6 text-right">{Math.floor(row.avgTime / 60)}m {row.avgTime % 60}s</TableCell>
                       </TableRow>
                     ))}
-                    {!visibleOrders.length && (
-                      <TableRow>
-                        <TableCell className="h-24 text-center text-muted-foreground" colSpan={7}>
-                          No recent orders match the current region and channel filters.
-                        </TableCell>
-                      </TableRow>
-                    )}
                   </TableBody>
                 </Table>
               </CardContent>
             </Card>
+          </div>
+        </section>
 
+        <section id="devices" className="scroll-mt-20">
+          <SectionHeading
+            eyebrow="Devices & campaigns"
+            title="Experience quality by context"
+            description="Device behavior exposes UX friction; campaign economics show whether acquired traffic is worth the cost."
+          />
+
+          <div className="grid gap-4 xl:grid-cols-[0.8fr_1.4fr]">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">Return reasons</CardTitle>
-                <CardDescription>Share of returned orders.</CardDescription>
+                <CardTitle className="text-base">Device mix</CardTitle>
+                <CardDescription>Session share by device.</CardDescription>
               </CardHeader>
               <CardContent>
-                <ChartContainer className="h-[285px] w-full" config={emptyConfig}>
+                <ChartContainer className="h-[290px] w-full" config={emptyConfig}>
                   <PieChart>
-                    <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
-                    <Pie
-                      data={returnReasons}
-                      dataKey="value"
-                      nameKey="name"
-                      innerRadius={52}
-                      outerRadius={90}
-                      paddingAngle={2}
-                    >
-                      {returnReasons.map((row) => (
-                        <Cell fill={row.fill} key={row.name} />
-                      ))}
+                    <ChartTooltip content={<ChartTooltipContent nameKey="device" />} />
+                    <Pie data={visibleDevices} dataKey="sessions" nameKey="device" innerRadius={58} outerRadius={96} paddingAngle={3}>
+                      {visibleDevices.map((row) => <Cell fill={row.fill} key={row.device} />)}
                     </Pie>
                     <Legend />
                   </PieChart>
                 </ChartContainer>
+                <div className="mt-2 space-y-2">
+                  {visibleDevices.map((row) => (
+                    <button
+                      className="flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-xs transition-colors hover:bg-muted/50"
+                      key={row.device}
+                      onClick={() => setDetail({
+                        eyebrow: "Device drill-through",
+                        title: row.device,
+                        description: row.device === "Mobile" ? "Mobile supplies the most traffic but underperforms desktop on conversion, suggesting friction after intent is established." : "This device segment shows a distinct balance between reach, engagement and conversion.",
+                        metrics: [
+                          { label: "Sessions", value: row.sessions.toFixed(1) + "K" },
+                          { label: "Share", value: row.share + "%" },
+                          { label: "Engagement", value: row.engagement.toFixed(1) + "%" },
+                          { label: "Conversion", value: row.conversion.toFixed(1) + "%" },
+                        ],
+                      })}
+                    >
+                      <span className="font-medium">{row.device}</span>
+                      <span className="text-muted-foreground">{row.engagement.toFixed(1)}% engaged · {row.conversion.toFixed(1)}% conv.</span>
+                    </button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Campaign economics</CardTitle>
+                <CardDescription>Paid and owned campaign quality, including ROAS.</CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="pl-6">Campaign</TableHead>
+                      <TableHead>Source</TableHead>
+                      <TableHead>Sessions</TableHead>
+                      <TableHead>Conversions</TableHead>
+                      <TableHead>CVR</TableHead>
+                      <TableHead>Cost</TableHead>
+                      <TableHead className="pr-6 text-right">ROAS</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {campaigns.map((row) => (
+                      <TableRow className="cursor-pointer" key={row.campaign} onClick={() => openCampaign(row)}>
+                        <TableCell className="pl-6 font-medium">{row.campaign}</TableCell>
+                        <TableCell>{row.source}</TableCell>
+                        <TableCell>{row.sessions.toFixed(1)}K</TableCell>
+                        <TableCell>{row.conversions.toLocaleString()}</TableCell>
+                        <TableCell>{row.conversion.toFixed(1)}%</TableCell>
+                        <TableCell>{moneyK(row.cost)}</TableCell>
+                        <TableCell className="pr-6 text-right">
+                          <Badge variant={row.revenue / row.cost >= 3 ? "secondary" : "outline"}>
+                            {(row.revenue / row.cost).toFixed(1)}x
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
           </div>
@@ -894,14 +822,13 @@ export function Dashboard() {
         <section id="methodology" className="scroll-mt-20 rounded-xl border bg-muted/25 p-5">
           <div className="flex items-start gap-3">
             <div className="grid size-9 shrink-0 place-items-center rounded-lg border bg-background">
-              <BoxesIcon className="size-4" />
+              <FilterIcon className="size-4" />
             </div>
             <div>
               <h2 className="text-sm font-medium">Portfolio methodology</h2>
               <p className="mt-1 max-w-4xl text-xs leading-5 text-muted-foreground">
-                All values are synthetic. The project is designed to demonstrate dashboard UX, filter context,
-                KPI hierarchy, multiple chart forms, exception analysis and drill-through without exposing client
-                or employer data.
+                All values are synthetic. The project demonstrates acquisition analysis, funnel diagnosis, journey exploration,
+                behavioral segmentation, content quality, filter context and drill-through without exposing production analytics data.
               </p>
             </div>
           </div>
@@ -924,11 +851,9 @@ export function Dashboard() {
             ))}
           </div>
           <div className="px-4 pb-4">
-            <h3 className="text-sm font-medium">How to use this detail</h3>
+            <h3 className="text-sm font-medium">Next analytical question</h3>
             <p className="mt-2 text-xs leading-5 text-muted-foreground">
-              Drill-through should answer the next question created by the selected visual, not repeat the same
-              KPI. In a production model this panel would receive the selected region, product or order key and
-              query the detailed fact table.
+              A useful drill-through should preserve the selected context and expose the next layer of behavior, not simply repeat the same KPI.
             </p>
           </div>
         </SheetContent>
@@ -948,9 +873,7 @@ function SectionHeading({
 }) {
   return (
     <div className="mb-4 flex flex-col gap-1">
-      <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-        {eyebrow}
-      </div>
+      <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">{eyebrow}</div>
       <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
       <p className="max-w-3xl text-sm text-muted-foreground">{description}</p>
     </div>
@@ -964,7 +887,7 @@ function MetricCard({
   delta,
   sublabel,
 }: {
-  icon: React.ReactNode
+  icon: ReactNode
   label: string
   value: string
   delta: number
@@ -975,15 +898,13 @@ function MetricCard({
     <div className="min-h-32 bg-background p-4">
       <div className="flex items-center justify-between gap-2">
         <div className="text-xs text-muted-foreground">{label}</div>
-        <div className="grid size-7 place-items-center rounded-md border bg-muted/25 text-muted-foreground [&>svg]:size-3.5">
-          {icon}
-        </div>
+        <div className="grid size-7 place-items-center rounded-md border bg-muted/25 text-muted-foreground [&>svg]:size-3.5">{icon}</div>
       </div>
       <div className="mt-4 text-2xl font-semibold tracking-tight tabular-nums">{value}</div>
       <div className="mt-2 flex items-center gap-1 text-[11px]">
         <span className={positive ? "text-emerald-600" : "text-rose-600"}>
           {positive ? <ArrowUpRightIcon className="inline size-3" /> : <ArrowDownRightIcon className="inline size-3" />}
-          {Math.abs(delta).toFixed(1)}%
+          {Math.abs(delta).toFixed(delta < 1 ? 2 : 1)}%
         </span>
         <span className="text-muted-foreground">{sublabel}</span>
       </div>
@@ -991,24 +912,34 @@ function MetricCard({
   )
 }
 
-function Signal({
-  icon,
+function Signal({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="rounded-lg border bg-background p-4">
+      <div className="text-xs font-medium">{title}</div>
+      <div className="mt-1 text-[11px] leading-4 text-muted-foreground">{body}</div>
+    </div>
+  )
+}
+
+function Dropoff({
+  rank,
   title,
-  body,
+  value,
+  note,
 }: {
-  icon: React.ReactNode
+  rank: string
   title: string
-  body: string
+  value: string
+  note: string
 }) {
   return (
-    <div className="flex gap-3 rounded-lg border bg-background p-4">
-      <div className="grid size-8 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground [&>svg]:size-4">
-        {icon}
-      </div>
-      <div>
+    <div className="flex items-center gap-3 rounded-lg border p-3">
+      <div className="grid size-8 place-items-center rounded-md bg-muted text-xs font-semibold">{rank}</div>
+      <div className="min-w-0 flex-1">
         <div className="text-xs font-medium">{title}</div>
-        <div className="mt-1 text-[11px] leading-4 text-muted-foreground">{body}</div>
+        <div className="text-[11px] text-muted-foreground">{note}</div>
       </div>
+      <div className="text-sm font-semibold text-rose-500">{value}</div>
     </div>
   )
 }
