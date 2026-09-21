@@ -1,0 +1,60 @@
+name: Publish Retail Preview
+
+on:
+  push:
+    branches:
+      - efferd-dashboard-1
+    paths:
+      - retail-efferd-src/**
+      - .github/workflows/publish-retail-preview.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout prototype branch
+        uses: actions/checkout@v4
+        with:
+          ref: efferd-dashboard-1
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: retail-efferd-src/package-lock.json
+
+      - name: Install dependencies
+        working-directory: retail-efferd-src
+        run: npm ci
+
+      - name: Build preview
+        working-directory: retail-efferd-src
+        run: npm run build -- --base=/retail-efferd-preview/
+
+      - name: Stage preview build
+        run: |
+          rm -rf /tmp/retail-preview
+          mkdir -p /tmp/retail-preview
+          cp -R retail-efferd-src/dist/. /tmp/retail-preview/
+
+      - name: Publish preview folder to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout main
+          rm -rf retail-efferd-preview
+          mkdir -p retail-efferd-preview
+          cp -R /tmp/retail-preview/. retail-efferd-preview/
+          git add retail-efferd-preview
+          if git diff --cached --quiet; then
+            echo "Preview already current"
+          else
+            git commit -m "Publish retail dashboard preview"
+            git push origin main
+          fi
