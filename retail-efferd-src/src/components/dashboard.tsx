@@ -5,10 +5,11 @@ import {
   Area,
   AreaChart,
   CartesianGrid,
-  Funnel,
-  FunnelChart,
-  LabelList,
   ReferenceLine,
+  PolarAngleAxis,
+  PolarGrid,
+  Radar,
+  RadarChart,
   Scatter,
   ScatterChart,
   XAxis,
@@ -143,11 +144,11 @@ const channelColors: Record<Exclude<ChannelKey, "all">, string> = {
   Email: "var(--chart-5)",
 }
 
-const weeklyChannel = [
-  { week: "W1", total: 40.7, Organic: 15.4, "Paid Search": 10.2, Direct: 7.2, Referral: 4.8, Email: 3.1 },
-  { week: "W2", total: 42.8, Organic: 16.2, "Paid Search": 10.6, Direct: 7.8, Referral: 5.0, Email: 3.2 },
-  { week: "W3", total: 46.4, Organic: 17.8, "Paid Search": 11.1, Direct: 8.4, Referral: 5.5, Email: 3.6 },
-  { week: "W4", total: 54.8, Organic: 20.8, "Paid Search": 12.4, Direct: 9.8, Referral: 6.9, Email: 4.9 },
+const quarterlyChannel = [
+  { quarter: "Q1", total: 28.4, Organic: 8.2, "Paid Search": 9.6, Direct: 4.8, Referral: 3.5, Email: 2.3 },
+  { quarter: "Q2", total: 41.7, Organic: 15.4, "Paid Search": 10.1, Direct: 7.9, Referral: 5.1, Email: 3.2 },
+  { quarter: "Q3", total: 56.9, Organic: 24.2, "Paid Search": 11.6, Direct: 10.8, Referral: 6.2, Email: 4.1 },
+  { quarter: "Q4", total: 73.8, Organic: 26.1, "Paid Search": 18.7, Direct: 14.9, Referral: 8.5, Email: 5.6 },
 ]
 
 const rankHistory: Record<Exclude<ChannelKey, "all">, number[]> = {
@@ -158,13 +159,18 @@ const rankHistory: Record<Exclude<ChannelKey, "all">, number[]> = {
   Email: [5, 5, 5, 4],
 }
 
-const funnelBase = [
-  { stage: "Landing sessions", value: 184700, rate: 100, fill: "var(--chart-1)" },
-  { stage: "Product views", value: 112400, rate: 60.9, fill: "var(--chart-2)" },
-  { stage: "Pricing / offer", value: 49300, rate: 26.7, fill: "var(--chart-3)" },
-  { stage: "Checkout start", value: 12400, rate: 6.7, fill: "var(--chart-4)" },
-  { stage: "Conversions", value: 6317, rate: 3.42, fill: "var(--chart-5)" },
+const journeyEfficiency = [
+  { stage: "Landing", current: 100, previous: 100 },
+  { stage: "Product", current: 60.9, previous: 56.4 },
+  { stage: "Pricing", current: 43.9, previous: 38.1 },
+  { stage: "Checkout", current: 25.2, previous: 21.6 },
+  { stage: "Conversion", current: 50.9, previous: 46.3 },
 ]
+
+const radarConfig = {
+  current: { label: "Current period", color: "var(--chart-1)" },
+  previous: { label: "Previous period", color: "var(--chart-2)" },
+} satisfies ChartConfig
 
 const journeyNodes = [
   { id: "landing", label: "Landing", x: 36, y: 74, h: 110 },
@@ -287,11 +293,6 @@ export function Dashboard() {
   const conversions = sessions * (conversion / 100)
   const revenue = 428.6 * scale * (conversion / 3.42)
   const engagement = 61.8 + engagementAdjustment
-
-  const funnel = funnelBase.map((row) => ({
-    ...row,
-    value: Math.round(row.value * scale),
-  }))
 
   function resetFilters() {
     setPeriod("30d")
@@ -453,7 +454,7 @@ export function Dashboard() {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">Acquisition composition</CardTitle>
-                <CardDescription>Marimekko · width = weekly traffic, height = channel share</CardDescription>
+                <CardDescription>Marimekko · width = quarterly traffic, height = channel share</CardDescription>
               </CardHeader>
               <CardContent>
                 <MarimekkoChart />
@@ -505,24 +506,47 @@ export function Dashboard() {
           <SectionHeading
             eyebrow="Funnel"
             title="Where intent collapses"
-            description="A proportional funnel makes stage loss visible immediately instead of disguising it as a standard bar chart."
+            description="The radar compares stage-to-stage journey efficiency, while the diagnostic panel ranks the biggest losses by business impact."
           />
 
           <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
             <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">Conversion funnel</CardTitle>
-                <CardDescription>Width is proportional to surviving users.</CardDescription>
+              <CardHeader className="items-center pb-2">
+                <CardTitle className="text-base">Journey efficiency radar</CardTitle>
+                <CardDescription>Stage-to-stage efficiency · current vs previous period</CardDescription>
               </CardHeader>
-              <CardContent>
-                <ChartContainer className="h-[360px] w-full" config={emptyConfig}>
-                  <FunnelChart>
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Funnel data={funnel} dataKey="value" nameKey="stage" isAnimationActive>
-                      <LabelList dataKey="stage" fill="var(--foreground)" position="right" stroke="none" />
-                    </Funnel>
-                  </FunnelChart>
+              <CardContent className="pb-2">
+                <ChartContainer config={radarConfig} className="mx-auto aspect-square max-h-[360px]">
+                  <RadarChart data={journeyEfficiency}>
+                    <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                    <PolarAngleAxis dataKey="stage" tick={{ fontSize: 11 }} />
+                    <PolarGrid />
+                    <Radar
+                      dataKey="previous"
+                      fill="var(--color-previous)"
+                      fillOpacity={0.12}
+                      stroke="var(--color-previous)"
+                      strokeWidth={1.5}
+                    />
+                    <Radar
+                      dataKey="current"
+                      fill="var(--color-current)"
+                      fillOpacity={0.35}
+                      stroke="var(--color-current)"
+                      strokeWidth={2}
+                    />
+                  </RadarChart>
                 </ChartContainer>
+                <div className="mt-2 flex items-center justify-center gap-5 text-[10px] text-muted-foreground">
+                  <span className="flex items-center gap-2">
+                    <span className="size-2.5 rounded-sm bg-[var(--chart-1)]" />
+                    Current period
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <span className="size-2.5 rounded-sm bg-[var(--chart-2)]" />
+                    Previous period
+                  </span>
+                </div>
               </CardContent>
             </Card>
 
@@ -869,17 +893,17 @@ function BumpChart() {
 }
 
 function MarimekkoChart() {
-  const maxTotal = Math.max(...weeklyChannel.map((row) => row.total))
+  const maxTotal = Math.max(...quarterlyChannel.map((row) => row.total))
   const channelOrder: Array<Exclude<ChannelKey, "all">> = ["Organic", "Paid Search", "Direct", "Referral", "Email"]
 
   return (
     <div>
       <div className="flex h-[250px] items-end gap-2 rounded-lg border bg-muted/10 p-3">
-        {weeklyChannel.map((row) => (
+        {quarterlyChannel.map((row) => (
           <div
             className="flex h-full flex-col justify-end"
-            key={row.week}
-            style={{ width: (row.total / maxTotal) * 25 + "%" }}
+            key={row.quarter}
+            style={{ flexGrow: row.total, flexBasis: (row.total / maxTotal) * 12 + "%", minWidth: "12%" }}
           >
             <div className="flex h-[210px] flex-col-reverse overflow-hidden rounded-md border bg-background">
               {channelOrder.map((channel) => {
@@ -897,7 +921,7 @@ function MarimekkoChart() {
               })}
             </div>
             <div className="mt-2 text-center text-[10px] text-muted-foreground">
-              {row.week}<br /><span className="font-medium text-foreground">{row.total.toFixed(1)}K</span>
+              {row.quarter}<br /><span className="font-medium text-foreground">{row.total.toFixed(1)}K</span>
             </div>
           </div>
         ))}
