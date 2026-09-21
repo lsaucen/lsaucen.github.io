@@ -1,15 +1,14 @@
 import type { ReactNode } from "react"
 import {
   ActivityIcon,
-  ChartNoAxesCombinedIcon,
-  CompassIcon,
-  GalleryVerticalEndIcon,
-  LayoutDashboardIcon,
-  MonitorSmartphoneIcon,
-  MousePointerClickIcon,
-  RouteIcon,
   ArrowUpRightIcon,
+  CalendarDaysIcon,
+  CircleDollarSignIcon,
   DatabaseIcon,
+  LayoutDashboardIcon,
+  RouteIcon,
+  TrendingDownIcon,
+  UsersIcon,
 } from "lucide-react"
 
 export type SidebarNavItem = {
@@ -26,14 +25,14 @@ export type SidebarNavGroup = {
 
 export const navGroups: SidebarNavGroup[] = [
   {
-    label: "Web analytics",
+    label: "Customer retention",
     items: [
       { title: "Overview", url: "#overview", icon: <LayoutDashboardIcon />, isActive: true },
-      { title: "Acquisition", url: "#acquisition", icon: <CompassIcon /> },
-      { title: "Funnel", url: "#funnel", icon: <MousePointerClickIcon /> },
-      { title: "Journeys", url: "#journeys", icon: <RouteIcon /> },
-      { title: "Content", url: "#content", icon: <GalleryVerticalEndIcon /> },
-      { title: "Devices", url: "#devices", icon: <MonitorSmartphoneIcon /> },
+      { title: "Cohorts", url: "#cohorts", icon: <CalendarDaysIcon /> },
+      { title: "Churn", url: "#churn", icon: <TrendingDownIcon /> },
+      { title: "Lifecycle", url: "#lifecycle", icon: <RouteIcon /> },
+      { title: "Economics", url: "#economics", icon: <CircleDollarSignIcon /> },
+      { title: "Segments", url: "#segments", icon: <UsersIcon /> },
     ],
   },
 ]
@@ -49,19 +48,17 @@ export const navLinks: SidebarNavItem[] = [
 ]
 
 export const dashboardIdentity = {
-  name: "Web Analytics",
-  subtitle: "Acquisition & journey analysis",
+  name: "Retention Intelligence",
+  subtitle: "Cohort & churn analysis",
   icon: <ActivityIcon />,
 }
 
 export const sectionLabels: Record<string, string> = {
   overview: "Overview",
-  acquisition: "Acquisition",
-  funnel: "Funnel",
-  journeys: "Journeys",
-  content: "Content",
-  devices: "Devices",
+  cohorts: "Cohorts",
+  churn: "Churn",
+  lifecycle: "Lifecycle",
+  economics: "Economics",
+  segments: "Segments",
   methodology: "Methodology",
 }
-
-export const analyticsIcon = <ChartNoAxesCombinedIcon />
