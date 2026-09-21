@@ -1,0 +1,71 @@
+name: Install Efferd Dashboard 1
+
+on:
+  push:
+    branches:
+      - efferd-dashboard-1
+    paths:
+      - .github/workflows/install-efferd-dashboard-1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: efferd-dashboard-1
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install shadcn skill
+        run: npx --yes skills add shadcn/ui
+
+      - name: Create Vite React app
+        run: |
+          rm -rf retail-efferd-src
+          npm create vite@latest retail-efferd-src -- --template react-ts
+
+      - name: Install dependencies
+        working-directory: retail-efferd-src
+        run: npm install
+
+      - name: Initialize shadcn
+        working-directory: retail-efferd-src
+        run: npx --yes shadcn@latest init -d
+
+      - name: Add Efferd registry
+        working-directory: retail-efferd-src
+        run: |
+          node <<'NODE'
+          const fs = require('fs')
+          const p = 'components.json'
+          const data = JSON.parse(fs.readFileSync(p, 'utf8'))
+          data.registries = data.registries || {}
+          data.registries['@efferd'] = 'https://efferd.com/r/{style}/{name}.json'
+          fs.writeFileSync(p, JSON.stringify(data, null, 2) + '\n')
+          NODE
+
+      - name: Install Efferd dashboard-1
+        working-directory: retail-efferd-src
+        run: npx --yes shadcn@latest add @efferd/dashboard-1 --yes
+
+      - name: Commit installed source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .agents .claude .cursor .github retail-efferd-src 2>/dev/null || true
+          git add retail-efferd-src .github/workflows/install-efferd-dashboard-1.yml
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Install Efferd dashboard-1 prototype"
+            git push origin HEAD:efferd-dashboard-1
+          fi
