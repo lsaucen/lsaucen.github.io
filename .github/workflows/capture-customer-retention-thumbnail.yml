@@ -1,0 +1,99 @@
+name: Capture Customer Retention Thumbnail
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - customer-retention-dashboard
+    paths:
+      - .github/workflows/capture-customer-retention-thumbnail.yml
+
+permissions:
+  contents: write
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source branch
+        uses: actions/checkout@v4
+        with:
+          ref: customer-retention-dashboard
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+
+      - name: Capture approved cohorts view
+        run: |
+          cat > capture.mjs <<'EOF'
+          import { chromium } from "playwright";
+
+          const browser = await chromium.launch({ headless: true });
+          const page = await browser.newPage({
+            viewport: { width: 1898, height: 865 },
+            deviceScaleFactor: 1,
+          });
+
+          await page.goto("https://lsaucen.github.io/customer-retention/#cohorts", {
+            waitUntil: "networkidle",
+          });
+
+          await page.evaluate(() => {
+            localStorage.removeItem("customer-retention-theme");
+          });
+          await page.reload({ waitUntil: "networkidle" });
+          await page.goto("https://lsaucen.github.io/customer-retention/#cohorts", {
+            waitUntil: "networkidle",
+          });
+
+          await page.waitForTimeout(1400);
+          await page.screenshot({
+            path: "/tmp/customer-retention-dashboard.png",
+            fullPage: false,
+          });
+          await browser.close();
+          EOF
+          node capture.mjs
+
+      - name: Publish thumbnail and portfolio link
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin main
+          git checkout main
+          git reset --hard origin/main
+
+          mkdir -p assets
+          cp /tmp/customer-retention-dashboard.png assets/customer-retention-dashboard.png
+
+          python <<'PY'
+          from pathlib import Path
+          p = Path("index.html")
+          s = p.read_text()
+          s = s.replace(
+              'imageUrl: "assets/thumb-customer-retention.svg"',
+              'imageUrl: "assets/customer-retention-dashboard.png"'
+          )
+          s = s.replace(
+              'link: "data-visualization-lab/customer-retention.html"',
+              'link: "customer-retention/"'
+          )
+          p.write_text(s)
+          PY
+
+          git add assets/customer-retention-dashboard.png index.html
+          if git diff --cached --quiet; then
+            echo "Customer Retention portfolio card already current"
+          else
+            git commit -m "Use approved Customer Retention screenshot and final link"
+            git push origin main
+          fi
